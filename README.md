@@ -1771,6 +1771,8 @@ the metadata the output is valid HTML, although it does accept bare `&` symbols.
 
 </details>
 
+> make sure you have `svn` and `hg` installed before initializing
+
 ## Testing
 
 ### Node
