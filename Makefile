@@ -7,6 +7,7 @@ AUXTARGETS=
 CMDS=bin/xlsx.njs
 HTMLLINT=index.html
 
+# upper-cased LIB
 ULIB=$(shell echo $(LIB) | tr a-z A-Z)
 DEPS=$(sort $(wildcard bits/*.js))
 TARGET=$(LIB).js
@@ -19,29 +20,45 @@ CLOSURE=/usr/local/lib/node_modules/google-closure-compiler/compiler.jar
 
 ## Main Targets
 
+# ----------------------------------
+# build xlsx.js
+# ----------------------------------
 .PHONY: all
 all: $(TARGET) $(AUXTARGETS) $(AUXSCPTS) ## Build library and auxiliary scripts
 
 $(FLOWTGTS): %.js : %.flow.js
 	node -e 'process.stdout.write(require("fs").readFileSync("$<","utf8").replace(/^[ \t]*\/\*[:#][^*]*\*\/\s*(\n)?/gm,"").replace(/\/\*[:#][^*]*\*\//gm,""))' > $@
 
+
+# concat all files in "bits/"" and generate as "xlsx.js"
 $(FLOWTARGET): $(DEPS)
 	cat $^ | tr -d '\15\32' > $@
 
+# pick the version from "package.json" to update version in "bits/01_version.js"
 bits/01_version.js: package.json
 	echo "$(ULIB).version = '"`grep version package.json | awk '{gsub(/[^0-9a-z\.-]/,"",$$2); print $$2}'`"';" > $@
 
+# copy "xlscfb" lib as "18_cfb.js"
 bits/18_cfb.js: node_modules/cfb/xlscfb.flow.js
 	cp $^ $@
 
+# ----------------------------------
+# remove builds
+# ----------------------------------
+# remove "xlsx.js"
 .PHONY: clean
 clean: ## Remove targets and build artifacts
 	rm -f $(TARGET) $(FLOWTARGET)
 
+# remove temporary files under repo root
 .PHONY: clean-data
 clean-data:
 	rm -f *.xlsx *.xlsm *.xlsb *.xls *.xml
 
+# ----------------------------------
+# test
+# ----------------------------------
+# init submodules and make them
 .PHONY: init
 init: ## Initial setup for development
 	git submodule init
@@ -50,6 +67,10 @@ init: ## Initial setup for development
 	git submodule foreach make
 	mkdir -p tmp
 
+# ----------------------------------
+# minification
+# ----------------------------------
+# minify the output files in dist folder
 .PHONY: dist
 dist: dist-deps $(TARGET) bower.json ## Prepare JS files for distribution
 	cp $(TARGET) dist/
@@ -62,11 +83,16 @@ dist: dist-deps $(TARGET) bower.json ## Prepare JS files for distribution
 	misc/strip_sourcemap.sh dist/$(LIB).full.min.js
 	cat <(head -n 1 bits/00_header.js) $(REQS) $(ADDONS) $(TARGET) $(AUXTARGETS) > demos/requirejs/$(LIB).full.js
 
+# cp some deps into dist folder
 .PHONY: dist-deps
 dist-deps: ## Copy dependencies for distribution
 	cp node_modules/codepage/dist/cpexcel.full.js dist/cpexcel.js
 	cp jszip.js dist/jszip.js
 
+# ----------------------------------
+# build ods.js
+# ----------------------------------
+# concat "odsbits/*.js" and generate as "ods.js"
 .PHONY: aux
 aux: $(AUXTARGETS)
 
@@ -94,8 +120,8 @@ xlsx.exe: bin/xlsx.njs xlsx.js
 test mocha: test.js ## Run test suite
 	mocha -R spec -t 20000
 
-#*                      To run tests for one format, make test_<fmt>
-#*                      To run the core test suite, make test_misc
+#* To run tests for one format, make test_<fmt>
+#* To run the core test suite, make test_misc
 TESTFMT=$(patsubst %,test_%,$(FMT))
 .PHONY: $(TESTFMT)
 $(TESTFMT): test_%:
@@ -142,6 +168,9 @@ demo-systemjs: ## Run systemjs demo build
 
 ## Code Checking
 
+# ----------------------------------
+# linting files
+# ----------------------------------
 .PHONY: lint
 lint: $(TARGET) $(AUXTARGETS) ## Run eslint checks
 	@eslint --ext .js,.njs,.json,.html,.htm $(TARGET) $(AUXTARGETS) $(CMDS) $(HTMLLINT) package.json bower.json
@@ -165,10 +194,14 @@ tslint: $(TARGET) ## Run typescript checks
 flow: lint ## Run flow checker
 	@flow check --all --show-all-errors
 
+# ----------------------------------
+# coverage
+# ----------------------------------
+# generate coverage report
 .PHONY: cov
 cov: misc/coverage.html ## Run coverage test
 
-#*                      To run coverage tests for one format, make cov_<fmt>
+#* To run coverage tests for one format, make cov_<fmt>
 COVFMT=$(patsubst %,cov_%,$(FMT))
 .PHONY: $(COVFMT)
 $(COVFMT): cov_%:
@@ -177,6 +210,7 @@ $(COVFMT): cov_%:
 misc/coverage.html: $(TARGET) test.js
 	mocha --require blanket -R html-cov -t 20000 > $@
 
+# generate coverage report for all formats
 .PHONY: coveralls
 coveralls: ## Coverage Test + Send to coveralls.io
 	mocha --require blanket --reporter mocha-lcov-reporter -t 20000 | node ./node_modules/coveralls/bin/coveralls.js
