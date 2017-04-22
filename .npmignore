@@ -24,7 +24,6 @@ tmp
 *.[qQ][pP][wW]
 *.123
 *.htm
-*.html
 *.sheetjs
 *.exe
 .gitignore
@@ -36,7 +35,6 @@ make.cmd
 *.lst
 .npmignore
 xlsworker.js
-shim.js
 test.js
 .jscs.json
 .gitmodules
