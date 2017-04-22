@@ -45,9 +45,11 @@
     "blanket": "^1.2.3",
     "coveralls": "^2.11.14",
     "dtslint": "^0.1.2",
+    "husky": "^0.13.3",
     "mocha": "^3.1.2",
     "mocha-lcov-reporter": "^1.2.0",
     "typescript": "2.2.0",
+    "validate-commit-msg": "^2.12.1",
     "xlsjs":""
   },
   "repository": {
@@ -57,7 +59,8 @@
   "scripts": {
     "pretest": "git submodule init && git submodule update --remote --merge",
     "test": "make travis",
-    "dtslint": "dtslint types"
+    "dtslint": "dtslint types",
+    "commitmsg": "validate-commit-msg"
   },
   "config": {
     "blanket": {
