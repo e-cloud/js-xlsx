@@ -51,6 +51,7 @@ jspm_packages
 tmp
 
 # custom ignore
+yarn.lock
 _book/
 misc/coverage.html
 v8.log
