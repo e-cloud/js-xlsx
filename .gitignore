@@ -74,3 +74,6 @@ v8.log
 *.html
 *.sheetjs
 *.exe
+src/*.map
+src/*.js
+*.map

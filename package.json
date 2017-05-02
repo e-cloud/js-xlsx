@@ -30,27 +30,26 @@
     "fs": false
   },
   "dependencies": {
-    "adler-32": "~1.0.0",
     "cfb": "~0.11.1",
-    "codepage": "~1.8.0",
+    "codepage": "^1.8.1",
     "commander": "~2.9.0",
-    "crc-32": "~1.0.2",
     "exit-on-epipe": "~1.0.0",
+    "jszip": "^2.0.0",
     "ssf": "~0.9.3"
   },
   "devDependencies": {
     "@sheetjs/uglify-js":"",
-    "@types/node":"",
     "@types/commander":"",
+    "@types/jszip": "^0.0.32",
+    "@types/node": "^7.0.14",
     "blanket": "^1.2.3",
     "coveralls": "^2.11.14",
     "dtslint": "^0.1.2",
     "husky": "^0.13.3",
     "mocha": "^3.1.2",
     "mocha-lcov-reporter": "^1.2.0",
-    "typescript": "2.2.0",
-    "validate-commit-msg": "^2.12.1",
-    "xlsjs":""
+    "typescript": "^2.2.2",
+    "validate-commit-msg": "^2.12.1"
   },
   "repository": {
     "type": "git",
@@ -60,7 +59,8 @@
     "pretest": "git submodule init && git submodule update --remote --merge",
     "test": "make travis",
     "dtslint": "dtslint types",
-    "commitmsg": "validate-commit-msg"
+    "commitmsg": "validate-commit-msg",
+    "build": "tsc"
   },
   "config": {
     "blanket": {
