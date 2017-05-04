@@ -964,6 +964,8 @@ export function stringify_formula(formula /*Array<any>*/, range, cell /*:any*/, 
                 /*::)*/
                 c = shift_cell_xls(f[1][2], _range, opts)
                 sname = supbooks.SheetNames[ixti]
+                var w = sname
+                /* IE9 fails on defined names */
                 stack.push(`${sname}!${encode_cell_xls(c)}`)
                 break
 

@@ -1950,8 +1950,6 @@ the metadata the output is valid HTML, although it does accept bare `&` symbols.
 
 </details>
 
-> make sure you have `svn` and `hg` installed before initializing
-
 ## Testing
 
 ### Node
@@ -2034,6 +2032,8 @@ Tests utilize the mocha testing framework.  Travis-CI and Sauce Labs links:
 </details>
 
 ### Test Files
+
+> make sure you have `svn` and `hg` installed before initializing
 
 Test files are housed in [another repo](https://github.com/SheetJS/test_files).
 

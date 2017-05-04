@@ -1,5 +1,5 @@
 import { reset_cp, setCurrentCodepage } from './02_codepage'
-import { DENSE } from './03_dense'
+import { DENSE } from './03_consts'
 import { bconcat } from './05_buf'
 import { SSF } from './10_ssf'
 /* [MS-OLEDS] 2.3.8 CompObjStream */
@@ -9,12 +9,12 @@ import { BErr } from './28_binstructs'
 import { DocSummaryPIDDSI, SummaryPIDSI, XLSIcv } from './29_xlsenum'
 import { parse_PropertySetStream } from './38_xlstypes'
 import { WK_ } from './41_lotus'
+import { find_mdw_colw, process_col, pt2px, rgb2Hex } from './45_styutils'
 import { update_xfext } from './50_styxls'
 import { stringify_formula } from './62_fxls'
 import { default_margins } from './66_wscommon'
 import { XLSRecordEnum } from './77_parsetab'
 import { fix_read_opts } from './84_defaults'
-import { find_mdw_colw, process_col, rgb2Hex } from './45_styutils'
 
 function parse_compobj(obj) {
     const v = {}
@@ -98,36 +98,42 @@ function slurp(R, blob, length /*:number*/, opts) {
 
 function safe_format_xf(p /*:any*/, opts /*:ParseOpts*/, date1904 /*:?boolean*/) {
     if (p.t === 'z') return
-    if (p.t === 'e') {
-        p.w = p.w || BErr[p.v]
     }
     if (!p.XF) return
+    let fmtid
     try {
-        const fmtid = p.XF.ifmt || 0
+        fmtid = p.XF.ifmt || 0
         if (opts.cellNF) p.z = SSF._table[fmtid]
-        if (p.t === 'e') {
-        } else if (fmtid === 0) {
-            if (p.t === 'n') {
-                if ((p.v | 0) === p.v) {
-                    p.w = SSF._general_int(p.v)
-                } else {
-                    p.w = SSF._general_num(p.v)
-                }
-            } else {
-                p.w = SSF._general(p.v)
-            }
-        } else {
-            p.w = SSF.format(fmtid, p.v, {date1904: !!date1904})
-        }
-        if (opts.cellDates && fmtid && p.t == 'n' && SSF.is_date(SSF._table[fmtid])) {
-            const _d = SSF.parse_date_code(p.v)
-            if (_d) {
-                p.t = 'd'
-                p.v = new Date(Date.UTC(_d.y, _d.m - 1, _d.d, _d.H, _d.M, _d.S, _d.u))
-            }
-        }
     } catch (e) {
         if (opts.WTF) throw e
+    }
+    if (!opts || opts.cellText !== false) {
+        try {
+            if (p.t === 'e') {
+                p.w = p.w || BErr[p.v]
+            } else if (fmtid === 0) {
+                if (p.t === 'n') {
+                    if ((p.v | 0) === p.v) {
+                        p.w = SSF._general_int(p.v)
+                    } else {
+                        p.w = SSF._general_num(p.v)
+                    }
+                } else {
+                    p.w = SSF._general(p.v)
+                }
+            } else {
+                p.w = SSF.format(fmtid, p.v, {date1904: !!date1904})
+            }
+            if (opts.cellDates && fmtid && p.t == 'n' && SSF.is_date(SSF._table[fmtid])) {
+                const _d = SSF.parse_date_code(p.v)
+                if (_d) {
+                    p.t = 'd'
+                    p.v = new Date(Date.UTC(_d.y, _d.m - 1, _d.d, _d.H, _d.M, _d.S, _d.u))
+                }
+            }
+        } catch (e) {
+            if (opts.WTF) throw e
+        }
     }
 }
 
@@ -745,7 +751,18 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
                         }
                             break
                         case 'Row':
-                            break // TODO
+                            const rowobj = {}
+                            if (val.hidden) {
+                                rowinfo[val.r] = rowobj
+                                rowobj.hidden = true
+                            }
+                            if (val.hpt) {
+                                rowinfo[val.r] = rowobj
+                                rowobj.hpt = val.hpt
+                                rowobj.hpx = pt2px(val.hpt)
+                            }
+
+                            break
 
                         case 'LeftMargin':
                         case 'RightMargin':
@@ -1255,6 +1272,27 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
     return wb
 }
 
+/* TODO: WTF */
+function parse_props(cfb) {
+    /* [MS-OSHARED] 2.3.3.2.2 Document Summary Information Property Set */
+    const DSI = cfb.find('!DocumentSummaryInformation')
+    if (DSI) {
+        try {
+            cfb.DocSummary = parse_PropertySetStream(DSI, DocSummaryPIDDSI)
+        } catch (e) {
+        }
+    }
+
+    /* [MS-OSHARED] 2.3.3.2.1 Summary Information Property Set*/
+    const SI = cfb.find('!SummaryInformation')
+    if (SI) {
+        try {
+            cfb.Summary = parse_PropertySetStream(SI, SummaryPIDSI)
+        } catch (e) {
+        }
+    }
+}
+
 export function parse_xlscfb(cfb /*:any*/, options /*:?ParseOpts*/) /*:Workbook*/ {
     if (!options) options = {}
     fix_read_opts(options)
@@ -1311,25 +1349,4 @@ export function parse_xlscfb(cfb /*:any*/, options /*:?ParseOpts*/) /*:Workbook*
     if (options.bookFiles) WorkbookP.cfb = cfb
     /*WorkbookP.CompObjP = CompObjP; // TODO: storage? */
     return WorkbookP
-}
-
-/* TODO: WTF */
-function parse_props(cfb) {
-    /* [MS-OSHARED] 2.3.3.2.2 Document Summary Information Property Set */
-    const DSI = cfb.find('!DocumentSummaryInformation')
-    if (DSI) {
-        try {
-            cfb.DocSummary = parse_PropertySetStream(DSI, DocSummaryPIDDSI)
-        } catch (e) {
-        }
-    }
-
-    /* [MS-OSHARED] 2.3.3.2.1 Summary Information Property Set*/
-    const SI = cfb.find('!SummaryInformation')
-    if (SI) {
-        try {
-            cfb.Summary = parse_PropertySetStream(SI, SummaryPIDSI)
-        } catch (e) {
-        }
-    }
 }

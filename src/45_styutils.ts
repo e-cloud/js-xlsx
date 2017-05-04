@@ -103,7 +103,7 @@ export function rgb_tint(hex, tint) {
 
 /* 18.3.1.13 width calculations */
 /* [MS-OI29500] 2.1.595 Column Width & Formatting */
-const DEF_MDW = 6
+export const DEF_MDW = 6
 
 const MAX_MDW = 15
 const MIN_MDW = 1
@@ -176,21 +176,25 @@ export function process_col(coll /*:ColInfo*/) {
         coll.wch = px2char(coll.wpx)
         coll.width = char2width(coll.wch)
         coll.MDW = MDW
+    } else if (typeof coll.wch == 'number') {
+        coll.width = char2width(coll.wch)
+        coll.wpx = width2px(coll.width)
+        coll.MDW = MDW
     }
     if (coll.customWidth) {
         delete coll.customWidth
     }
 }
 
-const DEF_DPI = 96
-const DPI = DEF_DPI
+const DEF_PPI = 96
+const PPI = DEF_PPI
 
 export function px2pt(px) {
-    return px * 72 / DPI
+    return px * 96 / PPI
 }
 
 export function pt2px(pt) {
-    return pt * DPI / 72
+    return pt * PPI / 96
 }
 
 /* [MS-EXSPXML3] 2.4.54 ST_enmPattern */

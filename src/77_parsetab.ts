@@ -222,8 +222,7 @@ import {
     parse_RefreshAll,
     parse_RichTextStream,
     parse_RightMargin,
-    parse_RK,
-    parse_Row,
+    parse_RK, parse_Row,
     parse_RRAutoFmt,
     parse_RRDChgCell,
     parse_RRDConflict,
@@ -357,7 +356,7 @@ import {
     parse_XF,
     parse_XFCRC,
     parse_XLSCodeName,
-    parse_YMult
+    parse_YMult,
 } from './39_xlsbiff'
 import { parse_BrtBeginSst } from './43_sstbin'
 import { parse_FilePass } from './44_offcrypto'

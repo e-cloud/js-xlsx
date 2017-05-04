@@ -1,4 +1,4 @@
-import { DENSE } from './03_dense'
+import { DENSE } from './03_consts'
 import { escapexml, parsexmltag, unescapexml, writextag } from './22_xmlutils'
 import { decode_range, encode_cell, encode_range, format_cell, sheet_to_workbook } from './27_csfutils'
 
