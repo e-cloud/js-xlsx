@@ -1,4 +1,4 @@
-import { DENSE } from './03_dense'
+import { DENSE } from './03_consts'
 import { SSF } from './10_ssf'
 import { datenum } from './20_jsutils'
 import { utf8read } from './22_xmlutils'
@@ -34,27 +34,55 @@ import {
 } from './28_binstructs'
 import { add_rels, RELS } from './31_rels'
 import { crypto_CreatePasswordVerifier_Method1 } from './44_offcrypto'
+import { find_mdw_colw, process_col, pt2px, px2pt } from './45_styutils'
 import { stringify_formula } from './62_fxls'
 import { parse_XLSBArrayParsedFormula, parse_XLSBCellParsedFormula, parse_XLSBSharedParsedFormula } from './63_fbin'
 import { col_obj_w, default_margins, get_sst_id, safe_format, strs } from './66_wscommon'
-import { find_mdw_colw, process_col } from './45_styutils'
 
 export function parse_BrtRowHdr(data, length) {
-    const z = []
-    /*:any*/
+    const z = ({}/*:any*/)
+    const tgt = data.l + length
     z.r = data.read_shift(4)
-    data.l += length - 4
+    data.l += 4 // TODO: ixfe
+    var miyRw = data.read_shift(2)
+    data.l += 1 // TODO: top/bot padding
+    var flags = data.read_shift(1)
+    data.l = tgt
+    if (flags & 0x10) z.hidden = true
+    if (flags & 0x20) z.hpt = miyRw / 20
     return z
 }
+
 export function write_BrtRowHdr(R /*:number*/, range, ws) {
     const o = new_buf(17 + 8 * 16)
+    const row = (ws['!rows'] || [])[R] || {}
     o.write_shift(4, R)
 
-    /* TODO: flags styles */
     o.write_shift(4, 0)
-    o.write_shift(2, 0x0140)
-    o.write_shift(2, 0)
+    /* TODO: ixfe */
+
+    let miyRw = 0x0140
+    if (row.hpx) {
+        miyRw = px2pt(row.hpx) * 20
+    } else if (row.hpt) {
+        miyRw = row.hpt * 20
+    }
+    o.write_shift(2, miyRw)
+
     o.write_shift(1, 0)
+    /* top/bot padding */
+
+    let flags = 0x0
+    if (row.hidden) {
+        flags |= 0x10
+    }
+    if (row.hpx || row.hpt) {
+        flags |= 0x20
+    }
+    o.write_shift(1, flags)
+
+    o.write_shift(1, 0)
+    /* phonetic guide */
 
     /* [MS-XLSB] 2.5.8 BrtColSpan explains the mechanism */
     let ncolspan = 0
@@ -306,6 +334,7 @@ export function parse_BrtHLink(data, length, opts) {
     data.l = end
     return {rfx, relId, loc, Tooltip: tooltip, display}
 }
+
 export function write_BrtHLink(l, rId, o?) {
     if (o == null) {
         o = new_buf(50 + 4 * l[1].Target.length)
@@ -360,9 +389,12 @@ export function write_BrtColInfo(C /*:number*/, col, o?) {
     const p = col_obj_w(C, col)
     o.write_shift(-4, C)
     o.write_shift(-4, C)
-    o.write_shift(4, p.width * 256)
-    o.write_shift(4, 0 /*ixfe*/) // style
-    o.write_shift(1, 2) // bit flag
+    o.write_shift(4, (p.width || 10) * 256)
+    o.write_shift(4, 0/*ixfe*/) // style
+    let flags = 0
+    if (col.hidden) flags |= 0x01
+    if (typeof p.width == 'number') flags |= 0x02
+    o.write_shift(1, flags) // bit flag
     o.write_shift(1, 0) // bit flag
     return o
 }
@@ -392,6 +424,24 @@ export function write_BrtMargins(margins, o?) {
     return o
 }
 
+/* [MS-XLSB] 2.4.292 BrtBeginWsView */
+function write_BrtBeginWsView(ws, o) {
+    if (o == null) o = new_buf(30)
+    o.write_shift(2, 924) // bit flag
+    o.write_shift(4, 0)
+    o.write_shift(4, 0) // view first row
+    o.write_shift(4, 0) // view first col
+    o.write_shift(1, 0) // gridline color ICV
+    o.write_shift(1, 0)
+    o.write_shift(2, 0)
+    o.write_shift(2, 100) // zoom scale
+    o.write_shift(2, 0)
+    o.write_shift(2, 0)
+    o.write_shift(2, 0)
+    o.write_shift(4, 0) // workbook view id
+    return o
+}
+
 /* [MS-XLSB] 2.4.740 BrtSheetProtection */
 export function write_BrtSheetProtection(sp, o?) {
     if (o == null) {
@@ -416,11 +466,10 @@ export function write_BrtSheetProtection(sp, o?) {
         ['pivotTables', true], // fPivotTables
         ['selectUnlockedCells', false] // fSelUnlockedCells
     ].forEach(function (n) {
-        o.write_shift(4, 1)
-        if (!n[1]) {
-            o.write_shift(4, sp[n] != null && sp[n] ? 1 : 0)
+        if (n[1]) {
+            o.write_shift(4, sp[n[0]] != null && !sp[n[0]] ? 1 : 0)
         } else {
-            o.write_shift(4, sp[n] != null && !sp[n] ? 0 : 1)
+            o.write_shift(4, sp[n[0]] != null && sp[n[0]] ? 0 : 1)
         }
     })
     return o
@@ -492,6 +541,10 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
                 }
                 rr = encode_row(R = row.r)
                 opts['!row'] = row.r
+                if (val.hidden || val.hpt) {
+                    if (val.hpt) val.hpx = pt2px(val.hpt)
+                    rowinfo[val.r] = val
+                }
                 break
 
             case 0x0002: /* 'BrtCellRk' */
@@ -517,11 +570,13 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
                         p.r = sstr.r
                         break
                     case 'b':
-                        p.v = val[1] ? true : false
+                        p.v = !!val[1]
                         break
                     case 'e':
                         p.v = val[1]
-                        p.w = BErr[p.v]
+                        if (opts.cellText !== false) {
+                            p.w = BErr[p.v]
+                        }
                         break
                     case 'str':
                         p.t = 's'
@@ -639,7 +694,7 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
                 /* 'BrtColInfo' */
                 if (!opts.cellStyles) break
                 while (val.e >= val.s) {
-                    colinfo[val.e--] = {width: val.w / 256}
+                    colinfo[val.e--] = {width: val.w / 256, hidden: !!(val.flags & 0x01)}
                     if (!seencol) {
                         seencol = true
                         find_mdw_colw(val.w / 256)
@@ -902,6 +957,22 @@ function write_AUTOFILTER(ba, ws) {
     write_record(ba, 'BrtEndAFilter')
 }
 
+function write_WSVIEWS2(ba, ws) {
+    write_record(ba, 'BrtBeginWsViews')
+    { /* 1*WSVIEW2 */
+        /* [ACUID] */
+        write_record(ba, 'BrtBeginWsView', write_BrtBeginWsView(ws))
+        /* [BrtPane] */
+        /* *4BrtSel */
+        /* *4SXSELECT */
+        /* *FRT */
+        write_record(ba, 'BrtEndWsView')
+    }
+    /* *FRT */
+    write_record(ba, 'BrtEndWsViews')
+}
+
+
 function write_SHEETPROTECT(ba, ws) {
     if (!ws['!protect']) return
     /* [BrtSheetProtectionIso] */
@@ -919,7 +990,7 @@ export function write_ws_bin(idx /*:number*/, opts, wb /*:Workbook*/, rels) {
     write_record(ba, 'BrtBeginSheet')
     write_record(ba, 'BrtWsProp', write_BrtWsProp(s))
     write_record(ba, 'BrtWsDim', write_BrtWsDim(r))
-    /* [WSVIEWS2] */
+    write_WSVIEWS2(ba, ws)
     /* [WSFMTINFO] */
     write_COLINFOS(ba, ws, idx, opts, wb)
     write_CELLTABLE(ba, ws, idx, opts, wb)

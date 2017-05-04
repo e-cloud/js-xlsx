@@ -1,4 +1,4 @@
-import { DENSE } from './03_dense'
+import { DENSE } from './03_consts'
 import { datenum } from './20_jsutils'
 /* BIFF2-4 single-sheet workbooks */
 import { is_buf, new_buf } from './23_binutils'

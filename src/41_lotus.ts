@@ -1,4 +1,4 @@
-import { DENSE } from './03_dense'
+import { DENSE } from './03_consts'
 import * as Base64 from './04_base64'
 import { s2a } from './05_buf'
 import { parsenoop, prep_blob } from './23_binutils'

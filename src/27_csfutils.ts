@@ -1,4 +1,4 @@
-import { DENSE } from './03_dense'
+import { DENSE } from './03_consts'
 import { SSF } from './10_ssf'
 import { datenum } from './20_jsutils'
 

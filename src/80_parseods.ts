@@ -1,4 +1,4 @@
-import { DENSE } from './03_dense'
+import { DENSE } from './03_consts'
 import { datenum, dup, parse_isodur, parseDate } from './20_jsutils'
 import { parsexmlbool, parsexmltag, unescapexml, utf8read } from './22_xmlutils'
 import { encode_cell, encode_range } from './27_csfutils'
@@ -235,7 +235,7 @@ export const parse_content_xml = function () {
                             q.c = comments
                             comments = []
                         }
-                        if (textp) q.w = textp
+                        if (textp && opts.cellText !== false) q.w = textp
                         if (!isstub || opts.sheetStubs) {
                             if (!(opts.sheetRows && opts.sheetRows < R)) {
                                 if (opts.dense) {

@@ -67,7 +67,7 @@ function sheet_to_json(sheet /*:Worksheet*/, opts /*:?Sheet2JSONOpts*/) {
         val = dense ? sheet[R][C] : sheet[cols[C] + rr]
         switch (header) {
             case 1:
-                hdr[C] = C
+                hdr[C] = C - r.s.c
                 break
             case 2:
                 hdr[C] = cols[C]

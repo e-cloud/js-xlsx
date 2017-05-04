@@ -1,6 +1,6 @@
 import cptable from 'codepage/dist/cpexcel.full.js'
 import { char_codes, debom } from './02_codepage'
-import { DENSE } from './03_dense'
+import { DENSE } from './03_consts'
 import * as Base64 from './04_base64'
 import { has_buf } from './05_buf'
 import { make_ssf, SSF } from './10_ssf'
@@ -11,21 +11,22 @@ import {
     parsexmlbool,
     parsexmltag,
     unescapexml,
+    writetag,
     writextag,
     xlml_fixstr,
     xlml_unfixstr,
     XLMLNS,
-    XML_HEADER
+    XML_HEADER,
 } from './22_xmlutils'
 import { decode_cell, encode_cell, encode_col, encode_range, encode_row, safe_decode_range } from './27_csfutils'
 import { BErr, RBErr } from './28_binstructs'
 import { xlml_set_prop, xlml_write_custprops, xlml_write_docprops } from './36_xlsprops'
+import { DEF_MDW, process_col, pt2px, px2pt, setMDW, width2px, XLMLPatternTypeMap } from './45_styutils'
 import { a1_to_rc, rc_to_a1 } from './61_fcommon'
 import { col_obj_w, default_margins } from './66_wscommon'
 import { HTML_ } from './79_html'
 import { parse_fods } from './83_ods'
 import { fix_read_opts } from './84_defaults'
-import { find_mdw_wpx, process_col, width2px, XLMLPatternTypeMap } from './45_styutils'
 
 const attregexg2 = /([\w:]+)=((?:")([^"]*)(?:")|(?:')([^']*)(?:'))/g
 const attregex2 = /([\w:]+)=((?:")(?:[^"]*)(?:")|(?:')(?:[^']*)(?:'))/
@@ -223,7 +224,7 @@ function parse_xlml_data(xml, ss, data, cell /*:any*/, base, styles, csty, row, 
         case 'Error':
             cell.t = 'e'
             cell.v = RBErr[xml]
-            cell.w = xml
+            if (o.cellText !== false) cell.w = xml
             break
         default:
             cell.t = 's'
@@ -231,7 +232,7 @@ function parse_xlml_data(xml, ss, data, cell /*:any*/, base, styles, csty, row, 
             break
     }
     safe_format_xlml(cell, nf, o)
-    if (o.cellFormula != null) {
+    if (o.cellFormula !== false) {
         if (cell.Formula) {
             let fstr = unescapexml(cell.Formula)
             /* strictly speaking, the leading = is required but some writers omit */
@@ -327,6 +328,7 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
     let seencol = false
     let arrayf = []
     let rowinfo = []
+    let rowobj = {}
     const Workbook = {Sheets: []}
     let wsprops = {}
     xlmlregex.lastIndex = 0
@@ -428,6 +430,16 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
                     if (row.Index) {
                         r = +row.Index - 1
                     }
+                    rowobj = {}
+                    if (row.AutoFitHeight == '0') {
+                        rowobj.hpx = parseInt(row.Height, 10)
+                        rowobj.hpt = px2pt(rowobj.hpx)
+                        rowinfo[r] = rowobj
+                    }
+                    if (row.Hidden == '1') {
+                        rowobj.hidden = true
+                        rowinfo[r] = rowobj
+                    }
                 }
                 break
             case 'Worksheet':
@@ -502,12 +514,19 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
             case 'Column':
                 if (state[state.length - 1][0] !== 'Table') break
                 csty = xlml_parsexmltag(Rn[0])
-                csty.wpx = parseInt(csty.Width, 10)
+                if (csty.Hidden) {
+                    csty.hidden = true
+                    delete csty.Hidden
+                }
+                if (csty.Width) csty.wpx = parseInt(csty.Width, 10)
                 if (!seencol && csty.wpx > 10) {
                     seencol = true
-                    find_mdw_wpx(csty.wpx)
+                    setMDW(DEF_MDW)
+                    //find_mdw_wpx(csty.wpx);
                     for (let _col = 0; _col < cstys.length; ++_col) {
-                        if (cstys[_col]) process_col(cstys[_col])
+                        if (cstys[_col]) {
+                            process_col(cstys[_col])
+                        }
                     }
                 }
                 if (seencol) process_col(csty)
@@ -698,7 +717,7 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
                                 break
                             case 'RGB':
                                 break
-                            case 'PixelsPerInch':
+                            case 'PixelsPerInch': // TODO: set PPI
                                 break
                             case 'TargetScreenSize':
                                 break
@@ -1406,16 +1425,62 @@ function write_sty_xlml(wb, opts) /*:string*/ {
 }
 
 /* WorksheetOptions */
-function write_ws_xlml_wsopts(ws /*:Worksheet*/, opts, idx /*:number*/, wb /*:Workbook*/) /*:string*/ {
+function write_ws_xlml_wsopts(ws/*:Worksheet*/, opts, idx/*:number*/, wb/*:Workbook*/)/*:string*/ {
+    if (!ws) return ''
     const o = []
+    /* NOTE: spec technically allows any order, but stick with implied order */
+
+    /* FitToPage */
+    /* DoNotDisplayColHeaders */
+    /* DoNotDisplayRowHeaders */
+    /* ViewableRange */
+    /* Selection */
+    /* GridlineColor */
+    /* Name */
+    /* ExcelWorksheetType */
+    /* IntlMacro */
+    /* Unsynced */
+    /* Selected */
+    /* CodeName */
+
+    if (ws['!margins']) {
+        o.push('<PageSetup>')
+        if (ws['!margins'].header) {
+            o.push(writextag('Header', null, {'x:Margin': ws['!margins'].header}))
+        }
+        if (ws['!margins'].footer) {
+            o.push(writextag('Footer', null, {'x:Margin': ws['!margins'].footer}))
+        }
+        o.push(writextag('PageMargins', null, {
+            'x:Bottom': ws['!margins'].bottom || '0.75',
+            'x:Left': ws['!margins'].left || '0.7',
+            'x:Right': ws['!margins'].right || '0.7',
+            'x:Top': ws['!margins'].top || '0.75',
+        }))
+        o.push('</PageSetup>')
+    }
+
     /* PageSetup */
+    /* DisplayPageBreak */
+    /* TransitionExpressionEvaluation */
+    /* TransitionFormulaEntry */
+    /* Print */
+    /* Zoom */
+    /* PageLayoutZoom */
+    /* PageBreakZoom */
+    /* ShowPageBreakZoom */
+    /* DefaultRowHeight */
+    /* DefaultColumnWidth */
+    /* StandardWidth */
+
     if (wb && wb.Workbook && wb.Workbook.Sheets && wb.Workbook.Sheets[idx]) {
         /* Visible */
         if (!!wb.Workbook.Sheets[idx].Hidden) {
-            o.push(`<Visible>${wb.Workbook.Sheets[idx].Hidden == 1 ? 'SheetHidden' : 'SheetVeryHidden'}</Visible>`)
+            o.push(writextag('Visible', (wb.Workbook.Sheets[idx].Hidden == 1 ? 'SheetHidden' : 'SheetVeryHidden'), {}))
         } else {
             /* Selected */
-            for (var i = 0; i < idx; ++i) {
+            let i = 0
+            for (; i < idx; ++i) {
                 if (wb.Workbook.Sheets[i] && !wb.Workbook.Sheets[i].Hidden) break
             }
             if (i == idx) {
@@ -1423,6 +1488,67 @@ function write_ws_xlml_wsopts(ws /*:Worksheet*/, opts, idx /*:number*/, wb /*:Wo
             }
         }
     }
+
+    /* LeftColumnVisible */
+    /* DisplayRightToLeft */
+    /* GridlineColorIndex */
+    /* DisplayFormulas */
+    /* DoNotDisplayGridlines */
+    /* DoNotDisplayHeadings */
+    /* DoNotDisplayOutline */
+    /* ApplyAutomaticOutlineStyles */
+    /* NoSummaryRowsBelowDetail */
+    /* NoSummaryColumnsRightDetail */
+    /* DoNotDisplayZeros */
+    /* ActiveRow */
+    /* ActiveColumn */
+    /* FilterOn */
+    /* RangeSelection */
+    /* TopRowVisible */
+    /* TopRowBottomPane */
+    /* LeftColumnRightPane */
+    /* ActivePane */
+    /* SplitHorizontal */
+    /* SplitVertical */
+    /* FreezePanes */
+    /* FrozenNoSplit */
+    /* TabColorIndex */
+    /* Panes */
+
+    /* NOTE: Password not supported in XLML Format */
+    if (ws['!protect']) {
+        o.push(writetag('ProtectContents', 'True'))
+        if (ws['!protect'].objects) {
+            o.push(writetag('ProtectObjects', 'True'))
+        }
+        if (ws['!protect'].scenarios) {
+            o.push(writetag('ProtectScenarios', 'True'))
+        }
+        if (ws['!protect'].selectLockedCells != null && !ws['!protect'].selectLockedCells) {
+            o.push(writetag('EnableSelection', 'NoSelection'))
+        } else if (ws['!protect'].selectUnlockedCells != null && !ws['!protect'].selectUnlockedCells) {
+            o.push(writetag('EnableSelection', 'UnlockedCells'))
+        }
+
+        [
+            ['formatColumns', 'AllowFormatCells'],
+            ['formatRows', 'AllowSizeCols'],
+            ['formatCells', 'AllowSizeRows'],
+            ['insertColumns', 'AllowInsertCols'],
+            ['insertRows', 'AllowInsertRows'],
+            ['insertHyperlinks', 'AllowInsertHyperlinks'],
+            ['deleteColumns', 'AllowDeleteCols'],
+            ['deleteRows', 'AllowDeleteRows'],
+            ['sort', 'AllowSort'],
+            ['autoFilter', 'AllowFilter'],
+            ['pivotTables', 'AllowUsePivotTables'],
+        ].forEach(function (x) {
+            if (ws['!protect'][x[0]]) {
+                o.push('<' + x[1] + '/>')
+            }
+        })
+    }
+
     if (o.length == 0) return ''
     return writextag('WorksheetOptions', o.join(''), {xmlns: XLMLNS.x})
 }
@@ -1505,6 +1631,23 @@ function write_ws_xlml_cell(cell, ref, ws, opts, idx, wb, addr) /*:string*/ {
 
     return writextag('Cell', m, attr)
 }
+
+function write_ws_xlml_row(R/*:number*/, row)/*:string*/ {
+    let o = `<Row ss:Index="${R + 1}"`
+    if (row) {
+        if (row.hpt && !row.hpx) {
+            row.hpx = pt2px(row.hpt)
+        }
+        if (row.hpx) {
+            o += ` ss:AutoFitHeight="0" ss:Height="${row.hpx}"`
+        }
+        if (row.hidden) {
+            o += ' ss:Hidden="1"'
+        }
+    }
+    return o + '>'
+}
+
 /* TODO */
 function write_ws_xlml_table(ws /*:Worksheet*/, opts, idx /*:number*/, wb /*:Workbook*/) /*:string*/ {
     if (!ws['!ref']) return ''
@@ -1514,13 +1657,22 @@ function write_ws_xlml_table(ws /*:Worksheet*/, opts, idx /*:number*/, wb /*:Wor
     const o = []
     if (ws['!cols']) {
         ws['!cols'].forEach(function (n, i) {
+            process_col(n)
+            const w = !!n.width
             const p = col_obj_w(i, n)
-            o.push(writextag('Column', null, {'ss:Index': i + 1, 'ss:Width': width2px(p.width)}))
+            const k = {'ss:Index': i + 1}
+            if (w) {
+                k['ss:Width'] = width2px(p.width)
+            }
+            if (n.hidden) {
+                k['ss:Hidden'] = '1'
+            }
+            o.push(writextag('Column', null, k))
         })
     }
     const dense = Array.isArray(ws)
     for (let R = range.s.r; R <= range.e.r; ++R) {
-        const row = [`<Row ss:Index="${R + 1}">`]
+        const row = [write_ws_xlml_row(R, (ws['!rows'] || [])[R])]
         for (let C = range.s.c; C <= range.e.c; ++C) {
             let skip = false
             for (mi = 0; mi != marr.length; ++mi) {

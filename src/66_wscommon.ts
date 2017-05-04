@@ -5,7 +5,7 @@ import { RELS } from './31_rels'
 import { char2width, px2char, rgb_tint, setMDW } from './45_styutils'
 
 export const strs = {} // shared strings
-export const _ssfopts = {} // spreadsheet formatting options
+export let _ssfopts = {} // spreadsheet formatting options
 
 RELS.WS = [
     'http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet',
@@ -30,20 +30,23 @@ export function col_obj_w(C /*:number*/, col) {
     const p = {min: C + 1, max: C + 1}
     /*:any*/
     /* wch (chars), wpx (pixels) */
-    let width = -1
+    let wch = -1
     if (col.MDW) setMDW(col.MDW)
     if (col.width != null) {
         p.customWidth = 1
     } else if (col.wpx != null) {
-        width = px2char(col.wpx)
+        wch = px2char(col.wpx)
     } else if (col.wch != null) {
-        width = col.wch
+        wch = col.wch
     }
-    if (width > -1) {
-        p.width = char2width(width)
+    if (wch > -1) {
+        p.width = char2width(wch)
         p.customWidth = 1
-    } else {
+    } else if (col.width != null) {
         p.width = col.width
+    }
+    if (col.hidden) {
+        p.hidden = true
     }
     return p
 }

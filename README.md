@@ -432,7 +432,7 @@ Note: browser generates binary blob and forces a "download" to client.  This
 example uses [FileSaver.js](https://github.com/eligrey/FileSaver.js/):
 
 ```js
-/* bookType can be any supported output type */ 
+/* bookType can be any supported output type */
 var wopts = { bookType:'xlsx', bookSST:false, type:'binary' };
 
 var wbout = XLSX.write(workbook,wopts);
@@ -1771,8 +1771,6 @@ the metadata the output is valid HTML, although it does accept bare `&` symbols.
 
 </details>
 
-> make sure you have `svn` and `hg` installed before initializing
-
 ## Testing
 
 ### Node
@@ -1850,6 +1848,8 @@ Tests utilize the mocha testing framework.  Travis-CI and Sauce Labs links:
  - <https://saucelabs.com/u/sheetjs> for XLS\* modules using Sauce Labs
 
 ### Test Files
+
+> make sure you have `svn` and `hg` installed before initializing
 
 Test files are housed in [another repo](https://github.com/SheetJS/test_files).
 

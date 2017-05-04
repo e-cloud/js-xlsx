@@ -1,11 +1,14 @@
 /* from js-harb (C) 2014-present  SheetJS */
 import cptable from 'codepage/dist/cpexcel.full.js'
-import { DENSE } from './03_dense'
+import { DENSE, DIF_XL } from './03_consts'
 import * as Base64 from './04_base64'
 import { new_raw_buf, s2a } from './05_buf'
-import { cc2str, numdate } from './20_jsutils'
+import { SSF } from './10_ssf'
+import { cc2str, datenum, keys, numdate, parseDate } from './20_jsutils'
 import { prep_blob } from './23_binutils'
 import { aoa_to_sheet, decode_range, encode_cell, encode_range, format_cell, sheet_to_workbook } from './27_csfutils'
+import { process_col, pt2px, px2char, px2pt, width2px } from './45_styutils'
+import { a1_to_rc } from './61_fcommon'
 
 export const DBF = function () {
     const dbf_codepage_map = {
@@ -309,60 +312,99 @@ export const SYLK = function () {
         const arr = []
         const formats = []
         let next_cell_format = null
+        const sht = {}
+        const rowinfo = []
+        const colinfo = []
+        let cw = []
+        let Mval = 0
         for (; ri !== records.length; ++ri) {
+            Mval = 0
             const record = records[ri].trim().split(';')
             const RT = record[0]
             let val
-            if (RT === 'P') {
-                for (rj = 1; rj < record.length; ++rj) {
-                    switch (record[rj].charAt(0)) {
-                        case 'P':
-                            formats.push(record[rj].substr(1))
-                            break
+            switch (RT) {
+                case 'P':
+                    if (record[1].charAt(0) == 'P') {
+                        formats.push(records[ri].trim().substr(3).replace(/;;/g, ';'))
                     }
-                }
-            } else if (RT !== 'C' && RT !== 'F') {
-                continue
-            } else {
-                for (rj = 1; rj < record.length; ++rj) {
-                    switch (record[rj].charAt(0)) {
-                        case 'Y':
-                            R = parseInt(record[rj].substr(1)) - 1
-                            C = 0
-                            for (let j = arr.length; j <= R; ++j) arr[j] = [];
-                            break
-                        case 'X':
-                            C = parseInt(record[rj].substr(1)) - 1
-                            break
-                        case 'K':
-                            val = record[rj].substr(1)
-                            if (val.charAt(0) === '"') {
-                                val = val.substr(1, val.length - 2)
-                            } else if (val === 'TRUE') {
-                                val = true
-                            } else if (val === 'FALSE') {
-                                val = false
-                            } else if (+val === +val) {
-                                val = +val
-                                if (next_cell_format !== null && next_cell_format.match(/[ymdhmsYMDHMS]/)) {
-                                    val = numdate(val)
+                    break
+                case 'C':
+                case 'F':
+                    for (rj = 1; rj < record.length; ++rj) {
+                        switch (record[rj].charAt(0)) {
+                            case 'Y':
+                                R = parseInt(record[rj].substr(1)) - 1
+                                C = 0
+                                for (let j = arr.length; j <= R; ++j) {
+                                    arr[j] = []
                                 }
-                            }
-                            arr[R][C] = val
-                            next_cell_format = null
-                            break
-                        case 'P':
-                            if (RT !== 'F') break
-                            next_cell_format = formats[parseInt(record[rj].substr(1))]
+                                break
+                            case 'X':
+                                C = parseInt(record[rj].substr(1)) - 1
+                                break
+                            case 'K':
+                                val = record[rj].substr(1)
+                                if (val.charAt(0) === '"') {
+                                    val = val.substr(1, val.length - 2)
+                                } else if (val === 'TRUE') {
+                                    val = true
+                                } else if (val === 'FALSE') {
+                                    val = false
+                                } else if (+val === +val) {
+                                    val = +val
+                                    if (next_cell_format !== null && SSF.is_date(next_cell_format)) {
+                                        val = numdate(val)
+                                    }
+                                }
+                                arr[R][C] = val
+                                next_cell_format = null
+                                break
+                            case 'P':
+                                if (RT !== 'F') break
+                                next_cell_format = formats[parseInt(record[rj].substr(1))]
+                                break
+                            case 'M':
+                                Mval = parseInt(record[rj].substr(1)) / 20
+                                break
+                            case 'W':
+                                if (RT !== 'F') break
+                                cw = record[rj].substr(1).split(' ')
+                                for (let j = parseInt(cw[0], 10); j <= parseInt(cw[1], 10); ++j) {
+                                    Mval = parseInt(cw[2], 10)
+                                    colinfo[j - 1] = Mval == 0 ? {hidden: true} : {wch: Mval}
+                                    process_col(colinfo[j - 1])
+                                }
+                                break
+                            case 'R':
+                                R = parseInt(record[rj].substr(1)) - 1
+                                rowinfo[R] = {}
+                                if (Mval > 0) {
+                                    rowinfo[R].hpt = Mval
+                                    rowinfo[R].hpx = pt2px(Mval)
+                                } else if (Mval == 0) {
+                                    rowinfo[R].hidden = true
+                                }
+                        }
                     }
-                }
+                    break
+                default:
+                    break
             }
         }
+        if (rowinfo.length > 0) sht['!rows'] = rowinfo
+        if (colinfo.length > 0) sht['!cols'] = colinfo
+        arr[arr.length] = sht
         return arr
     }
 
-    function sylk_to_sheet(str /*:string*/, opts) /*:Worksheet*/ {
-        return aoa_to_sheet(sylk_to_aoa(str, opts), opts)
+    function sylk_to_sheet(str/*:string*/, opts)/*:Worksheet*/ {
+        const aoa = sylk_to_aoa(str, opts)
+        const ws = aoa.pop()
+        const o = aoa_to_sheet(aoa, opts)
+        keys(ws).forEach(function (k) {
+            o[k] = ws[k]
+        })
+        return o
     }
 
     function sylk_to_workbook(str /*:string*/, opts) /*:Workbook*/ {
@@ -373,7 +415,10 @@ export const SYLK = function () {
         let o = `C;Y${R + 1};X${C + 1};K`
         switch (cell.t) {
             case 'n':
-                o += cell.v
+                o += (cell.v || 0)
+                if (cell.f && !cell.F) {
+                    o += ';E' + a1_to_rc(cell.f, {r: R, c: C})
+                }
                 break
             case 'b':
                 o += cell.v ? 'TRUE' : 'FALSE'
@@ -391,24 +436,59 @@ export const SYLK = function () {
         return o
     }
 
+    function write_ws_cols_sylk(out, cols) {
+        cols.forEach(function (col, i) {
+            let rec = 'F;W' + (i + 1) + ' ' + (i + 1) + ' '
+            if (col.hidden) {
+                rec += '0'
+            } else {
+                if (typeof col.width == 'number') col.wpx = width2px(col.width)
+                if (typeof col.wpx == 'number') col.wch = px2char(col.wpx)
+                if (typeof col.wch == 'number') rec += Math.round(col.wch)
+            }
+            if (rec.charAt(rec.length - 1) != ' ') out.push(rec)
+        })
+    }
+
+    function write_ws_rows_sylk(out, rows) {
+        rows.forEach(function (row, i) {
+            let rec = 'F;'
+            if (row.hidden) {
+                rec += 'M0;'
+            } else if (row.hpt) {
+                rec += 'M' + 20 * row.hpt + ';'
+            } else if (row.hpx) {
+                rec += 'M' + 20 * px2pt(row.hpx) + ';'
+            }
+            if (rec.length > 2) {
+                out.push(rec + 'R' + (i + 1))
+            }
+        })
+    }
+
     function sheet_to_sylk(ws /*:Worksheet*/, opts /*:?any*/) /*:string*/ {
         const preamble /*:Array<string>*/ = ['ID;PWXL;N;E']
         const o /*:Array<string>*/ = []
-        preamble.push('P;PGeneral')
         const r = decode_range(ws['!ref'])
         let cell
         /*:Cell*/
         const dense = Array.isArray(ws)
+
+        const RS = '\r\n'
+
+        preamble.push('P;PGeneral')
+        preamble.push('F;P0;DG0G8;M255')
+        if (ws['!cols']) write_ws_cols_sylk(preamble, ws['!cols'])
+        if (ws['!rows']) write_ws_rows_sylk(preamble, ws['!rows'])
+
         for (let R = r.s.r; R <= r.e.r; ++R) {
             for (let C = r.s.c; C <= r.e.c; ++C) {
                 const coord = encode_cell({r: R, c: C})
                 cell = dense ? (ws[R] || [])[C] : ws[coord]
-                if (!cell || cell.v == null) continue
+                if (!cell || cell.v == null && (!cell.f || cell.F)) continue
                 o.push(write_ws_cell_sylk(cell, ws, R, C, opts))
             }
         }
-        preamble.push('F;P0;DG0G8;M255')
-        const RS = '\r\n'
         return `${preamble.join(RS) + RS + o.join(RS) + RS}E${RS}`
     }
 
@@ -470,7 +550,7 @@ export const DIF = function () {
                     } else if (+value == +value) {
                         arr[R][C] = +value
                     } else if (!isNaN(new Date(value).getDate())) {
-                        arr[R][C] = new Date(value)
+                        arr[R][C] = parseDate(value)
                     } else {
                         arr[R][C] = value
                     }
@@ -528,19 +608,38 @@ export const DIF = function () {
                 for (let C = r.s.c; C <= r.e.c; ++C) {
                     const coord = encode_cell({r: R, c: C})
                     cell = dense ? (ws[R] || [])[C] : ws[coord]
-                    if (!cell || cell.v == null) {
+                    if (!cell) {
                         push_value(o, 1, 0, '')
                         continue
                     }
                     switch (cell.t) {
                         case 'n':
-                            push_value(o, 0, /*cell.w ||*/cell.v, 'V')
+                            let val = DIF_XL ? cell.w : cell.v
+                            if (!val && cell.v != null) val = cell.v
+                            if (val == null) {
+                                if (DIF_XL && cell.f && !cell.F) {
+                                    push_value(o, 1, 0, '=' + cell.f)
+                                } else {
+                                    push_value(o, 1, 0, '')
+                                }
+                            }
+                            else {
+                                push_value(o, 0, val, 'V')
+                            }
                             break
                         case 'b':
                             push_value(o, 0, cell.v ? 1 : 0, cell.v ? 'TRUE' : 'FALSE')
                             break
                         case 's':
-                            push_value(o, 1, 0, cell.v)
+                            push_value(o, 1, 0, (!DIF_XL || isNaN(cell.v)) ? cell.v : '="' + cell.v + '"')
+                            break
+                        case 'd':
+                            if (!cell.w) cell.w = SSF.format(cell.z || SSF._table[14], datenum(parseDate(cell.v)))
+                            if (DIF_XL) {
+                                push_value(o, 0, cell.w, 'V')
+                            } else {
+                                push_value(o, 1, 0, cell.w)
+                            }
                             break
                         default:
                             push_value(o, 1, 0, '')
