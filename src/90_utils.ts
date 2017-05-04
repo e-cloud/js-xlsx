@@ -19,14 +19,14 @@ function sheet_to_json(sheet /*:Worksheet*/, opts /*:?Sheet2JSONOpts*/) {
     if (sheet == null || sheet['!ref'] == null) {
         return []
     }
-    let val = {t: 'n', v: 0}
+    let val = { t: 'n', v: 0 }
     let header = 0
     let offset = 1
     const hdr /*:Array<any>*/ = []
     let isempty = true
     let v = 0
     let vv = ''
-    let r = {s: {r: 0, c: 0}, e: {r: 0, c: 0}}
+    let r = { s: { r: 0, c: 0 }, e: { r: 0, c: 0 } }
     const o = opts != null ? opts : {}
     const raw = o.raw
     const defval = o.defval
@@ -61,7 +61,9 @@ function sheet_to_json(sheet /*:Worksheet*/, opts /*:?Sheet2JSONOpts*/) {
     let R = r.s.r
     let C = 0
     let CC = 0
-    if (!sheet[R]) sheet[R] = []
+    if (!sheet[R]) {
+        sheet[R] = []
+    }
     for (C = r.s.c; C <= r.e.c; ++C) {
         cols[C] = encode_col(C)
         val = dense ? sheet[R][C] : sheet[cols[C] + rr]
@@ -99,7 +101,7 @@ function sheet_to_json(sheet /*:Worksheet*/, opts /*:?Sheet2JSONOpts*/) {
             row = {}
             if (Object.defineProperty) {
                 try {
-                    Object.defineProperty(row, '__rowNum__', {value: R, enumerable: false})
+                    Object.defineProperty(row, '__rowNum__', { value: R, enumerable: false })
                 } catch (e) {
                     row.__rowNum__ = R
                 }
@@ -111,7 +113,9 @@ function sheet_to_json(sheet /*:Worksheet*/, opts /*:?Sheet2JSONOpts*/) {
             for (C = r.s.c; C <= r.e.c; ++C) {
                 val = dense ? sheet[R][C] : sheet[cols[C] + rr]
                 if (val === undefined || val.t === undefined) {
-                    if (defval === undefined) continue
+                    if (defval === undefined) {
+                        continue
+                    }
                     if (hdr[C] != null) {
                         row[hdr[C]] = defval
                         isempty = false
@@ -121,7 +125,9 @@ function sheet_to_json(sheet /*:Worksheet*/, opts /*:?Sheet2JSONOpts*/) {
                 v = val.v
                 switch (val.t) {
                     case 'z':
-                        if (v == null) break
+                        if (v == null) {
+                            break
+                        }
                         continue
                     case 'e':
                         continue
@@ -229,8 +235,12 @@ export function sheet_to_csv(sheet /*:Worksheet*/, opts /*:?Sheet2CSVOpts*/) /*:
     }
     for (let R = r.s.r; R <= r.e.r; ++R) {
         row = make_csv_row(sheet, r, R, cols, fs, rs, FS, o)
-        if (row == null) continue
-        if (o.strip) row = row.replace(endregex, '')
+        if (row == null) {
+            continue
+        }
+        if (o.strip) {
+            row = row.replace(endregex, '')
+        }
         out.push(row + RS)
     }
     delete o.dense
@@ -238,11 +248,15 @@ export function sheet_to_csv(sheet /*:Worksheet*/, opts /*:?Sheet2CSVOpts*/) /*:
 }
 
 export function sheet_to_txt(sheet /*:Worksheet*/, opts /*:?Sheet2CSVOpts*/) {
-    if (!opts) opts = {}
+    if (!opts) {
+        opts = {}
+    }
     opts.FS = '\t'
     opts.RS = '\n'
     const s = sheet_to_csv(sheet, opts)
-    if (typeof cptable == 'undefined') return s
+    if (typeof cptable == 'undefined') {
+        return s
+    }
     const o = cptable.utils.encode(1200, s)
     return `\xFF\xFE${o}`
 }
@@ -251,7 +265,9 @@ function sheet_to_formulae(sheet /*:Worksheet*/) /*:Array<string>*/ {
     let y = ''
     let x
     let val = ''
-    if (sheet == null || sheet['!ref'] == null) return []
+    if (sheet == null || sheet['!ref'] == null) {
+        return []
+    }
     const r = safe_decode_range(sheet['!ref'])
     let rr = ''
     const cols = []
@@ -272,9 +288,13 @@ function sheet_to_formulae(sheet /*:Worksheet*/) /*:Array<string>*/ {
                 continue
             } else if (x.F != null) {
                 y = x.F
-                if (!x.f) continue
+                if (!x.f) {
+                    continue
+                }
                 val = x.f
-                if (!y.includes(':')) y = `${y}:${y}`
+                if (!y.includes(':')) {
+                    y = `${y}:${y}`
+                }
             }
             if (x.f != null) {
                 val = x.f

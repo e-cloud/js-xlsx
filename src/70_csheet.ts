@@ -11,22 +11,30 @@ const CS_XML_ROOT = writextag('chartsheet', null, {
 
 /* 18.3 Worksheets also covers Chartsheets */
 export function parse_cs_xml(data /*:?string*/, opts, rels, wb, themes, styles) /*:Worksheet*/ {
-    if (!data) return data
+    if (!data) {
+        return data
+    }
     /* 18.3.1.12 chartsheet CT_ChartSheet */
-    if (!rels) rels = {'!id': {}}
-    const s = {'!type': 'chart', '!chart': null, '!rel': ''}
+    if (!rels) {
+        rels = { '!id': {} }
+    }
+    const s = { '!type': 'chart', '!chart': null, '!rel': '' }
     let m
 
     /* 18.3.1.36 drawing CT_Drawing */
-    if (m = data.match(/drawing r:id="(.*?)"/)) s['!rel'] = m[1]
+    if (m = data.match(/drawing r:id="(.*?)"/)) {
+        s['!rel'] = m[1]
+    }
 
-    if (rels['!id'][s['!rel']]) s['!chart'] = rels['!id'][s['!rel']]
+    if (rels['!id'][s['!rel']]) {
+        s['!chart'] = rels['!id'][s['!rel']]
+    }
     return s
 }
 
 export function write_cs_xml(idx /*:number*/, opts, wb /*:Workbook*/, rels) /*:string*/ {
     const o = [XML_HEADER, CS_XML_ROOT]
-    o[o.length] = writextag('drawing', null, {'r:id': 'rId1'})
+    o[o.length] = writextag('drawing', null, { 'r:id': 'rId1' })
     add_rels(rels, -1, `../drawings/drawing${idx + 1}.xml`, RELS.DRAW)
     if (o.length > 2) {
         o[o.length] = '</chartsheet>'
@@ -37,9 +45,13 @@ export function write_cs_xml(idx /*:number*/, opts, wb /*:Workbook*/, rels) /*:s
 
 /* [MS-XLSB] 2.1.7.7 Chart Sheet */
 export function parse_cs_bin(data, opts, rels, wb, themes, styles) /*:Worksheet*/ {
-    if (!data) return data
-    if (!rels) rels = {'!id': {}}
-    const s = {'!type': 'chart', '!chart': null, '!rel': ''}
+    if (!data) {
+        return data
+    }
+    if (!rels) {
+        rels = { '!id': {} }
+    }
+    const s = { '!type': 'chart', '!chart': null, '!rel': '' }
     const state = []
     let pass = false
     recordhopper(data, function cs_parse(val, R_n, RT) {
@@ -84,11 +96,15 @@ export function parse_cs_bin(data, opts, rels, wb, themes, styles) /*:Worksheet*
                     state.push(R_n)
                 } else if ((R_n || '').indexOf('End') > 0) {
                     state.pop()
-                } else if (!pass || opts.WTF) throw new Error(`Unexpected record ${RT} ${R_n}`)
+                } else if (!pass || opts.WTF) {
+                    throw new Error(`Unexpected record ${RT} ${R_n}`)
+                }
         }
     }, opts)
 
-    if (rels['!id'][s['!rel']]) s['!chart'] = rels['!id'][s['!rel']]
+    if (rels['!id'][s['!rel']]) {
+        s['!chart'] = rels['!id'][s['!rel']]
+    }
     return s
 }
 

@@ -12,13 +12,17 @@ export function make_ssf(SSF) {
     function _strrev(x /*:string*/) /*:string*/ {
         let o = ''
         let i = x.length - 1
-        while (i >= 0) o += x.charAt(i--)
+        while (i >= 0) {
+            o += x.charAt(i--)
+        }
         return o
     }
 
     function fill(c /*:string*/, l /*:number*/) /*:string*/ {
         let o = ''
-        while (o.length < l) o += c
+        while (o.length < l) {
+            o += c
+        }
         return o
     }
 
@@ -50,7 +54,9 @@ export function make_ssf(SSF) {
     const p2_32 = Math.pow(2, 32)
 
     function pad0r(v /*:any*/, d /*:number*/) /*:string*/ {
-        if (v > p2_32 || v < -p2_32) return pad0r1(v, d)
+        if (v > p2_32 || v < -p2_32) {
+            return pad0r1(v, d)
+        }
         const i = Math.round(v)
         return pad0r2(i, d)
     }
@@ -153,7 +159,9 @@ export function make_ssf(SSF) {
             A = Math.floor(B)
             P = A * P_1 + P_2
             Q = A * Q_1 + Q_2
-            if (B - A < 0.00000005) break
+            if (B - A < 0.00000005) {
+                break
+            }
             B = 1 / (B - A)
             P_2 = P_1
             P_1 = P
@@ -169,7 +177,9 @@ export function make_ssf(SSF) {
                 P = P_1
             }
         }
-        if (!mixed) return [0, sgn * P, Q]
+        if (!mixed) {
+            return [0, sgn * P, Q]
+        }
         const q = Math.floor(sgn * P / Q)
         return [q, sgn * P - q * Q, Q]
     }
@@ -189,15 +199,21 @@ export function make_ssf(SSF) {
         function gfn2(v) {
             const w = v < 0 ? 12 : 11
             let o = gfn5(v.toFixed(12))
-            if (o.length <= w) return o
+            if (o.length <= w) {
+                return o
+            }
             o = v.toPrecision(10)
-            if (o.length <= w) return o
+            if (o.length <= w) {
+                return o
+            }
             return v.toExponential(5)
         }
 
         function gfn3(v) {
             let o = v.toFixed(11).replace(gnr1, '.$1')
-            if (o.length > (v < 0 ? 12 : 11)) o = v.toPrecision(6)
+            if (o.length > (v < 0 ? 12 : 11)) {
+                o = v.toPrecision(6)
+            }
             return o
         }
 
@@ -214,8 +230,8 @@ export function make_ssf(SSF) {
         }
 
         function gfn5(o) {
-            //for(var i = 0; i != o.length; ++i) if(o.charCodeAt(i) === 46) return o.replace(gnr2,"").replace(gnr1,".$1");
-            //return o;
+            //for(var i = 0; i != o.length; ++i) if(o.charCodeAt(i) === 46) return
+            // o.replace(gnr2,"").replace(gnr1,".$1"); return o;
             return o.includes('.') ? o.replace(gnr2, '').replace(gnr1, '.$1') : o
         }
 
@@ -247,7 +263,9 @@ export function make_ssf(SSF) {
             case 'undefined':
                 return ''
             case 'object':
-                if (v == null) return ''
+                if (v == null) {
+                    return ''
+                }
         }
         throw new Error(`unsupported value in General format: ${v}`)
     }
@@ -258,15 +276,21 @@ export function make_ssf(SSF) {
     }
 
     function parse_date_code(v /*:number*/, opts? /*:?any*/, b2? /*:?boolean*/) {
-        if (v > 2958465 || v < 0) return null
+        if (v > 2958465 || v < 0) {
+            return null
+        }
         let date = v | 0
         let time = Math.floor(86400 * (v - date))
         let dow = 0
         let dout = []
-        const out = {D: date, T: time, u: 86400 * (v - date) - time, y: 0, m: 0, d: 0, H: 0, M: 0, S: 0, q: 0}
-        if (Math.abs(out.u) < 1e-6) out.u = 0
+        const out = { D: date, T: time, u: 86400 * (v - date) - time, y: 0, m: 0, d: 0, H: 0, M: 0, S: 0, q: 0 }
+        if (Math.abs(out.u) < 1e-6) {
+            out.u = 0
+        }
         fixopts(opts != null ? opts : opts = [])
-        if (opts.date1904) date += 1462
+        if (opts.date1904) {
+            date += 1462
+        }
         if (out.u > 0.999) {
             out.u = 0
             if (++time == 86400) {
@@ -281,14 +305,20 @@ export function make_ssf(SSF) {
             dout = b2 ? [1317, 8, 29] : [1900, 1, 0]
             dow = 6
         } else {
-            if (date > 60) --date
+            if (date > 60) {
+                --date
+            }
             /* 1 = Jan 1 1900 in Gregorian */
             const d = new Date(1900, 0, 1)
             d.setDate(d.getDate() + date - 1)
             dout = [d.getFullYear(), d.getMonth() + 1, d.getDate()]
             dow = d.getDay()
-            if (date < 60) dow = (dow + 6) % 7
-            if (b2) dow = fix_hijri(d, dout)
+            if (date < 60) {
+                dow = (dow + 6) % 7
+            }
+            if (b2) {
+                dow = fix_hijri(d, dout)
+            }
         }
         out.y = dout[0]
         out.m = dout[1]
@@ -422,10 +452,16 @@ export function make_ssf(SSF) {
                             tt = ss0 === 1 ? 10 : 1
                         }
                         ss = Math.round(tt * (val.S + val.u))
-                        if (ss >= 60 * tt) ss = 0
-                        if (fmt === 's') return ss === 0 ? '0' : `${ss / tt}`
+                        if (ss >= 60 * tt) {
+                            ss = 0
+                        }
+                        if (fmt === 's') {
+                            return ss === 0 ? '0' : `${ss / tt}`
+                        }
                         o = pad0(ss, 2 + ss0)
-                        if (fmt === 'ss') return o.substr(0, 2)
+                        if (fmt === 'ss') {
+                            return o.substr(0, 2)
+                        }
                         return `.${o.substr(2, fmt.length - 1)}`
                     default:
                         throw `bad second format: ${fmt}`
@@ -464,10 +500,14 @@ export function make_ssf(SSF) {
 
     /*jshint +W086 */
     function commaify(s /*:string*/) /*:string*/ {
-        if (s.length <= 3) return s
+        if (s.length <= 3) {
+            return s
+        }
         let j = s.length % 3
         let o = s.substr(0, j)
-        for (; j != s.length; j += 3) o += (o.length > 0 ? ',' : '') + s.substr(j, 3);
+        for (; j != s.length; j += 3) {
+            o += (o.length > 0 ? ',' : '') + s.substr(j, 3)
+        }
         return o
     }
 
@@ -482,7 +522,9 @@ export function make_ssf(SSF) {
 
         function write_num_cm(type /*:string*/, fmt /*:string*/, val /*:number*/) /*:string*/ {
             let idx = fmt.length - 1
-            while (fmt.charCodeAt(idx - 1) === 44) --idx
+            while (fmt.charCodeAt(idx - 1) === 44) {
+                --idx
+            }
             return write_num(type, fmt.substr(0, idx), val / Math.pow(10, 3 * (fmt.length - idx)))
         }
 
@@ -492,9 +534,13 @@ export function make_ssf(SSF) {
             const idx = fmt.indexOf('E') - fmt.indexOf('.') - 1
             if (fmt.match(/^#+0.0E\+0$/)) {
                 let period = fmt.indexOf('.')
-                if (period === -1) period = fmt.indexOf('E')
+                if (period === -1) {
+                    period = fmt.indexOf('E')
+                }
                 let ee = Math.floor(Math.log(Math.abs(val)) * Math.LOG10E) % period
-                if (ee < 0) ee += period
+                if (ee < 0) {
+                    ee += period
+                }
                 o = (val / Math.pow(10, ee)).toPrecision(idx + 1 + (period + ee) % period)
                 if (!o.includes('e')) {
                     const fakee = Math.floor(Math.log(Math.abs(val)) * Math.LOG10E)
@@ -515,8 +561,12 @@ export function make_ssf(SSF) {
             } else {
                 o = val.toExponential(idx)
             }
-            if (fmt.match(/E\+00$/) && o.match(/e[+-]\d$/)) o = `${o.substr(0, o.length - 1)}0${o.charAt(o.length - 1)}`
-            if (fmt.match(/E\-/) && o.match(/e\+/)) o = o.replace(/e\+/, 'e')
+            if (fmt.match(/E\+00$/) && o.match(/e[+-]\d$/)) {
+                o = `${o.substr(0, o.length - 1)}0${o.charAt(o.length - 1)}`
+            }
+            if (fmt.match(/E\-/) && o.match(/e\+/)) {
+                o = o.replace(/e\+/, 'e')
+            }
             return o.replace('e', 'E')
         }
 
@@ -528,7 +578,9 @@ export function make_ssf(SSF) {
             const base = Math.floor(rr / den)
             const myn = rr - base * den
             const myd = den
-            return `${sign + (base === 0 ? '' : '' + base)} ${myn === 0 ? fill(' ', r[1].length + 1 + r[4].length) : pad_(myn, r[1].length) + r[2] + '/' + r[3] + pad0(myd, r[4].length)}`
+            return `${sign + (base === 0 ? '' : '' + base)} ${myn === 0
+                ? fill(' ', r[1].length + 1 + r[4].length)
+                : pad_(myn, r[1].length) + r[2] + '/' + r[3] + pad0(myd, r[4].length)}`
         }
 
         function write_num_f2(r /*:Array<string>*/, aval /*:number*/, sign /*:string*/) /*:string*/ {
@@ -579,20 +631,34 @@ export function make_ssf(SSF) {
         }
 
         function flr(val /*:number*/) /*:string*/ {
-            if (val < 2147483647 && val > -2147483648) return `${val >= 0 ? val | 0 : val - 1 | 0}`
+            if (val < 2147483647 && val > -2147483648) {
+                return `${val >= 0 ? val | 0 : val - 1 | 0}`
+            }
             return `${Math.floor(val)}`
         }
 
         function write_num_flt(type /*:string*/, fmt /*:string*/, val /*:number*/) /*:string*/ {
             if (type.charCodeAt(0) === 40 && !fmt.match(closeparen)) {
                 const ffmt = fmt.replace(/\( */, '').replace(/ \)/, '').replace(/\)/, '')
-                if (val >= 0) return write_num_flt('n', ffmt, val)
+                if (val >= 0) {
+                    return write_num_flt('n', ffmt, val)
+                }
                 return `(${write_num_flt('n', ffmt, -val)})`
             }
-            if (fmt.charCodeAt(fmt.length - 1) === 44) return write_num_cm(type, fmt, val)
-            if (fmt.includes('%')) return write_num_pct(type, fmt, val)
-            if (fmt.includes('E')) return write_num_exp(fmt, val)
-            if (fmt.charCodeAt(0) === 36) return `$${write_num_flt(type, fmt.substr(fmt.charAt(1) == ' ' ? 2 : 1), val)}`
+            if (fmt.charCodeAt(fmt.length - 1) === 44) {
+                return write_num_cm(type, fmt, val)
+            }
+            if (fmt.includes('%')) {
+                return write_num_pct(type, fmt, val)
+            }
+            if (fmt.includes('E')) {
+                return write_num_exp(fmt, val)
+            }
+            if (fmt.charCodeAt(0) === 36) {
+                return `$${write_num_flt(type, fmt.substr(fmt.charAt(1) == ' '
+                    ? 2
+                    : 1), val)}`
+            }
             let o
             let r
             /*:?Array<string>*/
@@ -600,14 +666,22 @@ export function make_ssf(SSF) {
             let ff
             const aval = Math.abs(val)
             const sign = val < 0 ? '-' : ''
-            if (fmt.match(/^00+$/)) return sign + pad0r(aval, fmt.length)
+            if (fmt.match(/^00+$/)) {
+                return sign + pad0r(aval, fmt.length)
+            }
             if (fmt.match(/^[#?]+$/)) {
                 o = pad0r(val, 0)
-                if (o === '0') o = ''
+                if (o === '0') {
+                    o = ''
+                }
                 return o.length > fmt.length ? o : hashq(fmt.substr(0, fmt.length - o.length)) + o
             }
-            if (r = fmt.match(frac1)) return write_num_f1(r, aval, sign)
-            if (fmt.match(/^#+0+$/)) return sign + pad0r(aval, fmt.length - fmt.indexOf('0'))
+            if (r = fmt.match(frac1)) {
+                return write_num_f1(r, aval, sign)
+            }
+            if (fmt.match(/^#+0+$/)) {
+                return sign + pad0r(aval, fmt.length - fmt.indexOf('0'))
+            }
             if (r = fmt.match(dec1)) {
                 o = rnd(val, r[1].length)
                     .replace(/^([^\.]+)$/, `$1.${r[1]}`)
@@ -624,11 +698,17 @@ export function make_ssf(SSF) {
                         .replace(/^(-?\d*)$/, '$1.')
                         .replace(/^0\./, r[1].length ? '0.' : '.')
             }
-            if (r = fmt.match(/^#,##0(\.?)$/)) return sign + commaify(pad0r(aval, 0))
-            if (r = fmt.match(/^#,##0\.([#0]*0)$/)) {
-                return val < 0 ? `-${write_num_flt(type, fmt, -val)}` : `${commaify('' + (Math.floor(val) + carry(val, r[1].length)))}.${pad0(dec(val, r[1].length), r[1].length)}`
+            if (r = fmt.match(/^#,##0(\.?)$/)) {
+                return sign + commaify(pad0r(aval, 0))
             }
-            if (r = fmt.match(/^#,#*,#0/)) return write_num_flt(type, fmt.replace(/^#,#*,/, ''), val)
+            if (r = fmt.match(/^#,##0\.([#0]*0)$/)) {
+                return val < 0
+                    ? `-${write_num_flt(type, fmt, -val)}`
+                    : `${commaify('' + (Math.floor(val) + carry(val, r[1].length)))}.${pad0(dec(val, r[1].length), r[1].length)}`
+            }
+            if (r = fmt.match(/^#,#*,#0/)) {
+                return write_num_flt(type, fmt.replace(/^#,#*,/, ''), val)
+            }
             if (r = fmt.match(/^([0#]+)(\\?-([0#]+))+$/)) {
                 o = _strrev(write_num_flt(type, fmt.replace(/[\\-]/g, ''), val))
                 ri = 0
@@ -646,22 +726,30 @@ export function make_ssf(SSF) {
                 ff = frac(aval, Math.pow(10, ri) - 1, false)
                 o = `${sign}`
                 oa = write_num('n', /*::String(*/r[1] /*::)*/, ff[1])
-                if (oa.charAt(oa.length - 1) == ' ') oa = `${oa.substr(0, oa.length - 1)}0`
+                if (oa.charAt(oa.length - 1) == ' ') {
+                    oa = `${oa.substr(0, oa.length - 1)}0`
+                }
                 o += `${oa + /*::String(*/r[2] /*::)*/}/${/*::String(*/r[3]}`
                 /*::)*/
                 oa = rpad_(ff[2], ri)
-                if (oa.length < r[4].length) oa = hashq(r[4].substr(r[4].length - oa.length)) + oa
+                if (oa.length < r[4].length) {
+                    oa = hashq(r[4].substr(r[4].length - oa.length)) + oa
+                }
                 o += oa
                 return o
             }
             if (r = fmt.match(/^# ([#0?]+)( ?)\/( ?)([#0?]+)/)) {
                 ri = Math.min(Math.max(r[1].length, r[4].length), 7)
                 ff = frac(aval, Math.pow(10, ri) - 1, true)
-                return `${sign + (ff[0] || (ff[1] ? '' : '0'))} ${ff[1] ? pad_(ff[1], ri) + r[2] + '/' + r[3] + rpad_(ff[2], ri) : fill(' ', 2 * ri + 1 + r[2].length + r[3].length)}`
+                return `${sign + (ff[0] || (ff[1] ? '' : '0'))} ${ff[1]
+                    ? pad_(ff[1], ri) + r[2] + '/' + r[3] + rpad_(ff[2], ri)
+                    : fill(' ', 2 * ri + 1 + r[2].length + r[3].length)}`
             }
             if (r = fmt.match(/^[#0?]+$/)) {
                 o = pad0r(val, 0)
-                if (fmt.length <= o.length) return o
+                if (fmt.length <= o.length) {
+                    return o
+                }
                 return hashq(fmt.substr(0, fmt.length - o.length)) + o
             }
             if (r = fmt.match(/^([#0?]+)\.([#0]+)$/)) {
@@ -673,9 +761,11 @@ export function make_ssf(SSF) {
             }
             if (r = fmt.match(/^00,000\.([#0]*0)$/)) {
                 ri = dec(val, r[1].length)
-                return val < 0 ? `-${write_num_flt(type, fmt, -val)}` : `${commaify(flr(val)).replace(/^\d,\d{3}$/, '0$&').replace(/^\d*$/, function ($$) {
-                    return '00,' + ($$.length < 3 ? pad0(0, 3 - $$.length) : '') + $$
-                })}.${pad0(ri, r[1].length)}`
+                return val < 0 ? `-${write_num_flt(type, fmt, -val)}` : `${commaify(flr(val))
+                    .replace(/^\d,\d{3}$/, '0$&')
+                    .replace(/^\d*$/, function ($$) {
+                        return '00,' + ($$.length < 3 ? pad0(0, 3 - $$.length) : '') + $$
+                    })}.${pad0(ri, r[1].length)}`
             }
             switch (fmt) {
                 case '#,###':
@@ -688,7 +778,9 @@ export function make_ssf(SSF) {
 
         function write_num_cm2(type /*:string*/, fmt /*:string*/, val /*:number*/) /*:string*/ {
             let idx = fmt.length - 1
-            while (fmt.charCodeAt(idx - 1) === 44) --idx
+            while (fmt.charCodeAt(idx - 1) === 44) {
+                --idx
+            }
             return write_num(type, fmt.substr(0, idx), val / Math.pow(10, 3 * (fmt.length - idx)))
         }
 
@@ -704,9 +796,13 @@ export function make_ssf(SSF) {
             const idx = fmt.indexOf('E') - fmt.indexOf('.') - 1
             if (fmt.match(/^#+0.0E\+0$/)) {
                 let period = fmt.indexOf('.')
-                if (period === -1) period = fmt.indexOf('E')
+                if (period === -1) {
+                    period = fmt.indexOf('E')
+                }
                 let ee = Math.floor(Math.log(Math.abs(val)) * Math.LOG10E) % period
-                if (ee < 0) ee += period
+                if (ee < 0) {
+                    ee += period
+                }
                 o = (val / Math.pow(10, ee)).toPrecision(idx + 1 + (period + ee) % period)
                 if (!o.match(/[Ee]/)) {
                     const fakee = Math.floor(Math.log(Math.abs(val)) * Math.LOG10E)
@@ -723,35 +819,59 @@ export function make_ssf(SSF) {
             } else {
                 o = val.toExponential(idx)
             }
-            if (fmt.match(/E\+00$/) && o.match(/e[+-]\d$/)) o = `${o.substr(0, o.length - 1)}0${o.charAt(o.length - 1)}`
-            if (fmt.match(/E\-/) && o.match(/e\+/)) o = o.replace(/e\+/, 'e')
+            if (fmt.match(/E\+00$/) && o.match(/e[+-]\d$/)) {
+                o = `${o.substr(0, o.length - 1)}0${o.charAt(o.length - 1)}`
+            }
+            if (fmt.match(/E\-/) && o.match(/e\+/)) {
+                o = o.replace(/e\+/, 'e')
+            }
             return o.replace('e', 'E')
         }
 
         function write_num_int(type /*:string*/, fmt /*:string*/, val /*:number*/) /*:string*/ {
             if (type.charCodeAt(0) === 40 && !fmt.match(closeparen)) {
                 const ffmt = fmt.replace(/\( */, '').replace(/ \)/, '').replace(/\)/, '')
-                if (val >= 0) return write_num_int('n', ffmt, val)
+                if (val >= 0) {
+                    return write_num_int('n', ffmt, val)
+                }
                 return `(${write_num_int('n', ffmt, -val)})`
             }
-            if (fmt.charCodeAt(fmt.length - 1) === 44) return write_num_cm2(type, fmt, val)
-            if (fmt.includes('%')) return write_num_pct2(type, fmt, val)
-            if (fmt.includes('E')) return write_num_exp2(fmt, val)
-            if (fmt.charCodeAt(0) === 36) return `$${write_num_int(type, fmt.substr(fmt.charAt(1) == ' ' ? 2 : 1), val)}`
+            if (fmt.charCodeAt(fmt.length - 1) === 44) {
+                return write_num_cm2(type, fmt, val)
+            }
+            if (fmt.includes('%')) {
+                return write_num_pct2(type, fmt, val)
+            }
+            if (fmt.includes('E')) {
+                return write_num_exp2(fmt, val)
+            }
+            if (fmt.charCodeAt(0) === 36) {
+                return `$${write_num_int(type, fmt.substr(fmt.charAt(1) == ' '
+                    ? 2
+                    : 1), val)}`
+            }
             let o
             let r
             let ri
             let ff
             const aval = Math.abs(val)
             const sign = val < 0 ? '-' : ''
-            if (fmt.match(/^00+$/)) return sign + pad0(aval, fmt.length)
+            if (fmt.match(/^00+$/)) {
+                return sign + pad0(aval, fmt.length)
+            }
             if (fmt.match(/^[#?]+$/)) {
                 o = `${val}`
-                if (val === 0) o = ''
+                if (val === 0) {
+                    o = ''
+                }
                 return o.length > fmt.length ? o : hashq(fmt.substr(0, fmt.length - o.length)) + o
             }
-            if (r = fmt.match(frac1)) return write_num_f2(r, aval, sign)
-            if (fmt.match(/^#+0+$/)) return sign + pad0(aval, fmt.length - fmt.indexOf('0'))
+            if (r = fmt.match(frac1)) {
+                return write_num_f2(r, aval, sign)
+            }
+            if (fmt.match(/^#+0+$/)) {
+                return sign + pad0(aval, fmt.length - fmt.indexOf('0'))
+            }
             if (r = fmt.match(dec1)) {
                 /*:: if(!Array.isArray(r)) throw new Error("unreachable"); */
                 o = (`${val}`).replace(/^([^\.]+)$/, `$1.${r[1]}`).replace(/\.$/, `.${r[1]}`)
@@ -768,11 +888,17 @@ export function make_ssf(SSF) {
                         .replace(/^(-?\d*)$/, '$1.')
                         .replace(/^0\./, r[1].length ? '0.' : '.')
             }
-            if (r = fmt.match(/^#,##0(\.?)$/)) return sign + commaify('' + aval)
-            if (r = fmt.match(/^#,##0\.([#0]*0)$/)) {
-                return val < 0 ? `-${write_num_int(type, fmt, -val)}` : `${commaify('' + val)}.${fill('0', r[1].length)}`
+            if (r = fmt.match(/^#,##0(\.?)$/)) {
+                return sign + commaify('' + aval)
             }
-            if (r = fmt.match(/^#,#*,#0/)) return write_num_int(type, fmt.replace(/^#,#*,/, ''), val)
+            if (r = fmt.match(/^#,##0\.([#0]*0)$/)) {
+                return val < 0
+                    ? `-${write_num_int(type, fmt, -val)}`
+                    : `${commaify('' + val)}.${fill('0', r[1].length)}`
+            }
+            if (r = fmt.match(/^#,#*,#0/)) {
+                return write_num_int(type, fmt.replace(/^#,#*,/, ''), val)
+            }
             if (r = fmt.match(/^([0#]+)(\\?-([0#]+))+$/)) {
                 o = _strrev(write_num_int(type, fmt.replace(/[\\-]/g, ''), val))
                 ri = 0
@@ -790,21 +916,29 @@ export function make_ssf(SSF) {
                 ff = frac(aval, Math.pow(10, ri) - 1, false)
                 o = `${sign}`
                 oa = write_num('n', r[1], ff[1])
-                if (oa.charAt(oa.length - 1) == ' ') oa = `${oa.substr(0, oa.length - 1)}0`
+                if (oa.charAt(oa.length - 1) == ' ') {
+                    oa = `${oa.substr(0, oa.length - 1)}0`
+                }
                 o += `${oa + r[2]}/${r[3]}`
                 oa = rpad_(ff[2], ri)
-                if (oa.length < r[4].length) oa = hashq(r[4].substr(r[4].length - oa.length)) + oa
+                if (oa.length < r[4].length) {
+                    oa = hashq(r[4].substr(r[4].length - oa.length)) + oa
+                }
                 o += oa
                 return o
             }
             if (r = fmt.match(/^# ([#0?]+)( ?)\/( ?)([#0?]+)/)) {
                 ri = Math.min(Math.max(r[1].length, r[4].length), 7)
                 ff = frac(aval, Math.pow(10, ri) - 1, true)
-                return `${sign + (ff[0] || (ff[1] ? '' : '0'))} ${ff[1] ? pad_(ff[1], ri) + r[2] + '/' + r[3] + rpad_(ff[2], ri) : fill(' ', 2 * ri + 1 + r[2].length + r[3].length)}`
+                return `${sign + (ff[0] || (ff[1] ? '' : '0'))} ${ff[1]
+                    ? pad_(ff[1], ri) + r[2] + '/' + r[3] + rpad_(ff[2], ri)
+                    : fill(' ', 2 * ri + 1 + r[2].length + r[3].length)}`
             }
             if (r = fmt.match(/^[#0?]+$/)) {
                 o = `${val}`
-                if (fmt.length <= o.length) return o
+                if (fmt.length <= o.length) {
+                    return o
+                }
                 return hashq(fmt.substr(0, fmt.length - o.length)) + o
             }
             if (r = fmt.match(/^([#0]+)\.([#0]+)$/)) {
@@ -815,9 +949,11 @@ export function make_ssf(SSF) {
                 return hashq(fmt.substr(0, lres) + o + fmt.substr(fmt.length - rres))
             }
             if (r = fmt.match(/^00,000\.([#0]*0)$/)) {
-                return val < 0 ? `-${write_num_int(type, fmt, -val)}` : `${commaify('' + val).replace(/^\d,\d{3}$/, '0$&').replace(/^\d*$/, function ($$) {
-                    return '00,' + ($$.length < 3 ? pad0(0, 3 - $$.length) : '') + $$
-                })}.${pad0(0, r[1].length)}`
+                return val < 0 ? `-${write_num_int(type, fmt, -val)}` : `${commaify('' + val)
+                    .replace(/^\d,\d{3}$/, '0$&')
+                    .replace(/^\d*$/, function ($$) {
+                        return '00,' + ($$.length < 3 ? pad0(0, 3 - $$.length) : '') + $$
+                    })}.${pad0(0, r[1].length)}`
             }
             switch (fmt) {
                 case '#,###':
@@ -858,7 +994,9 @@ export function make_ssf(SSF) {
             }
         }
         out[out.length] = fmt.substr(j)
-        if (in_str === true) throw new Error(`Format |${fmt}| unterminated string `)
+        if (in_str === true) {
+            throw new Error(`Format |${fmt}| unterminated string `)
+        }
         return out
     }
 
@@ -873,11 +1011,15 @@ export function make_ssf(SSF) {
         while (i < fmt.length) {
             switch (c = fmt.charAt(i)) {
                 case 'G':
-                    if (isgeneral(fmt, i)) i += 6
+                    if (isgeneral(fmt, i)) {
+                        i += 6
+                    }
                     i++
                     break
                 case '"':
-                    for (; (cc = fmt.charCodeAt(++i)) !== 34 && i < fmt.length;) ++i;
+                    for (; (cc = fmt.charCodeAt(++i)) !== 34 && i < fmt.length;) {
+                        ++i
+                    }
                     ++i
                     break
                 case '\\':
@@ -891,7 +1033,9 @@ export function make_ssf(SSF) {
                     break
                 case 'B':
                 case 'b':
-                    if (fmt.charAt(i + 1) === '1' || fmt.charAt(i + 1) === '2') return true
+                    if (fmt.charAt(i + 1) === '1' || fmt.charAt(i + 1) === '2') {
+                        return true
+                    }
                 /* falls through */
                 case 'M':
                 case 'D':
@@ -909,14 +1053,22 @@ export function make_ssf(SSF) {
                 case 'g':
                     return true
                 case 'A':
-                    if (fmt.substr(i, 3) === 'A/P') return true
-                    if (fmt.substr(i, 5) === 'AM/PM') return true
+                    if (fmt.substr(i, 3) === 'A/P') {
+                        return true
+                    }
+                    if (fmt.substr(i, 5) === 'AM/PM') {
+                        return true
+                    }
                     ++i
                     break
                 case '[':
                     o = c
-                    while (fmt.charAt(i++) !== ']' && i < fmt.length) o += fmt.charAt(i)
-                    if (o.match(abstime)) return true
+                    while (fmt.charAt(i++) !== ']' && i < fmt.length) {
+                        o += fmt.charAt(i)
+                    }
+                    if (o.match(abstime)) {
+                        return true
+                    }
                     break
                 case '.':
                 /* falls through */
@@ -937,7 +1089,9 @@ export function make_ssf(SSF) {
                     break
                 case '*':
                     ++i
-                    if (fmt.charAt(i) == ' ' || fmt.charAt(i) == '*') ++i
+                    if (fmt.charAt(i) == ' ' || fmt.charAt(i) == '*') {
+                        ++i
+                    }
                     break
                 case '(':
                 case ')':
@@ -987,7 +1141,7 @@ export function make_ssf(SSF) {
                     if (!isgeneral(fmt, i)) {
                         throw new Error(`unrecognized character ${c} in ${fmt}`)
                     }
-                    out[out.length] = {t: 'G', v: 'General'}
+                    out[out.length] = { t: 'G', v: 'General' }
                     i += 7
                     break
                 case '"':
@@ -995,22 +1149,22 @@ export function make_ssf(SSF) {
                     for (o = ''; (cc = fmt.charCodeAt(++i)) !== 34 && i < fmt.length;) {
                         o += String.fromCharCode(cc)
                     }
-                    out[out.length] = {t: 't', v: o}
+                    out[out.length] = { t: 't', v: o }
                     ++i
                     break
                 case '\\':
                     const w = fmt.charAt(++i)
                     const t = w === '(' || w === ')' ? w : 't'
-                    out[out.length] = {t, v: w}
+                    out[out.length] = { t, v: w }
                     ++i
                     break
                 case '_':
-                    out[out.length] = {t: 't', v: ' '}
+                    out[out.length] = { t: 't', v: ' ' }
                     i += 2
                     break
                 case '@':
                     /* Text Placeholder */
-                    out[out.length] = {t: 'T', v}
+                    out[out.length] = { t: 'T', v }
                     ++i
                     break
                 case 'B':
@@ -1018,9 +1172,11 @@ export function make_ssf(SSF) {
                     if (fmt.charAt(i + 1) === '1' || fmt.charAt(i + 1) === '2') {
                         if (dt == null) {
                             dt = parse_date_code(v, opts, fmt.charAt(i + 1) === '2')
-                            if (dt == null) return ''
+                            if (dt == null) {
+                                return ''
+                            }
                         }
-                        out[out.length] = {t: 'X', v: fmt.substr(i, 2)}
+                        out[out.length] = { t: 'X', v: fmt.substr(i, 2) }
                         lst = c
                         i += 2
                         break
@@ -1041,29 +1197,45 @@ export function make_ssf(SSF) {
                 case 's':
                 case 'e':
                 case 'g':
-                    if (v < 0) return ''
+                    if (v < 0) {
+                        return ''
+                    }
                     if (dt == null) {
                         dt = parse_date_code(v, opts)
-                        if (dt == null) return ''
+                        if (dt == null) {
+                            return ''
+                        }
                     }
                     o = c
-                    while (++i < fmt.length && fmt.charAt(i).toLowerCase() === c) o += c
-                    if (c === 'm' && lst.toLowerCase() === 'h') c = 'M'
+                    while (++i < fmt.length && fmt.charAt(i).toLowerCase() === c) {
+                        o += c
+                    }
+                    if (c === 'm' && lst.toLowerCase() === 'h') {
+                        c = 'M'
+                    }
                     /* m = minute */
-                    if (c === 'h') c = hr
-                    out[out.length] = {t: c, v: o}
+                    if (c === 'h') {
+                        c = hr
+                    }
+                    out[out.length] = { t: c, v: o }
                     lst = c
                     break
                 case 'A':
-                    q = {t: c, v: 'A'}
-                    if (dt == null) dt = parse_date_code(v, opts)
+                    q = { t: c, v: 'A' }
+                    if (dt == null) {
+                        dt = parse_date_code(v, opts)
+                    }
                     if (fmt.substr(i, 3) === 'A/P') {
-                        if (dt != null) q.v = dt.H >= 12 ? 'P' : 'A'
+                        if (dt != null) {
+                            q.v = dt.H >= 12 ? 'P' : 'A'
+                        }
                         q.t = 'T'
                         hr = 'h'
                         i += 3
                     } else if (fmt.substr(i, 5) === 'AM/PM') {
-                        if (dt != null) q.v = dt.H >= 12 ? 'PM' : 'AM'
+                        if (dt != null) {
+                            q.v = dt.H >= 12 ? 'PM' : 'AM'
+                        }
                         q.t = 'T'
                         i += 5
                         hr = 'h'
@@ -1071,24 +1243,32 @@ export function make_ssf(SSF) {
                         q.t = 't'
                         ++i
                     }
-                    if (dt == null && q.t === 'T') return ''
+                    if (dt == null && q.t === 'T') {
+                        return ''
+                    }
                     out[out.length] = q
                     lst = c
                     break
                 case '[':
                     o = c
-                    while (fmt.charAt(i++) !== ']' && i < fmt.length) o += fmt.charAt(i)
-                    if (o.slice(-1) !== ']') throw `unterminated "[" block: |${o}|`
+                    while (fmt.charAt(i++) !== ']' && i < fmt.length) {
+                        o += fmt.charAt(i)
+                    }
+                    if (o.slice(-1) !== ']') {
+                        throw `unterminated "[" block: |${o}|`
+                    }
                     if (o.match(abstime)) {
                         if (dt == null) {
                             dt = parse_date_code(v, opts)
-                            if (dt == null) return ''
+                            if (dt == null) {
+                                return ''
+                            }
                         }
-                        out[out.length] = {t: 'Z', v: o.toLowerCase()}
-                    } else if (o.indexOf('$') > -1) {
+                        out[out.length] = { t: 'Z', v: o.toLowerCase() }
+                    } else if (o.includes('$')) {
                         o = (o.match(/\$([^-\[\]]*)/) || [])[1] || '$'
                         if (!fmt_is_date(fmt)) {
-                            out[out.length] = {t: 't', v: o}
+                            out[out.length] = { t: 't', v: o }
                         }
                     }
                     break
@@ -1096,8 +1276,10 @@ export function make_ssf(SSF) {
                 case '.':
                     if (dt != null) {
                         o = c
-                        while ((c = fmt.charAt(++i)) === '0') o += c
-                        out[out.length] = {t: 's', v: o}
+                        while ((c = fmt.charAt(++i)) === '0') {
+                            o += c
+                        }
+                        out[out.length] = { t: 's', v: o }
                         break
                     }
                 /* falls through */
@@ -1110,22 +1292,26 @@ export function make_ssf(SSF) {
                     && '0#'.includes(fmt.charAt(i + 2))) {
                         o += c
                     }
-                    out[out.length] = {t: 'n', v: o}
+                    out[out.length] = { t: 'n', v: o }
                     break
                 case '?':
                     o = c
-                    while (fmt.charAt(++i) === c) o += c
-                    q = {t: c, v: o}
+                    while (fmt.charAt(++i) === c) {
+                        o += c
+                    }
+                    q = { t: c, v: o }
                     out[out.length] = q
                     lst = c
                     break
                 case '*':
                     ++i
-                    if (fmt.charAt(i) == ' ' || fmt.charAt(i) == '*') ++i
+                    if (fmt.charAt(i) == ' ' || fmt.charAt(i) == '*') {
+                        ++i
+                    }
                     break // **
                 case '(':
                 case ')':
-                    out[out.length] = {t: flen === 1 ? 't' : c, v: c}
+                    out[out.length] = { t: flen === 1 ? 't' : c, v: c }
                     ++i
                     break
                 case '1':
@@ -1138,16 +1324,20 @@ export function make_ssf(SSF) {
                 case '8':
                 case '9':
                     o = c
-                    while (i < fmt.length && '0123456789'.includes(fmt.charAt(++i))) o += fmt.charAt(i)
-                    out[out.length] = {t: 'D', v: o}
+                    while (i < fmt.length && '0123456789'.includes(fmt.charAt(++i))) {
+                        o += fmt.charAt(i)
+                    }
+                    out[out.length] = { t: 'D', v: o }
                     break
                 case ' ':
-                    out[out.length] = {t: c, v: c}
+                    out[out.length] = { t: c, v: c }
                     ++i
                     break
                 default:
-                    if (!',$-+/():!^&\'~{}<>=\u20ACacfijklopqrtuvwxz'.includes(c)) throw new Error(`unrecognized character ${c} in ${fmt}`)
-                    out[out.length] = {t: 't', v: c}
+                    if (!',$-+/():!^&\'~{}<>=\u20ACacfijklopqrtuvwxz'.includes(c)) {
+                        throw new Error(`unrecognized character ${c} in ${fmt}`)
+                    }
+                    out[out.length] = { t: 't', v: c }
                     ++i
                     break
             }
@@ -1161,11 +1351,17 @@ export function make_ssf(SSF) {
                 case 'H':
                     out[i].t = hr
                     lst = 'h'
-                    if (bt < 1) bt = 1
+                    if (bt < 1) {
+                        bt = 1
+                    }
                     break
                 case 's':
-                    if (ssm = out[i].v.match(/\.0+$/)) ss0 = Math.max(ss0, ssm[0].length - 1)
-                    if (bt < 3) bt = 3
+                    if (ssm = out[i].v.match(/\.0+$/)) {
+                        ss0 = Math.max(ss0, ssm[0].length - 1)
+                    }
+                    if (bt < 3) {
+                        bt = 3
+                    }
                 /* falls through */
                 case 'd':
                 case 'y':
@@ -1176,16 +1372,24 @@ export function make_ssf(SSF) {
                 case 'm':
                     if (lst === 's') {
                         out[i].t = 'M'
-                        if (bt < 2) bt = 2
+                        if (bt < 2) {
+                            bt = 2
+                        }
                     }
                     break
                 case 'X':
                     /*if (out[i].v === 'B2') {}*/
                     break
                 case 'Z':
-                    if (bt < 1 && out[i].v.match(/[Hh]/)) bt = 1
-                    if (bt < 2 && out[i].v.match(/[Mm]/)) bt = 2
-                    if (bt < 3 && out[i].v.match(/[Ss]/)) bt = 3
+                    if (bt < 1 && out[i].v.match(/[Hh]/)) {
+                        bt = 1
+                    }
+                    if (bt < 2 && out[i].v.match(/[Mm]/)) {
+                        bt = 2
+                    }
+                    if (bt < 3 && out[i].v.match(/[Ss]/)) {
+                        bt = 3
+                    }
             }
         }
         switch (bt) {
@@ -1272,7 +1476,7 @@ export function make_ssf(SSF) {
                         )
                     )) {
                         out[i].v += out[jj].v
-                        out[jj] = {v: '', t: ';'}
+                        out[jj] = { v: '', t: ';' }
                         ++jj
                     }
                     nstr += out[i].v
@@ -1302,7 +1506,7 @@ export function make_ssf(SSF) {
             jj = ostr.length - 1
             let decpt = out.length
             for (i = 0; i < out.length; ++i) {
-                if (out[i] != null && out[i].t != 't' && out[i].v.indexOf('.') > -1) {
+                if (out[i] != null && out[i].t != 't' && out[i].v.includes('.')) {
                     decpt = i
                     break
                 }
@@ -1310,7 +1514,9 @@ export function make_ssf(SSF) {
             let lasti = out.length
             if (decpt === out.length && !ostr.includes('E')) {
                 for (i = out.length - 1; i >= 0; --i) {
-                    if (out[i] == null || !'n?('.includes(out[i].t)) continue
+                    if (out[i] == null || !'n?('.includes(out[i].t)) {
+                        continue
+                    }
                     if (jj >= out[i].v.length - 1) {
                         jj -= out[i].v.length
                         out[i].v = ostr.substr(jj + 1, out[i].v.length)
@@ -1329,7 +1535,9 @@ export function make_ssf(SSF) {
             } else if (decpt !== out.length && !ostr.includes('E')) {
                 jj = ostr.indexOf('.') - 1
                 for (i = decpt; i >= 0; --i) {
-                    if (out[i] == null || !'n?('.includes(out[i].t)) continue
+                    if (out[i] == null || !'n?('.includes(out[i].t)) {
+                        continue
+                    }
                     j = out[i].v.includes('.') && i === decpt ? out[i].v.indexOf('.') - 1 : out[i].v.length - 1
                     vv = out[i].v.substr(j + 1)
                     for (; j >= 0; --j) {
@@ -1346,7 +1554,9 @@ export function make_ssf(SSF) {
                 }
                 jj = ostr.indexOf('.') + 1
                 for (i = decpt; i < out.length; ++i) {
-                    if (out[i] == null || !'n?('.includes(out[i].t) && i !== decpt) continue
+                    if (out[i] == null || !'n?('.includes(out[i].t) && i !== decpt) {
+                        continue
+                    }
                     j = out[i].v.includes('.') && i === decpt ? out[i].v.indexOf('.') + 1 : 0
                     vv = out[i].v.substr(0, j)
                     for (; j < out[i].v.length; ++j) {
@@ -1382,26 +1592,40 @@ export function make_ssf(SSF) {
     const cfregex2 = /\[([=<>]*)(-?\d+\.?\d*)\]/
 
     function chkcond(v, rr) {
-        if (rr == null) return false
+        if (rr == null) {
+            return false
+        }
         const thresh = parseFloat(rr[2])
         switch (rr[1]) {
             case '=':
-                if (v == thresh) return true
+                if (v == thresh) {
+                    return true
+                }
                 break
             case '>':
-                if (v > thresh) return true
+                if (v > thresh) {
+                    return true
+                }
                 break
             case '<':
-                if (v < thresh) return true
+                if (v < thresh) {
+                    return true
+                }
                 break
             case '<>':
-                if (v != thresh) return true
+                if (v != thresh) {
+                    return true
+                }
                 break
             case '>=':
-                if (v >= thresh) return true
+                if (v >= thresh) {
+                    return true
+                }
                 break
             case '<=':
-                if (v <= thresh) return true
+                if (v <= thresh) {
+                    return true
+                }
                 break
         }
         return false
@@ -1411,7 +1635,9 @@ export function make_ssf(SSF) {
         let fmt = split_fmt(f)
         let l = fmt.length
         const lat = fmt[l - 1].indexOf('@')
-        if (l < 4 && lat > -1) --l
+        if (l < 4 && lat > -1) {
+            --l
+        }
         if (fmt.length > 4) {
             throw new Error(`cannot find right format for |${fmt.join('|')}|`)
         }
@@ -1448,7 +1674,9 @@ export function make_ssf(SSF) {
     }
 
     function format(fmt /*:string|number*/, v /*:any*/, o /*:?any*/) {
-        if (o == null) o = {}
+        if (o == null) {
+            o = {}
+        }
         //fixopts(o != null ? o : (o=[]));
         let sfmt = ''
         switch (typeof fmt) {
@@ -1467,9 +1695,13 @@ export function make_ssf(SSF) {
                 }
                 break
         }
-        if (isgeneral(sfmt, 0)) return general_fmt(v, o)
+        if (isgeneral(sfmt, 0)) {
+            return general_fmt(v, o)
+        }
         const f = choose_fmt(sfmt, v)
-        if (isgeneral(f[1])) return general_fmt(v, o)
+        if (isgeneral(f[1])) {
+            return general_fmt(v, o)
+        }
         if (v === true) {
             v = 'TRUE'
         } else if (v === false) {

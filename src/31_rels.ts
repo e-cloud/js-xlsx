@@ -19,7 +19,9 @@ export function get_rels_path(file /*:string*/) /*:string*/ {
 }
 
 export function parse_rels(data /*:?string*/, currentFilePath /*:string*/) {
-    if (!data) return data
+    if (!data) {
+        return data
+    }
     if (currentFilePath.charAt(0) !== '/') {
         currentFilePath = `/${currentFilePath}`
     }
@@ -65,8 +67,12 @@ export function write_rels(rels) /*:string*/ {
 }
 
 export function add_rels(rels, rId, f, type, relobj?) /*:number*/ {
-    if (!relobj) relobj = {}
-    if (!rels['!id']) rels['!id'] = {}
+    if (!relobj) {
+        relobj = {}
+    }
+    if (!rels['!id']) {
+        rels['!id'] = {}
+    }
     if (rId < 0) {
         for (rId = 1; rels['!id'][`rId${rId}`]; ++rId) {
         }
@@ -74,7 +80,9 @@ export function add_rels(rels, rId, f, type, relobj?) /*:number*/ {
     relobj.Id = `rId${rId}`
     relobj.Type = type
     relobj.Target = f
-    if (relobj.Type == RELS.HLINK) relobj.TargetMode = 'External'
+    if (relobj.Type == RELS.HLINK) {
+        relobj.TargetMode = 'External'
+    }
     if (rels['!id'][relobj.Id]) {
         throw new Error(`Cannot rewrite rId ${rId}`)
     }

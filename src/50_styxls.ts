@@ -4,7 +4,9 @@ import { parse_LongRGBA } from './38_xlstypes'
 /* [MS-XLS] 2.4.326 TODO: payload is a zip file */
 export function parse_Theme(blob, length, opts) {
     const dwThemeVersion = blob.read_shift(4)
-    if (dwThemeVersion === 124226) return
+    if (dwThemeVersion === 124226) {
+        return
+    }
     blob.l += length - 4
 }
 
@@ -89,7 +91,7 @@ export function parse_XFExt(blob, length) {
     while (cexts-- > 0) {
         ext.push(parse_ExtProp(blob, end - blob.l))
     }
-    return {ixfe, ext}
+    return { ixfe, ext }
 }
 
 /* xf is an XF, see parse_XFExt for xfext */

@@ -5,17 +5,17 @@ RELS.MS = 'http://schemas.microsoft.com/office/2006/relationships/xlMacrosheet'
 
 /* macro and dialog sheet stubs */
 export function parse_ds_bin() {
-    return {'!type': 'dialog'}
+    return { '!type': 'dialog' }
 }
 
 export function parse_ds_xml() {
-    return {'!type': 'dialog'}
+    return { '!type': 'dialog' }
 }
 
 export function parse_ms_bin() {
-    return {'!type': 'macro'}
+    return { '!type': 'macro' }
 }
 
 export function parse_ms_xml() {
-    return {'!type': 'macro'}
+    return { '!type': 'macro' }
 }

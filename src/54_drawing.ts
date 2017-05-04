@@ -5,7 +5,9 @@ RELS.DRAW = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships
 
 /* 20.5 DrawingML - SpreadsheetML Drawing */
 export function parse_drawing(data, rels /*:any*/) {
-    if (!data) return '??'
+    if (!data) {
+        return '??'
+    }
     /*
      Chartsheet Drawing:
      - 20.5.2.35 wsDr CT_Drawing

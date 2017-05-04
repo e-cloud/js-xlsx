@@ -18,7 +18,7 @@ export function parse_wb_xml(data, opts) /*:WorkbookFile*/ {
     if (!data) {
         throw new Error('Could not find file')
     }
-    const wb = {AppVersion: {}, WBProps: {}, WBView: [], Sheets: [], CalcPr: {}, Names: [], xmlns: ''}
+    const wb = { AppVersion: {}, WBProps: {}, WBView: [], Sheets: [], CalcPr: {}, Names: [], xmlns: '' }
     let pass = false
     let xmlns = 'xmlns'
     let dname = {}
@@ -32,7 +32,9 @@ export function parse_wb_xml(data, opts) /*:WorkbookFile*/ {
 
             /* 18.2.27 workbook CT_Workbook 1 */
             case '<workbook':
-                if (x.match(wbnsregex)) xmlns = `xmlns${x.match(/<(\w+):/)[1]}`
+                if (x.match(wbnsregex)) {
+                    xmlns = `xmlns${x.match(/<(\w+):/)[1]}`
+                }
                 wb.xmlns = y[xmlns]
                 break
             case '</workbook>':
@@ -137,8 +139,12 @@ export function parse_wb_xml(data, opts) /*:WorkbookFile*/ {
             case '<definedName': {
                 dname = {}
                 dname.Name = y.name
-                if (y.comment) dname.Comment = y.comment
-                if (y.localSheetId) dname.Sheet = +y.localSheetId
+                if (y.comment) {
+                    dname.Comment = y.comment
+                }
+                if (y.localSheetId) {
+                    dname.Sheet = +y.localSheetId
+                }
                 dnstart = idx + x.length
             }
                 break
@@ -266,8 +272,12 @@ const WB_XML_ROOT = writextag('workbook', null, {
 
 function safe1904(wb /*:Workbook*/) /*:string*/ {
     /* TODO: store date1904 somewhere else */
-    if (!wb.Workbook) return 'false'
-    if (!wb.Workbook.WBProps) return 'false'
+    if (!wb.Workbook) {
+        return 'false'
+    }
+    if (!wb.Workbook.WBProps) {
+        return 'false'
+    }
     // $FlowIgnore
     return parsexmlbool(wb.Workbook.WBProps.date1904) ? 'true' : 'false'
 }
@@ -281,7 +291,7 @@ export function write_wb_xml(wb /*:Workbook*/, opts /*:?WriteOpts*/) /*:string*/
     /* fileVersion */
     /* fileSharing */
 
-    o[o.length] = writextag('workbookPr', null, {date1904: safe1904(wb), codeName: 'ThisWorkbook'})
+    o[o.length] = writextag('workbookPr', null, { date1904: safe1904(wb), codeName: 'ThisWorkbook' })
 
     /* workbookProtection */
     /* bookViews */
@@ -289,7 +299,7 @@ export function write_wb_xml(wb /*:Workbook*/, opts /*:?WriteOpts*/) /*:string*/
     o[o.length] = '<sheets>'
     const sheets = wb.Workbook && wb.Workbook.Sheets || []
     for (let i = 0; i != wb.SheetNames.length; ++i) {
-        const sht = {name: escapexml(wb.SheetNames[i].substr(0, 31))}
+        const sht = { name: escapexml(wb.SheetNames[i].substr(0, 31)) }
         /*:any*/
         sht.sheetId = `${i + 1}`
         sht['r:id'] = `rId${i + 1}`
@@ -314,10 +324,16 @@ export function write_wb_xml(wb /*:Workbook*/, opts /*:?WriteOpts*/) /*:string*/
         o[o.length] = '<definedNames>'
         if (wb.Workbook && wb.Workbook.Names) {
             wb.Workbook.Names.forEach(function (n) {
-                const d = {name: n.Name}
-                if (n.Comment) d.comment = n.Comment
-                if (n.Sheet != null) d.localSheetId = `${n.Sheet}`
-                if (!n.Ref) return
+                const d = { name: n.Name }
+                if (n.Comment) {
+                    d.comment = n.Comment
+                }
+                if (n.Sheet != null) {
+                    d.localSheetId = `${n.Sheet}`
+                }
+                if (!n.Ref) {
+                    return
+                }
                 o[o.length] = writextag('definedName', String(n.Ref), d)
             })
         }

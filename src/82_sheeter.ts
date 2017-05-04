@@ -19,8 +19,8 @@ function write_obj_str(factory /*:WriteObjStrFactory*/) {
 }
 
 export const write_htm_str = write_obj_str(HTML_)
-export const write_csv_str = write_obj_str({from_sheet: sheet_to_csv})
+export const write_csv_str = write_obj_str({ from_sheet: sheet_to_csv })
 export const write_slk_str = write_obj_str(SYLK)
 export const write_dif_str = write_obj_str(DIF)
 export const write_prn_str = write_obj_str(PRN)
-export const write_txt_str = write_obj_str({from_sheet: sheet_to_txt})
+export const write_txt_str = write_obj_str({ from_sheet: sheet_to_txt })

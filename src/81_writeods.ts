@@ -16,20 +16,34 @@ export const write_content_xml /*:{(wb:any, opts:any):string}*/ = function () {
         const marr = ws['!merges'] || []
         let mi = 0
         const dense = Array.isArray(ws)
-        for (R = 0; R < range.s.r; ++R) o.push('        <table:table-row></table:table-row>\n');
+        for (R = 0; R < range.s.r; ++R) {
+            o.push('        <table:table-row></table:table-row>\n')
+        }
         for (; R <= range.e.r; ++R) {
             o.push('        <table:table-row>\n')
-            for (C = 0; C < range.s.c; ++C) o.push(null_cell_xml);
+            for (C = 0; C < range.s.c; ++C) {
+                o.push(null_cell_xml)
+            }
             for (; C <= range.e.c; ++C) {
                 let skip = false
                 const ct = {}
                 let textp = ''
                 for (mi = 0; mi != marr.length; ++mi) {
-                    if (marr[mi].s.c > C) continue
-                    if (marr[mi].s.r > R) continue
-                    if (marr[mi].e.c < C) continue
-                    if (marr[mi].e.r < R) continue
-                    if (marr[mi].s.c != C || marr[mi].s.r != R) skip = true
+                    if (marr[mi].s.c > C) {
+                        continue
+                    }
+                    if (marr[mi].s.r > R) {
+                        continue
+                    }
+                    if (marr[mi].e.c < C) {
+                        continue
+                    }
+                    if (marr[mi].e.r < R) {
+                        continue
+                    }
+                    if (marr[mi].s.c != C || marr[mi].s.r != R) {
+                        skip = true
+                    }
                     ct['table:number-columns-spanned'] = (marr[mi].e.c - marr[mi].s.c + 1)
                     ct['table:number-rows-spanned'] = (marr[mi].e.r - marr[mi].s.r + 1)
                     break
@@ -38,7 +52,7 @@ export const write_content_xml /*:{(wb:any, opts:any):string}*/ = function () {
                     o.push(covered_cell_xml)
                     continue
                 }
-                const ref = encode_cell({r: R, c: C})
+                const ref = encode_cell({ r: R, c: C })
                 const cell = dense ? (ws[R] || [])[C] : ws[ref]
                 if (cell && cell.f) {
                     ct['table:formula'] = escapexml(csf_to_ods_formula(cell.f))

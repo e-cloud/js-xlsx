@@ -8,7 +8,9 @@ export function new_raw_buf(len /*:number*/) {
 }
 
 export function s2a(s /*:string*/) {
-    if (has_buf) return new Buffer(s, 'binary')
+    if (has_buf) {
+        return new Buffer(s, 'binary')
+    }
     return s.split('').map(function (x) {
         return x.charCodeAt(0) & 0xff
     })

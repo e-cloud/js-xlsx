@@ -23,9 +23,15 @@ export function char_codes(data) {
 let debom = function (data /*:string*/) /*:string*/ {
     const c1 = data.charCodeAt(0)
     const c2 = data.charCodeAt(1)
-    if (c1 == 0xFF && c2 == 0xFE) return data.substr(2)
-    if (c1 == 0xFE && c2 == 0xFF) return data.substr(2)
-    if (c1 == 0xFEFF) return data.substr(1)
+    if (c1 == 0xFF && c2 == 0xFE) {
+        return data.substr(2)
+    }
+    if (c1 == 0xFE && c2 == 0xFF) {
+        return data.substr(2)
+    }
+    if (c1 == 0xFEFF) {
+        return data.substr(1)
+    }
     return data
 }
 

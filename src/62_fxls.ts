@@ -36,13 +36,15 @@ function parse_RgceArea(blob, length, opts) {
     if (opts) {
         if (opts.biff >= 2 && opts.biff <= 5) {
             return parse_RgceArea_BIFF2(blob, length, opts)
-        } else if (opts.biff == 12) w = 4
+        } else if (opts.biff == 12) {
+            w = 4
+        }
     }
     const r = blob.read_shift(w)
     const R = blob.read_shift(w)
     const c = parse_ColRelU(blob, 2)
     const C = parse_ColRelU(blob, 2)
-    return {s: {r, c: c[0], cRel: c[1], rRel: c[2]}, e: {r: R, c: C[0], cRel: C[1], rRel: C[2]}}
+    return { s: { r, c: c[0], cRel: c[1], rRel: c[2] }, e: { r: R, c: C[0], cRel: C[1], rRel: C[2] } }
 }
 /* BIFF 2-5 encodes flags in the row field */
 function parse_RgceArea_BIFF2(blob, length, opts) {
@@ -50,7 +52,7 @@ function parse_RgceArea_BIFF2(blob, length, opts) {
     const R = parse_ColRelU(blob, 2)
     const c = blob.read_shift(1)
     const C = blob.read_shift(1)
-    return {s: {r: r[0], c, cRel: r[1], rRel: r[2]}, e: {r: R[0], c: C, cRel: R[1], rRel: R[2]}}
+    return { s: { r: r[0], c, cRel: r[1], rRel: r[2] }, e: { r: R[0], c: C, cRel: R[1], rRel: R[2] } }
 }
 
 /* 2.5.198.105 TODO */
@@ -59,35 +61,47 @@ function parse_RgceAreaRel(blob, length, opts) {
     const R = blob.read_shift(length == 12 ? 4 : 2)
     const c = parse_ColRelU(blob, 2)
     const C = parse_ColRelU(blob, 2)
-    return {s: {r, c: c[0], cRel: c[1], rRel: c[2]}, e: {r: R, c: C[0], cRel: C[1], rRel: C[2]}}
+    return { s: { r, c: c[0], cRel: c[1], rRel: c[2] }, e: { r: R, c: C[0], cRel: C[1], rRel: C[2] } }
 }
 
 /* 2.5.198.109 */
 function parse_RgceLoc(blob, length, opts) {
-    if (opts && opts.biff >= 2 && opts.biff <= 5) return parse_RgceLoc_BIFF2(blob, length, opts)
+    if (opts && opts.biff >= 2 && opts.biff <= 5) {
+        return parse_RgceLoc_BIFF2(blob, length, opts)
+    }
     const r = blob.read_shift(opts && opts.biff == 12 ? 4 : 2)
     const c = parse_ColRelU(blob, 2)
-    return {r, c: c[0], cRel: c[1], rRel: c[2]}
+    return { r, c: c[0], cRel: c[1], rRel: c[2] }
 }
 function parse_RgceLoc_BIFF2(blob, length, opts) {
     const r = parse_ColRelU(blob, 2)
     const c = blob.read_shift(1)
-    return {r: r[0], c, cRel: r[1], rRel: r[2]}
+    return { r: r[0], c, cRel: r[1], rRel: r[2] }
 }
 
 /* [MS-XLS] 2.5.198.111 TODO */
 /* [MS-XLSB] 2.5.97.92 TODO */
 function parse_RgceLocRel(blob, length, opts) {
     const biff = opts && opts.biff ? opts.biff : 8
-    if (biff >= 2 && biff <= 5) return parse_RgceLocRel_BIFF2(blob, length, opts)
+    if (biff >= 2 && biff <= 5) {
+        return parse_RgceLocRel_BIFF2(blob, length, opts)
+    }
     let r = blob.read_shift(biff >= 12 ? 4 : 2)
     let cl = blob.read_shift(2)
     const cRel = (cl & 0x8000) >> 15
     const rRel = (cl & 0x4000) >> 14
     cl &= 0x3FFF
-    if (rRel == 1) while (r > 0x7FFFF) r -= 0x100000
-    if (cRel == 1) while (cl > 0x1FFF) cl = cl - 0x4000
-    return {r, c: cl, cRel, rRel}
+    if (rRel == 1) {
+        while (r > 0x7FFFF) {
+            r -= 0x100000
+        }
+    }
+    if (cRel == 1) {
+        while (cl > 0x1FFF) {
+            cl = cl - 0x4000
+        }
+    }
+    return { r, c: cl, cRel, rRel }
 }
 function parse_RgceLocRel_BIFF2(blob, length) {
     let rl = blob.read_shift(2)
@@ -95,9 +109,13 @@ function parse_RgceLocRel_BIFF2(blob, length) {
     const rRel = (rl & 0x8000) >> 15
     const cRel = (rl & 0x4000) >> 14
     rl &= 0x3FFF
-    if (rRel == 1 && rl >= 0x2000) rl = rl - 0x4000
-    if (cRel == 1 && c >= 0x80) c = c - 0x100
-    return {r: rl, c, cRel, rRel}
+    if (rRel == 1 && rl >= 0x2000) {
+        rl = rl - 0x4000
+    }
+    if (cRel == 1 && c >= 0x80) {
+        c = c - 0x100
+    }
+    return { r: rl, c, cRel, rRel }
 }
 
 /* Ptg Tokens */
@@ -381,7 +399,7 @@ function parse_SerAr(blob, biff /*:number*/) {
         /* 2.5.192.117 */
         case 0x02:
             /* SerStr -- XLUnicodeString (<256 chars) */
-            val[1] = parse_XLUnicodeString2(blob, 0, {biff: biff > 0 && biff < 8 ? 2 : biff})
+            val[1] = parse_XLUnicodeString2(blob, 0, { biff: biff > 0 && biff < 8 ? 2 : biff })
             break
         // default: throw "Bad SerAr: " + val[0]; /* Unreachable */
     }
@@ -411,7 +429,9 @@ function parse_PtgExtraArray(blob, length, opts) {
     }
     if (opts.biff >= 2 && opts.biff < 8) {
         --rows
-        if (--cols == 0) cols = 0x100
+        if (--cols == 0) {
+            cols = 0x100
+        }
     }
     // $FlowIgnore
     const o /*:Array<Array<any> >*/ = []
@@ -445,7 +465,9 @@ function parse_PtgName(blob, length, opts) {
 
 /* 2.5.198.77 */
 function parse_PtgNameX(blob, length, opts) {
-    if (opts.biff == 5) return parse_PtgNameX_BIFF5(blob, length, opts)
+    if (opts.biff == 5) {
+        return parse_PtgNameX_BIFF5(blob, length, opts)
+    }
     const type = blob.read_shift(1) >>> 5 & 0x03
     const ixti = blob.read_shift(2) // XtiIndex
     const nameindex = blob.read_shift(4)
@@ -480,7 +502,9 @@ function parse_PtgMemFunc(blob, length, opts) {
 function parse_PtgRefErr(blob, length, opts) {
     const type = blob.read_shift(1) >>> 5 & 0x03
     blob.l += 4
-    if (opts.biff == 12) blob.l += 2
+    if (opts.biff == 12) {
+        blob.l += 2
+    }
     return [type]
 }
 
@@ -550,52 +574,52 @@ const parse_PtgTbl = parsenoop
 
 /* 2.5.198.25 */
 const PtgTypes = {
-    /*::[*/0x01 /*::]*/: {n: 'PtgExp', f: parse_PtgExp},
-    /*::[*/0x02 /*::]*/: {n: 'PtgTbl', f: parse_PtgTbl},
-    /*::[*/0x03 /*::]*/: {n: 'PtgAdd', f: parse_PtgAdd},
-    /*::[*/0x04 /*::]*/: {n: 'PtgSub', f: parse_PtgSub},
-    /*::[*/0x05 /*::]*/: {n: 'PtgMul', f: parse_PtgMul},
-    /*::[*/0x06 /*::]*/: {n: 'PtgDiv', f: parse_PtgDiv},
-    /*::[*/0x07 /*::]*/: {n: 'PtgPower', f: parse_PtgPower},
-    /*::[*/0x08 /*::]*/: {n: 'PtgConcat', f: parse_PtgConcat},
-    /*::[*/0x09 /*::]*/: {n: 'PtgLt', f: parse_PtgLt},
-    /*::[*/0x0A /*::]*/: {n: 'PtgLe', f: parse_PtgLe},
-    /*::[*/0x0B /*::]*/: {n: 'PtgEq', f: parse_PtgEq},
-    /*::[*/0x0C /*::]*/: {n: 'PtgGe', f: parse_PtgGe},
-    /*::[*/0x0D /*::]*/: {n: 'PtgGt', f: parse_PtgGt},
-    /*::[*/0x0E /*::]*/: {n: 'PtgNe', f: parse_PtgNe},
-    /*::[*/0x0F /*::]*/: {n: 'PtgIsect', f: parse_PtgIsect},
-    /*::[*/0x10 /*::]*/: {n: 'PtgUnion', f: parse_PtgUnion},
-    /*::[*/0x11 /*::]*/: {n: 'PtgRange', f: parse_PtgRange},
-    /*::[*/0x12 /*::]*/: {n: 'PtgUplus', f: parse_PtgUplus},
-    /*::[*/0x13 /*::]*/: {n: 'PtgUminus', f: parse_PtgUminus},
-    /*::[*/0x14 /*::]*/: {n: 'PtgPercent', f: parse_PtgPercent},
-    /*::[*/0x15 /*::]*/: {n: 'PtgParen', f: parse_PtgParen},
-    /*::[*/0x16 /*::]*/: {n: 'PtgMissArg', f: parse_PtgMissArg},
-    /*::[*/0x17 /*::]*/: {n: 'PtgStr', f: parse_PtgStr},
-    /*::[*/0x1C /*::]*/: {n: 'PtgErr', f: parse_PtgErr},
-    /*::[*/0x1D /*::]*/: {n: 'PtgBool', f: parse_PtgBool},
-    /*::[*/0x1E /*::]*/: {n: 'PtgInt', f: parse_PtgInt},
-    /*::[*/0x1F /*::]*/: {n: 'PtgNum', f: parse_PtgNum},
-    /*::[*/0x20 /*::]*/: {n: 'PtgArray', f: parse_PtgArray},
-    /*::[*/0x21 /*::]*/: {n: 'PtgFunc', f: parse_PtgFunc},
-    /*::[*/0x22 /*::]*/: {n: 'PtgFuncVar', f: parse_PtgFuncVar},
-    /*::[*/0x23 /*::]*/: {n: 'PtgName', f: parse_PtgName},
-    /*::[*/0x24 /*::]*/: {n: 'PtgRef', f: parse_PtgRef},
-    /*::[*/0x25 /*::]*/: {n: 'PtgArea', f: parse_PtgArea},
-    /*::[*/0x26 /*::]*/: {n: 'PtgMemArea', f: parse_PtgMemArea},
-    /*::[*/0x27 /*::]*/: {n: 'PtgMemErr', f: parse_PtgMemErr},
-    /*::[*/0x28 /*::]*/: {n: 'PtgMemNoMem', f: parse_PtgMemNoMem},
-    /*::[*/0x29 /*::]*/: {n: 'PtgMemFunc', f: parse_PtgMemFunc},
-    /*::[*/0x2A /*::]*/: {n: 'PtgRefErr', f: parse_PtgRefErr},
-    /*::[*/0x2B /*::]*/: {n: 'PtgAreaErr', f: parse_PtgAreaErr},
-    /*::[*/0x2C /*::]*/: {n: 'PtgRefN', f: parse_PtgRefN},
-    /*::[*/0x2D /*::]*/: {n: 'PtgAreaN', f: parse_PtgAreaN},
-    /*::[*/0x39 /*::]*/: {n: 'PtgNameX', f: parse_PtgNameX},
-    /*::[*/0x3A /*::]*/: {n: 'PtgRef3d', f: parse_PtgRef3d},
-    /*::[*/0x3B /*::]*/: {n: 'PtgArea3d', f: parse_PtgArea3d},
-    /*::[*/0x3C /*::]*/: {n: 'PtgRefErr3d', f: parse_PtgRefErr3d},
-    /*::[*/0x3D /*::]*/: {n: 'PtgAreaErr3d', f: parse_PtgAreaErr3d},
+    /*::[*/0x01 /*::]*/: { n: 'PtgExp', f: parse_PtgExp },
+    /*::[*/0x02 /*::]*/: { n: 'PtgTbl', f: parse_PtgTbl },
+    /*::[*/0x03 /*::]*/: { n: 'PtgAdd', f: parse_PtgAdd },
+    /*::[*/0x04 /*::]*/: { n: 'PtgSub', f: parse_PtgSub },
+    /*::[*/0x05 /*::]*/: { n: 'PtgMul', f: parse_PtgMul },
+    /*::[*/0x06 /*::]*/: { n: 'PtgDiv', f: parse_PtgDiv },
+    /*::[*/0x07 /*::]*/: { n: 'PtgPower', f: parse_PtgPower },
+    /*::[*/0x08 /*::]*/: { n: 'PtgConcat', f: parse_PtgConcat },
+    /*::[*/0x09 /*::]*/: { n: 'PtgLt', f: parse_PtgLt },
+    /*::[*/0x0A /*::]*/: { n: 'PtgLe', f: parse_PtgLe },
+    /*::[*/0x0B /*::]*/: { n: 'PtgEq', f: parse_PtgEq },
+    /*::[*/0x0C /*::]*/: { n: 'PtgGe', f: parse_PtgGe },
+    /*::[*/0x0D /*::]*/: { n: 'PtgGt', f: parse_PtgGt },
+    /*::[*/0x0E /*::]*/: { n: 'PtgNe', f: parse_PtgNe },
+    /*::[*/0x0F /*::]*/: { n: 'PtgIsect', f: parse_PtgIsect },
+    /*::[*/0x10 /*::]*/: { n: 'PtgUnion', f: parse_PtgUnion },
+    /*::[*/0x11 /*::]*/: { n: 'PtgRange', f: parse_PtgRange },
+    /*::[*/0x12 /*::]*/: { n: 'PtgUplus', f: parse_PtgUplus },
+    /*::[*/0x13 /*::]*/: { n: 'PtgUminus', f: parse_PtgUminus },
+    /*::[*/0x14 /*::]*/: { n: 'PtgPercent', f: parse_PtgPercent },
+    /*::[*/0x15 /*::]*/: { n: 'PtgParen', f: parse_PtgParen },
+    /*::[*/0x16 /*::]*/: { n: 'PtgMissArg', f: parse_PtgMissArg },
+    /*::[*/0x17 /*::]*/: { n: 'PtgStr', f: parse_PtgStr },
+    /*::[*/0x1C /*::]*/: { n: 'PtgErr', f: parse_PtgErr },
+    /*::[*/0x1D /*::]*/: { n: 'PtgBool', f: parse_PtgBool },
+    /*::[*/0x1E /*::]*/: { n: 'PtgInt', f: parse_PtgInt },
+    /*::[*/0x1F /*::]*/: { n: 'PtgNum', f: parse_PtgNum },
+    /*::[*/0x20 /*::]*/: { n: 'PtgArray', f: parse_PtgArray },
+    /*::[*/0x21 /*::]*/: { n: 'PtgFunc', f: parse_PtgFunc },
+    /*::[*/0x22 /*::]*/: { n: 'PtgFuncVar', f: parse_PtgFuncVar },
+    /*::[*/0x23 /*::]*/: { n: 'PtgName', f: parse_PtgName },
+    /*::[*/0x24 /*::]*/: { n: 'PtgRef', f: parse_PtgRef },
+    /*::[*/0x25 /*::]*/: { n: 'PtgArea', f: parse_PtgArea },
+    /*::[*/0x26 /*::]*/: { n: 'PtgMemArea', f: parse_PtgMemArea },
+    /*::[*/0x27 /*::]*/: { n: 'PtgMemErr', f: parse_PtgMemErr },
+    /*::[*/0x28 /*::]*/: { n: 'PtgMemNoMem', f: parse_PtgMemNoMem },
+    /*::[*/0x29 /*::]*/: { n: 'PtgMemFunc', f: parse_PtgMemFunc },
+    /*::[*/0x2A /*::]*/: { n: 'PtgRefErr', f: parse_PtgRefErr },
+    /*::[*/0x2B /*::]*/: { n: 'PtgAreaErr', f: parse_PtgAreaErr },
+    /*::[*/0x2C /*::]*/: { n: 'PtgRefN', f: parse_PtgRefN },
+    /*::[*/0x2D /*::]*/: { n: 'PtgAreaN', f: parse_PtgAreaN },
+    /*::[*/0x39 /*::]*/: { n: 'PtgNameX', f: parse_PtgNameX },
+    /*::[*/0x3A /*::]*/: { n: 'PtgRef3d', f: parse_PtgRef3d },
+    /*::[*/0x3B /*::]*/: { n: 'PtgArea3d', f: parse_PtgArea3d },
+    /*::[*/0x3C /*::]*/: { n: 'PtgRefErr3d', f: parse_PtgRefErr3d },
+    /*::[*/0x3D /*::]*/: { n: 'PtgAreaErr3d', f: parse_PtgAreaErr3d },
     /*::[*/0xFF /*::]*/: {},
 }
 /* These are duplicated in the PtgTypes table */
@@ -621,7 +645,9 @@ const PtgDupes = {
     /*::[*/0x5D /*::]*/: 0x3D, /*::[*/0x7D /*::]*/: 0x3D,
 };
 (function () {
-    for (const y in PtgDupes) PtgTypes[y] = PtgTypes[PtgDupes[y]];
+    for (const y in PtgDupes) {
+        PtgTypes[y] = PtgTypes[PtgDupes[y]]
+    }
 })()
 
 const Ptg18 = {
@@ -629,15 +655,15 @@ const Ptg18 = {
     //	/*::[*/0x1D/*::]*/: { n:'PtgSxName', f:parse_PtgSxName }, // TODO
 }
 const Ptg19 = {
-    /*::[*/0x01 /*::]*/: {n: 'PtgAttrSemi', f: parse_PtgAttrSemi},
-    /*::[*/0x02 /*::]*/: {n: 'PtgAttrIf', f: parse_PtgAttrIf},
-    /*::[*/0x04 /*::]*/: {n: 'PtgAttrChoose', f: parse_PtgAttrChoose},
-    /*::[*/0x08 /*::]*/: {n: 'PtgAttrGoto', f: parse_PtgAttrGoto},
-    /*::[*/0x10 /*::]*/: {n: 'PtgAttrSum', f: parse_PtgAttrSum},
-    /*::[*/0x20 /*::]*/: {n: 'PtgAttrBaxcel', f: parse_PtgAttrBaxcel},
-    /*::[*/0x40 /*::]*/: {n: 'PtgAttrSpace', f: parse_PtgAttrSpace},
-    /*::[*/0x41 /*::]*/: {n: 'PtgAttrSpaceSemi', f: parse_PtgAttrSpaceSemi},
-    /*::[*/0x80 /*::]*/: {n: 'PtgAttrIfError', f: parse_PtgAttrIfError},
+    /*::[*/0x01 /*::]*/: { n: 'PtgAttrSemi', f: parse_PtgAttrSemi },
+    /*::[*/0x02 /*::]*/: { n: 'PtgAttrIf', f: parse_PtgAttrIf },
+    /*::[*/0x04 /*::]*/: { n: 'PtgAttrChoose', f: parse_PtgAttrChoose },
+    /*::[*/0x08 /*::]*/: { n: 'PtgAttrGoto', f: parse_PtgAttrGoto },
+    /*::[*/0x10 /*::]*/: { n: 'PtgAttrSum', f: parse_PtgAttrSum },
+    /*::[*/0x20 /*::]*/: { n: 'PtgAttrBaxcel', f: parse_PtgAttrBaxcel },
+    /*::[*/0x40 /*::]*/: { n: 'PtgAttrSpace', f: parse_PtgAttrSpace },
+    /*::[*/0x41 /*::]*/: { n: 'PtgAttrSpaceSemi', f: parse_PtgAttrSpaceSemi },
+    /*::[*/0x80 /*::]*/: { n: 'PtgAttrIfError', f: parse_PtgAttrIfError },
     /*::[*/0xFF /*::]*/: {},
 }
 
@@ -645,7 +671,9 @@ const Ptg19 = {
 export function parse_Formula(blob, length, opts) {
     const end = blob.l + length
     const cell = parse_XLSCell(blob, 6)
-    if (opts.biff == 2) ++blob.l
+    if (opts.biff == 2) {
+        ++blob.l
+    }
     const val = parse_FormulaValue(blob, 8)
     const flags = blob.read_shift(1)
     if (opts.biff != 2) {
@@ -655,7 +683,7 @@ export function parse_Formula(blob, length, opts) {
         }
     }
     const cbf = parse_XLSCellParsedFormula(blob, end - blob.l, opts)
-    return {cell, val: val[0], formula: cbf, shared: flags >> 3 & 1, tt: val[1]}
+    return { cell, val: val[0], formula: cbf, shared: flags >> 3 & 1, tt: val[1] }
 }
 
 /* 2.5.133 TODO: how to emit empty strings? */
@@ -716,7 +744,9 @@ export function parse_RgbExtra(blob, length, rgce, opts) {
     length = target - blob.l
     /* note: this is technically an error but Excel disregards */
     //if(target !== blob.l && blob.l !== target - length) throw new Error(target + " != " + blob.l);
-    if (length !== 0) o.push(parsenoop(blob, length))
+    if (length !== 0) {
+        o.push(parsenoop(blob, length))
+    }
     return o
 }
 
@@ -725,7 +755,9 @@ export function parse_NameParsedFormula(blob, length, opts, cce) {
     const target = blob.l + length
     const rgce = parse_Rgce(blob, cce, opts)
     let rgcb
-    if (target !== blob.l) rgcb = parse_RgbExtra(blob, target - blob.l, rgce, opts)
+    if (target !== blob.l) {
+        rgcb = parse_RgbExtra(blob, target - blob.l, rgce, opts)
+    }
     return [rgce, rgcb]
 }
 
@@ -846,7 +878,7 @@ const PtgBinOp = {
 }
 export function stringify_formula(formula /*Array<any>*/, range, cell /*:any*/, supbooks, opts) {
     //console.log(formula);
-    const _range = /*range != null ? range :*/{s: {c: 0, r: 0}, e: {c: 0, r: 0}}
+    const _range = /*range != null ? range :*/{ s: { c: 0, r: 0 }, e: { c: 0, r: 0 } }
     const stack /*:Array<string>*/ = []
     let e1
     let e2
@@ -856,7 +888,9 @@ export function stringify_formula(formula /*Array<any>*/, range, cell /*:any*/, 
     let nameidx = 0
     let r
     let sname = ''
-    if (!formula[0] || !formula[0][0]) return ''
+    if (!formula[0] || !formula[0][0]) {
+        return ''
+    }
     let last_sp = -1
     let sp = ''
     //console.log("--",cell,formula[0])
@@ -964,7 +998,7 @@ export function stringify_formula(formula /*Array<any>*/, range, cell /*:any*/, 
                 /*::)*/
                 c = shift_cell_xls(f[1][2], _range, opts)
                 sname = supbooks.SheetNames[ixti]
-                var w = sname
+                const w = sname
                 /* IE9 fails on defined names */
                 stack.push(`${sname}!${encode_cell_xls(c)}`)
                 break
@@ -978,10 +1012,14 @@ export function stringify_formula(formula /*Array<any>*/, range, cell /*:any*/, 
                 let argc /*:number*/ = f[1][0]
 
                 let func /*:string*/ = f[1][1]
-                if (!argc) argc = 0
+                if (!argc) {
+                    argc = 0
+                }
                 const args = argc == 0 ? [] : stack.slice(-argc)
                 stack.length -= argc
-                if (func === 'User') func = args.shift()
+                if (func === 'User') {
+                    func = args.shift()
+                }
                 stack.push(`${func}(${args.join(',')})`)
                 break
 
@@ -1059,8 +1097,12 @@ export function stringify_formula(formula /*Array<any>*/, range, cell /*:any*/, 
                 /* TODO: Properly handle missing values */
                 //console.log(bookidx, supbooks);
                 if (opts.biff <= 5) {
-                    if (bookidx < 0) bookidx = -bookidx
-                    if (supbooks[bookidx]) externbook = supbooks[bookidx][nameidx]
+                    if (bookidx < 0) {
+                        bookidx = -bookidx
+                    }
+                    if (supbooks[bookidx]) {
+                        externbook = supbooks[bookidx][nameidx]
+                    }
                 } else {
                     const pnxname = supbooks.SheetNames[bookidx]
                     let o = ''
@@ -1082,7 +1124,9 @@ export function stringify_formula(formula /*Array<any>*/, range, cell /*:any*/, 
                     stack.push(o)
                     break
                 }
-                if (!externbook) externbook = {Name: '??NAMEX??'}
+                if (!externbook) {
+                    externbook = { Name: '??NAMEX??' }
+                }
                 stack.push(externbook.Name)
                 break
 
@@ -1133,8 +1177,8 @@ export function stringify_formula(formula /*Array<any>*/, range, cell /*:any*/, 
             /* */
             /* 2.5.198.58 TODO */
             case 'PtgExp':
-                c = {c: f[1][1], r: f[1][0]}
-                const q = {c: cell.c, r: cell.r}
+                c = { c: f[1][1], r: f[1][0] }
+                const q = { c: cell.c, r: cell.r }
                 /*:any*/
                 if (supbooks.sharedf[encode_cell(c)]) {
                     const parsedf = supbooks.sharedf[encode_cell(c)]
@@ -1144,13 +1188,19 @@ export function stringify_formula(formula /*Array<any>*/, range, cell /*:any*/, 
                     for (e1 = 0; e1 != supbooks.arrayf.length; ++e1) {
                         /* TODO: should be something like range_has */
                         e2 = supbooks.arrayf[e1]
-                        if (c.c < e2[0].s.c || c.c > e2[0].e.c) continue
-                        if (c.r < e2[0].s.r || c.r > e2[0].e.r) continue
+                        if (c.c < e2[0].s.c || c.c > e2[0].e.c) {
+                            continue
+                        }
+                        if (c.r < e2[0].s.r || c.r > e2[0].e.r) {
+                            continue
+                        }
                         stack.push(stringify_formula(e2[1], _range, q, supbooks, opts))
                         fnd = true
                         break
                     }
-                    if (!fnd) stack.push(/*::String(*/f[1] /*::)*/)
+                    if (!fnd) {
+                        stack.push(/*::String(*/f[1] /*::)*/)
+                    }
                 }
                 break
 
@@ -1234,6 +1284,8 @@ export function stringify_formula(formula /*Array<any>*/, range, cell /*:any*/, 
         //console.log("::",f, stack)
     }
     //console.log("--",stack);
-    if (stack.length > 1 && opts.WTF) throw new Error('bad formula stack')
+    if (stack.length > 1 && opts.WTF) {
+        throw new Error('bad formula stack')
+    }
     return stack[0]
 }

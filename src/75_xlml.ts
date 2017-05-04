@@ -16,7 +16,7 @@ import {
     xlml_fixstr,
     xlml_unfixstr,
     XLMLNS,
-    XML_HEADER,
+    XML_HEADER
 } from './22_xmlutils'
 import { decode_cell, encode_cell, encode_col, encode_range, encode_row, safe_decode_range } from './27_csfutils'
 import { BErr, RBErr } from './28_binstructs'
@@ -137,7 +137,9 @@ function xlml_set_custprop(Custprops, Rn, cp, val /*:string*/) {
 }
 
 function safe_format_xlml(cell /*:Cell*/, nf, o) {
-    if (cell.t === 'z') return
+    if (cell.t === 'z') {
+        return
+    }
     if (!o || o.cellText !== false) {
         try {
             if (cell.t === 'e') {
@@ -156,12 +158,16 @@ function safe_format_xlml(cell /*:Cell*/, nf, o) {
                 cell.w = xlml_format(nf || 'General', cell.v)
             }
         } catch (e) {
-            if (o.WTF) throw e
+            if (o.WTF) {
+                throw e
+            }
         }
     }
     try {
         const z = XLMLFormatMap[nf] || nf || 'General'
-        if (o.cellNF) cell.z = z
+        if (o.cellNF) {
+            cell.z = z
+        }
         if (o.cellDates && cell.t == 'n' && SSF.is_date(z)) {
             const _d = SSF.parse_date_code(cell.v)
             if (_d) {
@@ -170,7 +176,9 @@ function safe_format_xlml(cell /*:Cell*/, nf, o) {
             }
         }
     } catch (e) {
-        if (o.WTF) throw e
+        if (o.WTF) {
+            throw e
+        }
     }
 }
 
@@ -178,7 +186,9 @@ function process_style_xlml(styles, stag, opts) {
     if (opts.cellStyles) {
         if (stag.Interior) {
             const I = stag.Interior
-            if (I.Pattern) I.patternType = XLMLPatternTypeMap[I.Pattern] || I.Pattern
+            if (I.Pattern) {
+                I.patternType = XLMLPatternTypeMap[I.Pattern] || I.Pattern
+            }
         }
     }
     styles[stag.ID] = stag
@@ -192,12 +202,22 @@ function parse_xlml_data(xml, ss, data, cell /*:any*/, base, styles, csty, row, 
     o = o || {}
     const interiors = []
     let i = 0
-    if (sid === undefined && row) sid = row.StyleID
-    if (sid === undefined && csty) sid = csty.StyleID
+    if (sid === undefined && row) {
+        sid = row.StyleID
+    }
+    if (sid === undefined && csty) {
+        sid = csty.StyleID
+    }
     while (styles[sid] !== undefined) {
-        if (styles[sid].nf) nf = styles[sid].nf
-        if (styles[sid].Interior) interiors.push(styles[sid].Interior)
-        if (!styles[sid].Parent) break
+        if (styles[sid].nf) {
+            nf = styles[sid].nf
+        }
+        if (styles[sid].Interior) {
+            interiors.push(styles[sid].Interior)
+        }
+        if (!styles[sid].Parent) {
+            break
+        }
         sid = styles[sid].Parent
     }
     switch (data.Type) {
@@ -214,17 +234,27 @@ function parse_xlml_data(xml, ss, data, cell /*:any*/, base, styles, csty, row, 
             cell.v = (parseDate(xml) - new Date(Date.UTC(1899, 11, 30))) / (24 * 60 * 60 * 1000)
             if (cell.v !== cell.v) {
                 cell.v = unescapexml(xml)
-            } else if (cell.v < 60) cell.v = cell.v - 1
-            if (!nf || nf == 'General') nf = 'yyyy-mm-dd'
+            } else if (cell.v < 60) {
+                cell.v = cell.v - 1
+            }
+            if (!nf || nf == 'General') {
+                nf = 'yyyy-mm-dd'
+            }
         /* falls through */
         case 'Number':
-            if (cell.v === undefined) cell.v = +xml
-            if (!cell.t) cell.t = 'n'
+            if (cell.v === undefined) {
+                cell.v = +xml
+            }
+            if (!cell.t) {
+                cell.t = 'n'
+            }
             break
         case 'Error':
             cell.t = 'e'
             cell.v = RBErr[xml]
-            if (o.cellText !== false) cell.w = xml
+            if (o.cellText !== false) {
+                cell.w = xml
+            }
             break
         default:
             cell.t = 's'
@@ -278,7 +308,9 @@ export function xlml_normalize(d) /*:string*/ {
     if (has_buf && /*::typeof Buffer !== "undefined" && d != null &&*/Buffer.isBuffer(d)) {
         return d.toString('utf8')
     }
-    if (typeof d === 'string') return d
+    if (typeof d === 'string') {
+        return d
+    }
     throw new Error('Bad input format: expected Buffer or string')
 }
 
@@ -298,7 +330,9 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
     let Rn
     const state = []
     let tmp
-    if (DENSE != null && opts.dense == null) opts.dense = DENSE
+    if (DENSE != null && opts.dense == null) {
+        opts.dense = DENSE
+    }
     const sheets = {}
     const sheetnames = []
     let cursheet = opts.dense ? [] : {}
@@ -311,7 +345,7 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
     let didx = 0
     let c = 0
     let r = 0
-    let refguess = {s: {r: 2000000, c: 2000000}, e: {r: 0, c: 0}}
+    let refguess = { s: { r: 2000000, c: 2000000 }, e: { r: 0, c: 0 } }
     const styles = {}
     let stag = {}
     let ss = ''
@@ -329,21 +363,23 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
     let arrayf = []
     let rowinfo = []
     let rowobj = {}
-    const Workbook = {Sheets: []}
+    const Workbook = { Sheets: [] }
     let wsprops = {}
     xlmlregex.lastIndex = 0
     str = str.replace(/<!--([^\u2603]*?)-->/mg, '')
     while (Rn = xlmlregex.exec(str)) {
         switch (Rn[3]) {
             case 'Data':
-                if (state[state.length - 1][1]) break
+                if (state[state.length - 1][1]) {
+                    break
+                }
                 if (Rn[1] === '/') {
                     parse_xlml_data(
                         str.slice(didx, Rn.index),
                         ss,
                         dtag,
                         state[state.length - 1][0] == 'Comment' ? comment : cell,
-                        {c, r,},
+                        { c, r, },
                         styles,
                         cstys[c],
                         row,
@@ -363,14 +399,16 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
                     }
                     if ((!opts.sheetRows || opts.sheetRows > r) && cell.v !== undefined) {
                         if (opts.dense) {
-                            if (!cursheet[r]) cursheet[r] = []
+                            if (!cursheet[r]) {
+                                cursheet[r] = []
+                            }
                             cursheet[r][c] = cell
                         } else {
                             cursheet[encode_col(c) + encode_row(r)] = cell
                         }
                     }
                     if (cell.HRef) {
-                        cell.l = {Target: cell.HRef, Tooltip: cell.HRefScreenTip}
+                        cell.l = { Target: cell.HRef, Tooltip: cell.HRefScreenTip }
                         delete cell.HRef
                         delete cell.HRefScreenTip
                     }
@@ -378,7 +416,7 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
                     if (cell.MergeAcross || cell.MergeDown) {
                         cc = c + (parseInt(cell.MergeAcross, 10) | 0)
                         rr = r + (parseInt(cell.MergeDown, 10) | 0)
-                        mergecells.push({s: {c, r}, e: {c: cc, r: rr}})
+                        mergecells.push({ s: { c, r }, e: { c: cc, r: rr } })
                     }
                     if (!opts.sheetStubs) {
                         if (cell.MergeAcross) {
@@ -392,10 +430,12 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
                             for (let cmd = r; cmd <= rr; ++cmd) {
                                 if (cma > c || cmd > r) {
                                     if (opts.dense) {
-                                        if (!cursheet[cmd]) cursheet[cmd] = []
-                                        cursheet[cmd][cma] = {t: 'z'}
+                                        if (!cursheet[cmd]) {
+                                            cursheet[cmd] = []
+                                        }
+                                        cursheet[cmd][cma] = { t: 'z' }
                                     } else {
-                                        cursheet[encode_col(cma) + encode_row(cmd)] = {t: 'z'}
+                                        cursheet[encode_col(cma) + encode_row(cmd)] = { t: 'z' }
                                     }
                                 }
                             }
@@ -406,17 +446,29 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
                     }
                 } else {
                     cell = xlml_parsexmltagobj(Rn[0])
-                    if (cell.Index) c = +cell.Index - 1
-                    if (c < refguess.s.c) refguess.s.c = c
-                    if (c > refguess.e.c) refguess.e.c = c
-                    if (Rn[0].slice(-2) === '/>') ++c
+                    if (cell.Index) {
+                        c = +cell.Index - 1
+                    }
+                    if (c < refguess.s.c) {
+                        refguess.s.c = c
+                    }
+                    if (c > refguess.e.c) {
+                        refguess.e.c = c
+                    }
+                    if (Rn[0].slice(-2) === '/>') {
+                        ++c
+                    }
                     comments = []
                 }
                 break
             case 'Row':
                 if (Rn[1] === '/' || Rn[0].slice(-2) === '/>') {
-                    if (r < refguess.s.r) refguess.s.r = r
-                    if (r > refguess.e.r) refguess.e.r = r
+                    if (r < refguess.s.r) {
+                        refguess.s.r = r
+                    }
+                    if (r > refguess.e.r) {
+                        refguess.e.r = r
+                    }
                     if (Rn[0].slice(-2) === '/>') {
                         row = xlml_parsexmltag(Rn[0])
                         if (row.Index) {
@@ -453,12 +505,18 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
                         cursheet['!ref'] = encode_range(refguess)
                     }
 
-                    if (mergecells.length) cursheet['!merges'] = mergecells
-                    if (cstys.length > 0) cursheet['!cols'] = cstys
-                    if (rowinfo.length > 0) cursheet['!rows'] = rowinfo
+                    if (mergecells.length) {
+                        cursheet['!merges'] = mergecells
+                    }
+                    if (cstys.length > 0) {
+                        cursheet['!cols'] = cstys
+                    }
+                    if (rowinfo.length > 0) {
+                        cursheet['!rows'] = rowinfo
+                    }
                     sheets[sheetname] = cursheet
                 } else {
-                    refguess = {s: {r: 2000000, c: 2000000}, e: {r: 0, c: 0}}
+                    refguess = { s: { r: 2000000, c: 2000000 }, e: { r: 0, c: 0 } }
                     r = c = 0
                     state.push([Rn[3], false])
                     tmp = xlml_parsexmltag(Rn[0])
@@ -467,7 +525,7 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
                     mergecells = []
                     arrayf = []
                     rowinfo = []
-                    wsprops = {name: sheetname, Hidden: 0}
+                    wsprops = { name: sheetname, Hidden: 0 }
                     Workbook.Sheets.push(wsprops)
                 }
                 break
@@ -496,10 +554,14 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
 
             case 'NumberFormat':
                 stag.nf = unescapexml(xlml_parsexmltag(Rn[0]).Format || 'General')
-                if (XLMLFormatMap[stag.nf]) stag.nf = XLMLFormatMap[stag.nf]
+                if (XLMLFormatMap[stag.nf]) {
+                    stag.nf = XLMLFormatMap[stag.nf]
+                }
                 let ssfidx = 0
                 for (; ssfidx != 0x188; ++ssfidx) {
-                    if (SSF._table[ssfidx] == stag.nf) break
+                    if (SSF._table[ssfidx] == stag.nf) {
+                        break
+                    }
                 }
                 if (ssfidx == 0x188) {
                     for (ssfidx = 0x39; ssfidx != 0x188; ++ssfidx) {
@@ -512,13 +574,17 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
                 break
 
             case 'Column':
-                if (state[state.length - 1][0] !== 'Table') break
+                if (state[state.length - 1][0] !== 'Table') {
+                    break
+                }
                 csty = xlml_parsexmltag(Rn[0])
                 if (csty.Hidden) {
                     csty.hidden = true
                     delete csty.Hidden
                 }
-                if (csty.Width) csty.wpx = parseInt(csty.Width, 10)
+                if (csty.Width) {
+                    csty.wpx = parseInt(csty.Width, 10)
+                }
                 if (!seencol && csty.wpx > 10) {
                     seencol = true
                     setMDW(DEF_MDW)
@@ -529,7 +595,9 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
                         }
                     }
                 }
-                if (seencol) process_col(csty)
+                if (seencol) {
+                    process_col(csty)
+                }
                 cstys[csty.Index - 1 || cstys.length] = csty
                 for (let i = 0; i < +csty.Span; ++i) {
                     cstys[cstys.length] = dup(csty)
@@ -537,7 +605,9 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
                 break
 
             case 'NamedRange':
-                if (!Workbook.Names) Workbook.Names = []
+                if (!Workbook.Names) {
+                    Workbook.Names = []
+                }
                 const _NamedRange = parsexmltag(Rn[0])
                 const _DefinedName = {
                     Name: _NamedRange.Name,
@@ -581,7 +651,9 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
                 }
                 break
             case 'Interior':
-                if (!opts.cellStyles) break
+                if (!opts.cellStyles) {
+                    break
+                }
                 stag.Interior = xlml_parsexmltag(Rn[0])
                 break
             case 'Protection':
@@ -638,7 +710,7 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
                 } else {
                     state.push([Rn[3], false])
                     tmp = xlml_parsexmltag(Rn[0])
-                    comment = {a: tmp.Author}
+                    comment = { a: tmp.Author }
                 }
                 break
 
@@ -649,7 +721,7 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
                     }
                 } else if (Rn[0].charAt(Rn[0].length - 2) !== '/') {
                     const AutoFilter = xlml_parsexmltag(Rn[0])
-                    cursheet['!autofilter'] = {ref: rc_to_a1(AutoFilter.Range).replace(/\$/g, '')}
+                    cursheet['!autofilter'] = { ref: rc_to_a1(AutoFilter.Range).replace(/\$/g, '') }
                     state.push([Rn[3], true])
                 }
                 break
@@ -883,20 +955,34 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
                                 }
                                 break
                             case 'Header':
-                                if (!cursheet['!margins']) default_margins(cursheet['!margins'] = {}, 'xlml')
+                                if (!cursheet['!margins']) {
+                                    default_margins(cursheet['!margins'] = {}, 'xlml')
+                                }
                                 cursheet['!margins'].header = parsexmltag(Rn[0]).Margin
                                 break
                             case 'Footer':
-                                if (!cursheet['!margins']) default_margins(cursheet['!margins'] = {}, 'xlml')
+                                if (!cursheet['!margins']) {
+                                    default_margins(cursheet['!margins'] = {}, 'xlml')
+                                }
                                 cursheet['!margins'].footer = parsexmltag(Rn[0]).Margin
                                 break
                             case 'PageMargins':
                                 const pagemargins = parsexmltag(Rn[0])
-                                if (!cursheet['!margins']) default_margins(cursheet['!margins'] = {}, 'xlml')
-                                if (pagemargins.Top) cursheet['!margins'].top = pagemargins.Top
-                                if (pagemargins.Left) cursheet['!margins'].left = pagemargins.Left
-                                if (pagemargins.Right) cursheet['!margins'].right = pagemargins.Right
-                                if (pagemargins.Bottom) cursheet['!margins'].bottom = pagemargins.Bottom
+                                if (!cursheet['!margins']) {
+                                    default_margins(cursheet['!margins'] = {}, 'xlml')
+                                }
+                                if (pagemargins.Top) {
+                                    cursheet['!margins'].top = pagemargins.Top
+                                }
+                                if (pagemargins.Left) {
+                                    cursheet['!margins'].left = pagemargins.Left
+                                }
+                                if (pagemargins.Right) {
+                                    cursheet['!margins'].right = pagemargins.Right
+                                }
+                                if (pagemargins.Bottom) {
+                                    cursheet['!margins'].bottom = pagemargins.Bottom
+                                }
                                 break
                             case 'Unsynced':
                                 break
@@ -1350,7 +1436,9 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
                         seen = false
                         break
                 }
-                if (seen) break
+                if (seen) {
+                    break
+                }
                 /* CustomDocumentProperties */
                 if (!state[state.length - 1][1]) {
                     throw `Unrecognized tag: ${Rn[3]}|${state.join('|')}`
@@ -1373,7 +1461,9 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
     }
     const out = {}
     /*:any*/
-    if (!opts.bookSheets && !opts.bookProps) out.Sheets = sheets
+    if (!opts.bookSheets && !opts.bookProps) {
+        out.Sheets = sheets
+    }
     out.SheetNames = sheetnames
     out.Workbook = Workbook
     out.SSF = SSF.get_table()
@@ -1426,7 +1516,9 @@ function write_sty_xlml(wb, opts) /*:string*/ {
 
 /* WorksheetOptions */
 function write_ws_xlml_wsopts(ws/*:Worksheet*/, opts, idx/*:number*/, wb/*:Workbook*/)/*:string*/ {
-    if (!ws) return ''
+    if (!ws) {
+        return ''
+    }
     const o = []
     /* NOTE: spec technically allows any order, but stick with implied order */
 
@@ -1446,10 +1538,10 @@ function write_ws_xlml_wsopts(ws/*:Worksheet*/, opts, idx/*:number*/, wb/*:Workb
     if (ws['!margins']) {
         o.push('<PageSetup>')
         if (ws['!margins'].header) {
-            o.push(writextag('Header', null, {'x:Margin': ws['!margins'].header}))
+            o.push(writextag('Header', null, { 'x:Margin': ws['!margins'].header }))
         }
         if (ws['!margins'].footer) {
-            o.push(writextag('Footer', null, {'x:Margin': ws['!margins'].footer}))
+            o.push(writextag('Footer', null, { 'x:Margin': ws['!margins'].footer }))
         }
         o.push(writextag('PageMargins', null, {
             'x:Bottom': ws['!margins'].bottom || '0.75',
@@ -1481,7 +1573,9 @@ function write_ws_xlml_wsopts(ws/*:Worksheet*/, opts, idx/*:number*/, wb/*:Workb
             /* Selected */
             let i = 0
             for (; i < idx; ++i) {
-                if (wb.Workbook.Sheets[i] && !wb.Workbook.Sheets[i].Hidden) break
+                if (wb.Workbook.Sheets[i] && !wb.Workbook.Sheets[i].Hidden) {
+                    break
+                }
             }
             if (i == idx) {
                 o.push('<Selected/>')
@@ -1544,21 +1638,23 @@ function write_ws_xlml_wsopts(ws/*:Worksheet*/, opts, idx/*:number*/, wb/*:Workb
             ['pivotTables', 'AllowUsePivotTables'],
         ].forEach(function (x) {
             if (ws['!protect'][x[0]]) {
-                o.push('<' + x[1] + '/>')
+                o.push(`<${x[1]}/>`)
             }
         })
     }
 
-    if (o.length == 0) return ''
-    return writextag('WorksheetOptions', o.join(''), {xmlns: XLMLNS.x})
+    if (o.length == 0) {
+        return ''
+    }
+    return writextag('WorksheetOptions', o.join(''), { xmlns: XLMLNS.x })
 }
 
 function write_ws_xlml_comment(comments) {
     return comments.map(function (c) {
         // TODO: formatted text
         const t = xlml_unfixstr(c.t || '')
-        const d = writextag('ss:Data', t, {'xmlns': 'http://www.w3.org/TR/REC-html40'})
-        return writextag('Comment', d, {'ss:Author': c.a})
+        const d = writextag('ss:Data', t, { 'xmlns': 'http://www.w3.org/TR/REC-html40' })
+        return writextag('Comment', d, { 'ss:Author': c.a })
     }).join('')
 }
 
@@ -1568,23 +1664,35 @@ function write_ws_xlml_cell(cell, ref, ws, opts, idx, wb, addr) /*:string*/ {
     }
 
     const attr = {}
-    if (cell.f) attr['ss:Formula'] = `=${escapexml(a1_to_rc(cell.f, addr))}`
+    if (cell.f) {
+        attr['ss:Formula'] = `=${escapexml(a1_to_rc(cell.f, addr))}`
+    }
     if (cell.F && cell.F.substr(0, ref.length) == ref) {
         const end = decode_cell(cell.F.substr(ref.length + 1))
-        attr['ss:ArrayRange'] = `RC:R${end.r == addr.r ? '' : '[' + (end.r - addr.r) + ']'}C${end.c == addr.c ? '' : '[' + (end.c - addr.c) + ']'}`
+        attr['ss:ArrayRange'] = `RC:R${end.r == addr.r ? '' : `[${end.r - addr.r}]`}C${end.c == addr.c
+            ? ''
+            : `[${end.c - addr.c}]`}`
     }
 
     if (cell.l && cell.l.Target) {
         attr['ss:HRef'] = escapexml(cell.l.Target)
-        if (cell.l.Tooltip) attr['x:HRefScreenTip'] = escapexml(cell.l.Tooltip)
+        if (cell.l.Tooltip) {
+            attr['x:HRefScreenTip'] = escapexml(cell.l.Tooltip)
+        }
     }
 
     if (ws['!merges']) {
         const marr = ws['!merges']
         for (let mi = 0; mi != marr.length; ++mi) {
-            if (marr[mi].s.c != addr.c || marr[mi].s.r != addr.r) continue
-            if (marr[mi].e.c > marr[mi].s.c) attr['ss:MergeAcross'] = marr[mi].e.c - marr[mi].s.c
-            if (marr[mi].e.r > marr[mi].s.r) attr['ss:MergeDown'] = marr[mi].e.r - marr[mi].s.r
+            if (marr[mi].s.c != addr.c || marr[mi].s.r != addr.r) {
+                continue
+            }
+            if (marr[mi].e.c > marr[mi].s.c) {
+                attr['ss:MergeAcross'] = marr[mi].e.c - marr[mi].s.c
+            }
+            if (marr[mi].e.r > marr[mi].s.r) {
+                attr['ss:MergeDown'] = marr[mi].e.r - marr[mi].s.r
+            }
         }
     }
 
@@ -1645,12 +1753,14 @@ function write_ws_xlml_row(R/*:number*/, row)/*:string*/ {
             o += ' ss:Hidden="1"'
         }
     }
-    return o + '>'
+    return `${o}>`
 }
 
 /* TODO */
 function write_ws_xlml_table(ws /*:Worksheet*/, opts, idx /*:number*/, wb /*:Workbook*/) /*:string*/ {
-    if (!ws['!ref']) return ''
+    if (!ws['!ref']) {
+        return ''
+    }
     const range = safe_decode_range(ws['!ref'])
     const marr = ws['!merges'] || []
     let mi = 0
@@ -1660,7 +1770,7 @@ function write_ws_xlml_table(ws /*:Worksheet*/, opts, idx /*:number*/, wb /*:Wor
             process_col(n)
             const w = !!n.width
             const p = col_obj_w(i, n)
-            const k = {'ss:Index': i + 1}
+            const k = { 'ss:Index': i + 1 }
             if (w) {
                 k['ss:Width'] = width2px(p.width)
             }
@@ -1676,15 +1786,27 @@ function write_ws_xlml_table(ws /*:Worksheet*/, opts, idx /*:number*/, wb /*:Wor
         for (let C = range.s.c; C <= range.e.c; ++C) {
             let skip = false
             for (mi = 0; mi != marr.length; ++mi) {
-                if (marr[mi].s.c > C) continue
-                if (marr[mi].s.r > R) continue
-                if (marr[mi].e.c < C) continue
-                if (marr[mi].e.r < R) continue
-                if (marr[mi].s.c != C || marr[mi].s.r != R) skip = true
+                if (marr[mi].s.c > C) {
+                    continue
+                }
+                if (marr[mi].s.r > R) {
+                    continue
+                }
+                if (marr[mi].e.c < C) {
+                    continue
+                }
+                if (marr[mi].e.r < R) {
+                    continue
+                }
+                if (marr[mi].s.c != C || marr[mi].s.r != R) {
+                    skip = true
+                }
                 break
             }
-            if (skip) continue
-            const addr = {r: R, c: C}
+            if (skip) {
+                continue
+            }
+            const addr = { r: R, c: C }
             const ref = encode_cell(addr)
             const cell = dense ? (ws[R] || [])[C] : ws[ref]
             row.push(write_ws_xlml_cell(cell, ref, ws, opts, idx, wb, addr))
@@ -1718,7 +1840,7 @@ export function write_xlml(wb, opts) /*:string*/ {
     d.push(write_wb_xlml(wb, opts))
     d.push(write_sty_xlml(wb, opts))
     for (let i = 0; i < wb.SheetNames.length; ++i) {
-        d.push(writextag('Worksheet', write_ws_xlml(i, opts, wb), {'ss:Name': escapexml(wb.SheetNames[i])}))
+        d.push(writextag('Worksheet', write_ws_xlml(i, opts, wb), { 'ss:Name': escapexml(wb.SheetNames[i]) }))
     }
     return XML_HEADER + writextag('Workbook', d.join(''), {
             'xmlns': XLMLNS.ss,

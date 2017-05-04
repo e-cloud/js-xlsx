@@ -191,7 +191,9 @@ export const CT_LIST = function () {
         },
     }
     keys(o).forEach(function (k) {
-        if (!o[k].xlsm) o[k].xlsm = o[k].xlsx
+        if (!o[k].xlsm) {
+            o[k].xlsm = o[k].xlsx
+        }
     })
     keys(o).forEach(function (k) {
         keys(o[k]).forEach(function (v) {
@@ -214,7 +216,9 @@ export function parse_ct(data /*:?string*/, opts) {
         TODO: [], xmlns: '',
     }
     /*:any*/
-    if (!data || !data.match) return ct
+    if (!data || !data.match) {
+        return ct
+    }
     const ctext = {};
     (data.match(tagregex) || []).forEach(function (x) {
         const y = parsexmltag(x)
@@ -234,7 +238,9 @@ export function parse_ct(data /*:?string*/, opts) {
                 break
         }
     })
-    if (ct.xmlns !== XMLNS.CT) throw new Error(`Unknown Namespace: ${ct.xmlns}`)
+    if (ct.xmlns !== XMLNS.CT) {
+        throw new Error(`Unknown Namespace: ${ct.xmlns}`)
+    }
     ct.calcchain = ct.calcchains.length > 0 ? ct.calcchains[0] : ''
     ct.sst = ct.strs.length > 0 ? ct.strs[0] : ''
     ct.style = ct.styles.length > 0 ? ct.styles[0] : ''
@@ -257,7 +263,7 @@ export const CTYPE_DEFAULTS = [
     ['jpg', 'image/jpeg'], ['jpeg', 'image/jpeg'], ['tif', 'image/tiff'], ['tiff', 'image/tiff'],
     ['pdf', 'application/pdf'], ['rels', type2ct.rels[0]],
 ].map(function (x) {
-    return writextag('Default', null, {'Extension': x[0], 'ContentType': x[1]})
+    return writextag('Default', null, { 'Extension': x[0], 'ContentType': x[1] })
 })
 
 export function write_ct(ct, opts) /*:string*/ {

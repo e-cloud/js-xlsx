@@ -116,7 +116,9 @@ export function check_wb_names(N) {
                 throw new Error('Sheet name cannot contain : \\ / ? * [ ]')
             }
         })
-        if (n.length > 31) throw new Error('Sheet names cannot exceed 31 chars')
+        if (n.length > 31) {
+            throw new Error('Sheet names cannot exceed 31 chars')
+        }
         for (let j = 0; j < i; ++j) {
             if (n == N[j]) {
                 throw new Error(`Duplicate Sheet Name: ${n}`)

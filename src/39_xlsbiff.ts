@@ -25,7 +25,7 @@ export function parse_XLSCell(blob, length?) /*:Cell*/ {
     const rw = blob.read_shift(2) // 0-indexed
     const col = blob.read_shift(2)
     const ixfe = blob.read_shift(2)
-    return {r: rw, c: col, ixfe}
+    return { r: rw, c: col, ixfe }
     /*:any*/
 }
 
@@ -34,7 +34,7 @@ export function parse_frtHeader(blob) {
     const rt = blob.read_shift(2)
     const flags = blob.read_shift(2) // TODO: parse these flags
     blob.l += 8
-    return {type: rt, flags}
+    return { type: rt, flags }
 }
 
 export function parse_OptXLUnicodeString(blob, length, opts) {
@@ -81,7 +81,7 @@ export function parse_Ref8U(blob, length) {
     const rwLast = blob.read_shift(2)
     const colFirst = blob.read_shift(2)
     const colLast = blob.read_shift(2)
-    return {s: {c: colFirst, r: rwFirst}, e: {c: colLast, r: rwLast}}
+    return { s: { c: colFirst, r: rwFirst }, e: { c: colLast, r: rwLast } }
 }
 
 /* 2.5.211 */
@@ -90,7 +90,7 @@ export function parse_RefU(blob, length) {
     const rwLast = blob.read_shift(2)
     const colFirst = blob.read_shift(1)
     const colLast = blob.read_shift(1)
-    return {s: {c: colFirst, r: rwFirst}, e: {c: colLast, r: rwLast}}
+    return { s: { c: colFirst, r: rwFirst }, e: { c: colLast, r: rwLast } }
 }
 
 /* 2.5.207 */
@@ -185,7 +185,7 @@ const parse_FontIndex = parseuint16
 
 /* 2.4.21 */
 export function parse_BOF(blob, length) {
-    const o = {BIFFVer: 0, dt: 0}
+    const o = { BIFFVer: 0, dt: 0 }
     o.BIFFVer = blob.read_shift(2)
     length -= 2
     if (length >= 2) {
@@ -211,7 +211,9 @@ export function parse_BOF(blob, length) {
 
 /* 2.4.146 */
 export function parse_InterfaceHdr(blob, length) {
-    if (length === 0) return 0x04b0
+    if (length === 0) {
+        return 0x04b0
+    }
     let q
     if ((q = blob.read_shift(2)) !== 0x04b0) {
     }
@@ -251,8 +253,10 @@ export function parse_BoundSheet8(blob, length, opts) {
             break
     }
     let name = parse_ShortXLUnicodeString(blob, 0, opts)
-    if (name.length === 0) name = 'Sheet1'
-    return {pos, hs: hidden, dt, name}
+    if (name.length === 0) {
+        name = 'Sheet1'
+    }
+    return { pos, hs: hidden, dt, name }
 }
 
 /* 2.4.265 TODO */
@@ -287,8 +291,12 @@ export function parse_Row(blob, length) {
     blob.l += 4 // reserved(2), unused(2)
     const flags = blob.read_shift(1) // various flags
     blob.l += 3 // reserved(8), ixfe(12), flags(4)
-    if (flags & 0x20) z.hidden = true
-    if (flags & 0x40) z.hpt = miyRw / 20
+    if (flags & 0x20) {
+        z.hidden = true
+    }
+    if (flags & 0x40) {
+        z.hpt = miyRw / 20
+    }
     return z
 }
 
@@ -314,7 +322,7 @@ export function parse_RecalcId(blob, length) {
 /* 2.4.87 */
 export function parse_DefaultRowHeight(blob, length) {
     const f = blob.read_shift(2)
-    const fl = {Unsynced: f & 1, DyZero: (f & 2) >> 1, ExAsc: (f & 4) >> 2, ExDsc: (f & 8) >> 3}
+    const fl = { Unsynced: f & 1, DyZero: (f & 2) >> 1, ExAsc: (f & 4) >> 2, ExDsc: (f & 8) >> 3 }
     /* char is misleading, miyRw and miyRwHidden overlap */
     const miyRw = blob.read_shift(2)
     return [fl, miyRw]
@@ -355,7 +363,9 @@ export function parse_LabelSst(blob, length?) {
 export function parse_Label(blob, length, opts) {
     const target = blob.l + length
     const cell = parse_XLSCell(blob, 6)
-    if (opts.biff == 2) blob.l++
+    if (opts.biff == 2) {
+        blob.l++
+    }
     const str = parse_XLUnicodeString(blob, target - blob.l, opts)
     cell.val = str
     return cell
@@ -378,7 +388,7 @@ export function parse_Dimensions(blob, length, opts) {
     const c = blob.read_shift(2)
     const C = blob.read_shift(2)
     blob.l = end
-    return {s: {r, c}, e: {r: R, c: C}}
+    return { s: { r, c }, e: { r: R, c: C } }
 }
 
 /* 2.4.220 */
@@ -386,7 +396,7 @@ export function parse_RK(blob, length) {
     const rw = blob.read_shift(2)
     const col = blob.read_shift(2)
     const rkrec = parse_RkRec(blob)
-    return {r: rw, c: col, ixfe: rkrec[0], rknum: rkrec[1]}
+    return { r: rw, c: col, ixfe: rkrec[0], rknum: rkrec[1] }
 }
 
 /* 2.4.175 */
@@ -395,7 +405,9 @@ export function parse_MulRk(blob, length) {
     const rw = blob.read_shift(2)
     const col = blob.read_shift(2)
     const rkrecs = []
-    while (blob.l < target) rkrecs.push(parse_RkRec(blob))
+    while (blob.l < target) {
+        rkrecs.push(parse_RkRec(blob))
+    }
     if (blob.l !== target) {
         throw new Error('MulRK read error')
     }
@@ -403,7 +415,7 @@ export function parse_MulRk(blob, length) {
     if (rkrecs.length != lastcol - col + 1) {
         throw new Error('MulRK length mismatch')
     }
-    return {r: rw, c: col, C: lastcol, rkrec: rkrecs}
+    return { r: rw, c: col, C: lastcol, rkrec: rkrecs }
 }
 /* 2.4.174 */
 export function parse_MulBlank(blob, length) {
@@ -411,7 +423,9 @@ export function parse_MulBlank(blob, length) {
     const rw = blob.read_shift(2)
     const col = blob.read_shift(2)
     const ixfes = []
-    while (blob.l < target) ixfes.push(blob.read_shift(2))
+    while (blob.l < target) {
+        ixfes.push(blob.read_shift(2))
+    }
     if (blob.l !== target) {
         throw new Error('MulBlank read error')
     }
@@ -419,7 +433,7 @@ export function parse_MulBlank(blob, length) {
     if (ixfes.length != lastcol - col + 1) {
         throw new Error('MulBlank length mismatch')
     }
-    return {r: rw, c: col, C: lastcol, ixfe: ixfes}
+    return { r: rw, c: col, C: lastcol, ixfe: ixfes }
 }
 
 /* 2.5.20 2.5.249 TODO: interpret values here */
@@ -431,7 +445,9 @@ function parse_CellStyleXF(blob, length, style, opts) {
     const d = blob.read_shift(2)
     o.patternType = XLSFillPattern[c >> 26]
 
-    if (!opts.cellStyles) return o
+    if (!opts.cellStyles) {
+        return o
+    }
     o.alc = a & 0x07
     o.fWrap = a >> 3 & 0x01
     o.alcV = a >> 4 & 0x07
@@ -488,8 +504,12 @@ export function parse_XF(blob, length, opts) {
 export function parse_Guts(blob, length) {
     blob.l += 4
     const out = [blob.read_shift(2), blob.read_shift(2)]
-    if (out[0] !== 0) out[0]--
-    if (out[1] !== 0) out[1]--
+    if (out[0] !== 0) {
+        out[0]--
+    }
+    if (out[1] !== 0) {
+        out[1]--
+    }
     if (out[0] > 7 || out[1] > 7) {
         throw new Error(`Bad Gutters: ${out.join('|')}`)
     }
@@ -499,7 +519,9 @@ export function parse_Guts(blob, length) {
 /* 2.4.24 */
 export function parse_BoolErr(blob, length, opts) {
     const cell = parse_XLSCell(blob, 6)
-    if (opts.biff == 2) ++blob.l
+    if (opts.biff == 2) {
+        ++blob.l
+    }
     const val = parse_Bes(blob, 2)
     cell.val = val
     cell.t = val === true || val === false ? 'b' : 'e'
@@ -522,7 +544,9 @@ export function parse_SupBook(blob, length, opts) {
     const ctab = blob.read_shift(2)
     const cch = blob.read_shift(2)
     let virtPath
-    if (cch >= 0x01 && cch <= 0xff) virtPath = parse_XLUnicodeStringNoCch(blob, cch)
+    if (cch >= 0x01 && cch <= 0xff) {
+        virtPath = parse_XLUnicodeStringNoCch(blob, cch)
+    }
     const rgst = blob.read_shift(end - blob.l)
     opts.sbcch = cch
     return [cch, ctab, virtPath, rgst]
@@ -542,7 +566,9 @@ export function parse_ExternName(blob, length, opts) {
         fIcon: flags >>> 15 & 0x01,
     }
     /*:any*/
-    if (opts.sbcch === 0x3A01) body = parse_AddinUdf(blob, length - 2, opts)
+    if (opts.sbcch === 0x3A01) {
+        body = parse_AddinUdf(blob, length - 2, opts)
+    }
     //else throw new Error("unsupported SupBook cch: " + opts.sbcch);
     o.body = body || blob.read_shift(length - 2)
     if (typeof body === 'string') {
@@ -566,7 +592,9 @@ export function parse_Lbl(blob, length, opts) {
     }
     const name = parse_XLUnicodeStringNoCch(blob, cch, opts)
     let npflen = target - blob.l
-    if (opts && opts.biff == 2) --npflen
+    if (opts && opts.biff == 2) {
+        --npflen
+    }
     const rgce = target == blob.l || cce == 0 ? [] : parse_NameParsedFormula(blob, npflen, opts, cce)
     return {
         chKey,
@@ -584,7 +612,9 @@ export function parse_ExternSheet(blob, length, opts) {
     const o = []
     const target = blob.l + length
     let len = blob.read_shift(2)
-    while (len-- !== 0) o.push(parse_XTI(blob, 6))
+    while (len-- !== 0) {
+        o.push(parse_XTI(blob, 6))
+    }
     // [iSupBook, itabFirst, itabLast];
     const oo = []
     return o
@@ -643,14 +673,18 @@ export function parse_MTRSettings(blob, length) {
 
 /* 2.5.186 TODO: BIFF5 */
 export function parse_NoteSh(blob, length, opts) {
-    if (opts.biff < 8) return
+    if (opts.biff < 8) {
+        return
+    }
     const row = blob.read_shift(2)
     const col = blob.read_shift(2)
     const flags = blob.read_shift(2)
     const idObj = blob.read_shift(2)
     const stAuthor = parse_XLUnicodeString2(blob, 0, opts)
-    if (opts.biff < 8) blob.read_shift(1)
-    return [{r: row, c: col}, stAuthor, idObj, flags]
+    if (opts.biff < 8) {
+        blob.read_shift(1)
+    }
+    return [{ r: row, c: col }, stAuthor, idObj, flags]
 }
 
 /* 2.4.179 */
@@ -663,7 +697,9 @@ export function parse_Note(blob, length, opts) {
 export function parse_MergeCells(blob, length) {
     const merges = []
     let cmcs = blob.read_shift(2)
-    while (cmcs--) merges.push(parse_Ref8U(blob, length))
+    while (cmcs--) {
+        merges.push(parse_Ref8U(blob, length))
+    }
     return merges
 }
 
@@ -671,7 +707,7 @@ export function parse_MergeCells(blob, length) {
 export function parse_Obj(blob, length) {
     const cmo = parse_FtCmo(blob, 22) // id, ot, flags
     const fts = parse_FtArray(blob, length - 22, cmo[1])
-    return {cmo, ft: fts}
+    return { cmo, ft: fts }
 }
 
 /* 2.4.329 TODO: parse properly */
@@ -680,7 +716,7 @@ export function parse_TxO(blob, length, opts) {
     let texts = ''
     try {
         blob.l += 4
-        const ot = (opts.lastobj || {cmo: [0, 0]}).cmo[1]
+        const ot = (opts.lastobj || { cmo: [0, 0] }).cmo[1]
         let controlInfo
         if (![0, 5, 7, 11, 12, 14].includes(ot)) {
             blob.l += 6
@@ -701,7 +737,9 @@ export function parse_TxO(blob, length, opts) {
             const hdr = blob[blob.l]
             const t = parse_XLUnicodeStringNoCch(blob, blob.lens[i + 1] - blob.lens[i] - 1)
             texts += t
-            if (texts.length >= (hdr ? cchText : 2 * cchText)) break
+            if (texts.length >= (hdr ? cchText : 2 * cchText)) {
+                break
+            }
         }
         if (texts.length !== cchText && texts.length !== cchText * 2) {
             throw new Error(`cchText: ${cchText} != ${texts.length}`)
@@ -715,10 +753,10 @@ export function parse_TxO(blob, length, opts) {
         //	if(cchText2 !== cchText) throw new Error("TxOLastRun mismatch: " + cchText2 + " " + cchText);
         //	blob.l += 6;
         //	if(s + length != blob.l) throw new Error("TxO " + (s + length) + ", at " + blob.l);
-        return {t: texts}
+        return { t: texts }
     } catch (e) {
         blob.l = s + length
-        return {t: texts}
+        return { t: texts }
     }
 }
 
@@ -756,7 +794,9 @@ export function parse_Country(blob, length) {
 export function parse_ClrtClient(blob, length) {
     let ccv = blob.read_shift(2)
     const o = []
-    while (ccv-- > 0) o.push(parse_LongRGB(blob, 8))
+    while (ccv-- > 0) {
+        o.push(parse_LongRGB(blob, 8))
+    }
     return o
 }
 
@@ -764,14 +804,16 @@ export function parse_ClrtClient(blob, length) {
 export function parse_Palette(blob, length) {
     let ccv = blob.read_shift(2)
     const o = []
-    while (ccv-- > 0) o.push(parse_LongRGB(blob, 8))
+    while (ccv-- > 0) {
+        o.push(parse_LongRGB(blob, 8))
+    }
     return o
 }
 
 /* 2.4.354 */
 export function parse_XFCRC(blob, length) {
     blob.l += 2
-    const o = {cxfs: 0, crc: 0}
+    const o = { cxfs: 0, crc: 0 }
     o.cxfs = blob.read_shift(2)
     o.crc = blob.read_shift(4)
     return o
@@ -780,15 +822,19 @@ export function parse_XFCRC(blob, length) {
 /* 2.4.53 TODO: parse flags */
 /* [MS-XLSB] 2.4.323 TODO: parse flags */
 export function parse_ColInfo(blob, length, opts) {
-    if (!opts.cellStyles) return parsenoop(blob, length)
+    if (!opts.cellStyles) {
+        return parsenoop(blob, length)
+    }
     const w = opts && opts.biff >= 12 ? 4 : 2
     const colFirst = blob.read_shift(w)
     const colLast = blob.read_shift(w)
     const coldx = blob.read_shift(w)
     const ixfe = blob.read_shift(w)
     const flags = blob.read_shift(2)
-    if (w == 2) blob.l += 2
-    return {s: colFirst, e: colLast, w: coldx, ixfe, flags}
+    if (w == 2) {
+        blob.l += 2
+    }
+    return { s: colFirst, e: colLast, w: coldx, ixfe, flags }
 }
 
 /* 2.4.257 */
@@ -803,14 +849,16 @@ export function parse_Setup(blob, length, opts) {
 
 /* 2.4.261 */
 export function parse_ShtProps(blob, length, opts) {
-    const def = {area: false}
+    const def = { area: false }
     if (opts.biff != 5) {
         blob.l += length
         return def
     }
     const d = blob.read_shift(1)
     blob.l += 3
-    if (d & 0x10) def.area = true
+    if (d & 0x10) {
+        def.area = true
+    }
     return def
 }
 

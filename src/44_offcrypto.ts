@@ -174,7 +174,7 @@ function parse_EncInfoStd(blob, vers) {
     const tgt = blob.l + sz
     const hdr = parse_EncryptionHeader(blob, sz)
     const verifier = parse_EncryptionVerifier(blob, blob.length - blob.l)
-    return {t: 'Std', h: hdr, v: verifier}
+    return { t: 'Std', h: hdr, v: verifier }
 }
 
 /* [MS-OFFCRYPTO] 2.3.4.6  EncryptionInfo Stream (Extensible Encryption) */
@@ -192,8 +192,12 @@ function parse_RC4CryptoHeader(blob, length /*:number*/) {
     const o = {}
     const vers = o.EncryptionVersionInfo = parse_CRYPTOVersion(blob, 4)
     length -= 4
-    if (vers.Minor != 2) throw `unrecognized minor version code: ${vers.Minor}`
-    if (vers.Major > 4 || vers.Major < 2) throw `unrecognized major version code: ${vers.Major}`
+    if (vers.Minor != 2) {
+        throw `unrecognized minor version code: ${vers.Minor}`
+    }
+    if (vers.Major > 4 || vers.Major < 2) {
+        throw `unrecognized major version code: ${vers.Major}`
+    }
     o.Flags = blob.read_shift(4)
     length -= 4
     const sz = blob.read_shift(4)
@@ -231,7 +235,9 @@ export function crypto_CreatePasswordVerifier_Method1(Password /*:string*/) {
     let Intermediate3
     PasswordArray = new_raw_buf(len)
     PasswordArray[0] = PasswordDecoded.length
-    for (i = 1; i != len; ++i) PasswordArray[i] = PasswordDecoded[i - 1];
+    for (i = 1; i != len; ++i) {
+        PasswordArray[i] = PasswordDecoded[i - 1]
+    }
     for (i = len - 1; i >= 0; --i) {
         PasswordByte = PasswordArray[i]
         Intermediate1 = (Verifier & 0x4000) === 0x0000 ? 0 : 1
@@ -381,7 +387,9 @@ const crypto_CreateXorArray_Method1 = function () {
         for (let i = Password.length - 1; i >= 0; --i) {
             let Char = Password[i]
             for (let j = 0; j != 7; ++j) {
-                if (Char & 0x40) XorKey ^= XorMatrix[CurrentElement]
+                if (Char & 0x40) {
+                    XorKey ^= XorMatrix[CurrentElement]
+                }
                 Char *= 2
                 --CurrentElement
             }
@@ -434,8 +442,12 @@ const crypto_CreateXorArray_Method1 = function () {
 /* [MS-OFFCRYPTO] 2.3.7.3 Binary Document XOR Data Transformation Method 1 */
 const crypto_DecryptData_Method1 = function (password /*:string*/, Data, XorArrayIndex, XorArray, O?) {
     /* If XorArray is set, use it; if O is not set, make changes in-place */
-    if (!O) O = Data
-    if (!XorArray) XorArray = crypto_CreateXorArray_Method1(password)
+    if (!O) {
+        O = Data
+    }
+    if (!XorArray) {
+        XorArray = crypto_CreateXorArray_Method1(password)
+    }
     let Index
     let Value
     for (Index = 0; Index != Data.length; ++Index) {
@@ -460,7 +472,7 @@ const crypto_MakeXorDecryptor = function (password /*:string*/) {
 
 /* 2.5.343 */
 export function parse_XORObfuscation(blob, length, opts, out) {
-    const o = {key: parseuint16(blob), verificationBytes: parseuint16(blob)}
+    const o = { key: parseuint16(blob), verificationBytes: parseuint16(blob) }
     /*:any*/
     if (opts.password) {
         o.verifier = crypto_CreatePasswordVerifier_Method1(opts.password)
@@ -486,7 +498,7 @@ export function parse_FilePassHeader(blob, length /*:number*/, oo) {
 }
 
 export function parse_FilePass(blob, length /*:number*/, opts) {
-    const o = {Type: blob.read_shift(2)}
+    const o = { Type: blob.read_shift(2) }
     /* wEncryptionType */
     if (o.Type) {
         parse_FilePassHeader(blob, length - 2, o)

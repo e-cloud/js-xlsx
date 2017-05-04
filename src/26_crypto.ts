@@ -18,7 +18,9 @@ const make_offcrypto = function (O, _crypto) {
         let i = 0
         let j = 0
         let t = 0
-        for (i = 0; i != 256; ++i) S[i] = i;
+        for (i = 0; i != 256; ++i) {
+            S[i] = i
+        }
         for (i = 0; i != 256; ++i) {
             j = j + S[i] + key[i % key.length].charCodeAt(0) & 255
             t = S[i]

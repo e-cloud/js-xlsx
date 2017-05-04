@@ -66,7 +66,9 @@ RELS.EXT_PROPS = 'http://schemas.openxmlformats.org/officeDocument/2006/relation
 
 export function parse_ext_props(data, p) {
     const q = {}
-    if (!p) p = {}
+    if (!p) {
+        p = {}
+    }
 
     EXT_PROPS.forEach(function (f) {
         switch (f[2]) {
@@ -78,7 +80,9 @@ export function parse_ext_props(data, p) {
                 break
             case 'raw':
                 const cur = data.match(new RegExp(`<${f[0]}[^>]*>(.*)</${f[0]}>`))
-                if (cur && cur.length > 0) q[f[1]] = cur[1]
+                if (cur && cur.length > 0) {
+                    q[f[1]] = cur[1]
+                }
                 break
         }
     })
@@ -137,13 +141,17 @@ export function write_ext_props(cp, opts) /*:string*/ {
     const o = []
     const p = {}
     const W = writextag
-    if (!cp) cp = {}
+    if (!cp) {
+        cp = {}
+    }
     cp.Application = 'SheetJS'
     o[o.length] = XML_HEADER
     o[o.length] = EXT_PROPS_XML_ROOT
 
     EXT_PROPS.forEach(function (f) {
-        if (cp[f[1]] === undefined) return
+        if (cp[f[1]] === undefined) {
+            return
+        }
         let v
         switch (f[2]) {
             case 'string':
@@ -153,19 +161,21 @@ export function write_ext_props(cp, opts) /*:string*/ {
                 v = cp[f[1]] ? 'true' : 'false'
                 break
         }
-        if (v !== undefined) o[o.length] = W(f[0], v)
+        if (v !== undefined) {
+            o[o.length] = W(f[0], v)
+        }
     })
 
     /* TODO: HeadingPairs, TitlesOfParts */
     o[o.length] = W('HeadingPairs', W(
         'vt:vector',
         W('vt:variant', '<vt:lpstr>Worksheets</vt:lpstr>') + W('vt:variant', W('vt:i4', String(cp.Worksheets))),
-        {size: 2, baseType: 'variant'},
+        { size: 2, baseType: 'variant' },
     ))
     o[o.length] = W('TitlesOfParts', W(
         'vt:vector',
         cp.SheetNames.map(s => `<vt:lpstr>${escapexml(s)}</vt:lpstr>`).join(''),
-        {size: cp.Worksheets, baseType: 'lpstr'},
+        { size: cp.Worksheets, baseType: 'lpstr' },
     ))
     if (o.length > 2) {
         o[o.length] = '</Properties>'

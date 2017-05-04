@@ -3,7 +3,9 @@ import { parsexmltag, tagregex } from './22_xmlutils'
 /* 18.6 Calculation Chain */
 export function parse_cc_xml(data, opts) {
     const d = []
-    if (!data) return d
+    if (!data) {
+        return d
+    }
     const l = 0
     let i = 1;
     (data.match(tagregex) || []).forEach(function (x) {

@@ -71,7 +71,9 @@ function slurp(R, blob, length /*:number*/, opts) {
             case 'UsrExcl':
                 break
             default:
-                if (d.length === 0) break
+                if (d.length === 0) {
+                    break
+                }
                 opts.enc.insitu_decrypt(d)
         }
     }
@@ -97,15 +99,22 @@ function slurp(R, blob, length /*:number*/, opts) {
 }
 
 function safe_format_xf(p /*:any*/, opts /*:ParseOpts*/, date1904 /*:?boolean*/) {
-    if (p.t === 'z') return
+    if (p.t === 'z') {
+        return
     }
-    if (!p.XF) return
+    if (!p.XF) {
+        return
+    }
     let fmtid
     try {
         fmtid = p.XF.ifmt || 0
-        if (opts.cellNF) p.z = SSF._table[fmtid]
+        if (opts.cellNF) {
+            p.z = SSF._table[fmtid]
+        }
     } catch (e) {
-        if (opts.WTF) throw e
+        if (opts.WTF) {
+            throw e
+        }
     }
     if (!opts || opts.cellText !== false) {
         try {
@@ -122,7 +131,7 @@ function safe_format_xf(p /*:any*/, opts /*:ParseOpts*/, date1904 /*:?boolean*/)
                     p.w = SSF._general(p.v)
                 }
             } else {
-                p.w = SSF.format(fmtid, p.v, {date1904: !!date1904})
+                p.w = SSF.format(fmtid, p.v, { date1904: !!date1904 })
             }
             if (opts.cellDates && fmtid && p.t == 'n' && SSF.is_date(SSF._table[fmtid])) {
                 const _d = SSF.parse_date_code(p.v)
@@ -132,19 +141,21 @@ function safe_format_xf(p /*:any*/, opts /*:ParseOpts*/, date1904 /*:?boolean*/)
                 }
             }
         } catch (e) {
-            if (opts.WTF) throw e
+            if (opts.WTF) {
+                throw e
+            }
         }
     }
 }
 
 function make_cell(val, ixfe, t) /*:any*/ {
-    return {v: val, ixfe, t}
+    return { v: val, ixfe, t }
     /*:any*/
 }
 
 // 2.3.2
 function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
-    const wb = {opts: {}}
+    const wb = { opts: {} }
     /*:any*/
     const Sheets = {}
     if (DENSE != null && options.dense == null) {
@@ -175,52 +186,82 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
     const XFs = []
     /* XF records */
     let palette = []
-    const Workbook = {Sheets: []}
+    const Workbook = { Sheets: [] }
     let wsprops = {}
     const get_rgb = function getrgb(icv) {
-        if (icv < 8) return XLSIcv[icv]
-        if (icv < 64) return palette[icv - 8] || XLSIcv[icv]
+        if (icv < 8) {
+            return XLSIcv[icv]
+        }
+        if (icv < 64) {
+            return palette[icv - 8] || XLSIcv[icv]
+        }
         return XLSIcv[icv]
     }
     const process_cell_style = function pcs(cell, line /*:any*/, options) {
         const xfd = line.XF.data
-        if (!xfd || !xfd.patternType || !options || !options.cellStyles) return
+        if (!xfd || !xfd.patternType || !options || !options.cellStyles) {
+            return
+        }
         line.s = {}
         /*:any*/
         line.s.patternType = xfd.patternType
         let t
         if (t = rgb2Hex(get_rgb(xfd.icvFore))) {
-            line.s.fgColor = {rgb: t}
+            line.s.fgColor = { rgb: t }
         }
         if (t = rgb2Hex(get_rgb(xfd.icvBack))) {
-            line.s.bgColor = {rgb: t}
+            line.s.bgColor = { rgb: t }
         }
     }
     const addcell = function addcell(cell /*:any*/, line /*:any*/, options /*:any*/) {
-        if (file_depth > 1) return
-        if (!cell_valid) return
+        if (file_depth > 1) {
+            return
+        }
+        if (!cell_valid) {
+            return
+        }
         if (options.cellStyles && line.XF && line.XF.data) {
             process_cell_style(cell, line, options)
         }
         lastcell = cell
         last_cell = encode_cell(cell)
         if (range.s) {
-            if (cell.r < range.s.r) range.s.r = cell.r
-            if (cell.c < range.s.c) range.s.c = cell.c
+            if (cell.r < range.s.r) {
+                range.s.r = cell.r
+            }
+            if (cell.c < range.s.c) {
+                range.s.c = cell.c
+            }
         }
         if (range.e) {
-            if (cell.r + 1 > range.e.r) range.e.r = cell.r + 1
-            if (cell.c + 1 > range.e.c) range.e.c = cell.c + 1
+            if (cell.r + 1 > range.e.r) {
+                range.e.r = cell.r + 1
+            }
+            if (cell.c + 1 > range.e.c) {
+                range.e.c = cell.c + 1
+            }
         }
         if (options.cellFormula && line.f) {
             for (let afi = 0; afi < array_formulae.length; ++afi) {
-                if (array_formulae[afi][0].s.c > cell.c) continue
-                if (array_formulae[afi][0].s.r > cell.r) continue
-                if (array_formulae[afi][0].e.c < cell.c) continue
-                if (array_formulae[afi][0].e.r < cell.r) continue
+                if (array_formulae[afi][0].s.c > cell.c) {
+                    continue
+                }
+                if (array_formulae[afi][0].s.r > cell.r) {
+                    continue
+                }
+                if (array_formulae[afi][0].e.c < cell.c) {
+                    continue
+                }
+                if (array_formulae[afi][0].e.r < cell.r) {
+                    continue
+                }
                 line.F = encode_range(array_formulae[afi][0])
-                if (array_formulae[afi][0].s.c != cell.c) delete line.f
-                if (array_formulae[afi][0].s.r != cell.r) delete line.f
+                if (array_formulae[afi][0].s.c != cell.c) {
+                    delete line.f
+                }
+                if (array_formulae[afi][0].s.r != cell.r) {
+                    delete line.f
+                }
                 if (line.f) {
                     line.f = `${stringify_formula(array_formulae[afi][1], range, cell, supbooks, opts)}`
                 }
@@ -231,7 +272,9 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
             cell_valid = false
         } else {
             if (options.dense) {
-                if (!out[cell.r]) out[cell.r] = []
+                if (!out[cell.r]) {
+                    out[cell.r] = []
+                }
                 out[cell.r][cell.c] = line
             } else {
                 out[last_cell] = line
@@ -284,7 +327,9 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
     while (blob.l < blob.length - 1) {
         const s = blob.l
         const RecordType = blob.read_shift(2)
-        if (RecordType === 0 && last_Rn === 'EOF') break
+        if (RecordType === 0 && last_Rn === 'EOF') {
+            break
+        }
         let length = blob.l === blob.length ? 0 : blob.read_shift(2)
         let y
         const R = XLSRecordEnum[RecordType]
@@ -292,13 +337,17 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
         //if(!R) console.log(blob.slice(blob.l, blob.l + length));
         if (R && R.f) {
             if (options.bookSheets) {
-                if (last_Rn === 'BoundSheet8' && R.n !== 'BoundSheet8') break
+                if (last_Rn === 'BoundSheet8' && R.n !== 'BoundSheet8') {
+                    break
+                }
             }
             last_Rn = R.n
             if (R.r === 2 || R.r == 12) {
                 const rt = blob.read_shift(2)
                 length -= 2
-                if (!opts.enc && rt !== RecordType) throw 'rt mismatch'
+                if (!opts.enc && rt !== RecordType) {
+                    throw 'rt mismatch'
+                }
                 if (R.r == 12) {
                     blob.l += 10
                     length -= 10
@@ -322,13 +371,24 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
                     wb.opts.WriteProtect = true
                     break
                 case 'FilePass':
-                    if (!opts.enc) blob.l = 0
+                    if (!opts.enc) {
+                        blob.l = 0
+                    }
                     opts.enc = val
-                    if (opts.WTF) console.error(val)
-                    if (!options.password) throw new Error('File is password-protected')
-                    if (val.Type !== 0) throw new Error('Encryption scheme unsupported')
-                    if (!val.valid) throw new Error('Password is incorrect')
+                    if (opts.WTF) {
+                        console.error(val)
+                    }
+                    if (!options.password) {
+                        throw new Error('File is password-protected')
+                    }
+                    if (val.Type !== 0) {
+                        throw new Error('Encryption scheme unsupported')
+                    }
+                    if (!val.valid) {
+                        throw new Error('Password is incorrect')
+                    }
                     break
+
                 case 'WriteAccess':
                     opts.lastuser = val
                     break
@@ -338,7 +398,9 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
                     /* overrides based on test cases */
                     if (val === 0x5212) {
                         val = 1200
-                    } else if (val === 0x8001) val = 1252
+                    } else if (val === 0x8001) {
+                        val = 1252
+                    }
                     opts.codepage = val
                     setCurrentCodepage(val)
                     break
@@ -404,26 +466,34 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
                     supbooks.push([val])
                     supbooks[supbooks.length - 1].XTI = []
                     break
+
                 case 'ExternName':
                     supbooks[supbooks.length - 1].push(val)
                     break
+
                 case 'Index':
                     break // TODO
+
                 case 'Lbl':
                     last_lbl = {
                         Name: val.Name,
                         Ref: stringify_formula(val.rgce, range, null, supbooks, opts),
                     }
-                    if (val.itab > 0) last_lbl.Sheet = val.itab - 1
+                    if (val.itab > 0) {
+                        last_lbl.Sheet = val.itab - 1
+                    }
                     supbooks.names.push(last_lbl)
-                    if (!supbooks[0]) supbooks[0] = []
+                    if (!supbooks[0]) {
+                        supbooks[0] = []
+                    }
                     supbooks[supbooks.length - 1].push(val)
                     if (val.Name == '\r' && val.itab > 0) {
                         if (val.rgce && val.rgce[0] && val.rgce[0][0] && val.rgce[0][0][0] == 'PtgArea3d') {
-                            FilterDatabases[val.itab - 1] = {ref: encode_range(val.rgce[0][0][1][2])}
+                            FilterDatabases[val.itab - 1] = { ref: encode_range(val.rgce[0][0][1][2]) }
                         }
                     }
                     break
+
                 case 'ExternSheet':
                     if (supbooks.length == 0) {
                         supbooks[0] = []
@@ -434,7 +504,9 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
                     break
                 case 'NameCmt':
                     /* TODO: search for correct name */
-                    if (opts.biff < 8) break
+                    if (opts.biff < 8) {
+                        break
+                    }
                     last_lbl.Comment = val[1]
                     break
 
@@ -442,19 +514,23 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
                     out['!protect'] = val
                     break /* for sheet or book */
                 case 'Password':
-                    if (val !== 0 && opts.WTF) console.error(`Password verifier: ${val}`)
+                    if (val !== 0 && opts.WTF) {
+                        console.error(`Password verifier: ${val}`)
+                    }
                     break
                 case 'Prot4Rev':
                 case 'Prot4RevPass':
                     break /*TODO: Revision Control*/
 
-                case 'BoundSheet8': {
+                case 'BoundSheet8':
                     Directory[val.pos] = val
                     opts.snames.push(val.name)
-                }
                     break
-                case 'EOF': {
-                    if (--file_depth) break
+
+                case 'EOF':
+                    if (--file_depth) {
+                        break
+                    }
                     if (range.e) {
                         if (range.e.r > 0 && range.e.c > 0) {
                             range.e.r--
@@ -463,10 +539,18 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
                             range.e.r++
                             range.e.c++
                         }
-                        if (mergecells.length > 0) out['!merges'] = mergecells
-                        if (objects.length > 0) out['!objects'] = objects
-                        if (colinfo.length > 0) out['!cols'] = colinfo
-                        if (rowinfo.length > 0) out['!rows'] = rowinfo
+                        if (mergecells.length > 0) {
+                            out['!merges'] = mergecells
+                        }
+                        if (objects.length > 0) {
+                            out['!objects'] = objects
+                        }
+                        if (colinfo.length > 0) {
+                            out['!cols'] = colinfo
+                        }
+                        if (rowinfo.length > 0) {
+                            out['!rows'] = rowinfo
+                        }
                         Workbook.Sheets.push(wsprops)
                     }
                     if (cur_sheet === '') {
@@ -475,12 +559,11 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
                         Sheets[cur_sheet] = out
                     }
                     out = options.dense ? [] : {}
-                }
                     break
-                case 'BOF': {
+
+                case 'BOF':
                     if (opts.biff !== 8) {
-                    }
-                    else if (RecordType === 0x0009) {
+                    } else if (RecordType === 0x0009) {
                         opts.biff = 2
                     } else if (RecordType === 0x0209) {
                         opts.biff = 3
@@ -492,22 +575,30 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
                         opts.biff = 8
                     } else if (val.BIFFVer === 0x0002) {
                         opts.biff = 2
-                    } else if (val.BIFFVer === 0x0007) opts.biff = 2
-                    if (file_depth++) break
+                    } else if (val.BIFFVer === 0x0007) {
+                        opts.biff = 2
+                    }
+                    if (file_depth++) {
+                        break
+                    }
                     cell_valid = true
                     out = options.dense ? [] : {}
 
                     if (opts.biff < 5) {
-                        if (cur_sheet === '') cur_sheet = 'Sheet1'
-                        range = {s: {r: 0, c: 0}, e: {r: 0, c: 0}}
+                        if (cur_sheet === '') {
+                            cur_sheet = 'Sheet1'
+                        }
+                        range = { s: { r: 0, c: 0 }, e: { r: 0, c: 0 } }
                         /* fake BoundSheet8 */
-                        const fakebs8 = {pos: blob.l - length, name: cur_sheet}
+                        const fakebs8 = { pos: blob.l - length, name: cur_sheet }
                         Directory[fakebs8.pos] = fakebs8
                         opts.snames.push(cur_sheet)
                     } else {
-                        cur_sheet = (Directory[s] || {name: ''}).name
+                        cur_sheet = (Directory[s] || { name: '' }).name
                     }
-                    if (val.dt == 0x20) out['!type'] = 'chart'
+                    if (val.dt == 0x20) {
+                        out['!type'] = 'chart'
+                    }
                     mergecells = []
                     objects = []
                     array_formulae = []
@@ -516,53 +607,52 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
                     rowinfo = []
                     defwidth = defheight = 0
                     seencol = false
-                    wsprops = {Hidden: (Directory[s] || {hs: 0}).hs, name: cur_sheet}
-                }
+                    wsprops = { Hidden: (Directory[s] || { hs: 0 }).hs, name: cur_sheet }
                     break
 
                 case 'Number':
                 case 'BIFF2NUM':
-                case 'BIFF2INT': {
+                case 'BIFF2INT':
                     if (out['!type'] == 'chart') {
                         if (options.dense
                                 ? (out[val.r] || [])[val.c]
-                                : out[encode_cell({c: val.c, r: val.r,})]
+                                : out[encode_cell({ c: val.c, r: val.r, })]
                         ) {
                             ++val.c
                         }
                     }
-                    temp_val = {ixfe: val.ixfe, XF: XFs[val.ixfe], v: val.val, t: 'n'}
+                    temp_val = { ixfe: val.ixfe, XF: XFs[val.ixfe], v: val.val, t: 'n' }
                     safe_format_xf(temp_val, options, wb.opts.Date1904)
-                    addcell({c: val.c, r: val.r}, temp_val, options)
-                }
+                    addcell({ c: val.c, r: val.r }, temp_val, options)
                     break
-                case 'BoolErr': {
-                    temp_val = {ixfe: val.ixfe, XF: XFs[val.ixfe], v: val.val, t: val.t}
+
+                case 'BoolErr':
+                    temp_val = { ixfe: val.ixfe, XF: XFs[val.ixfe], v: val.val, t: val.t }
                     safe_format_xf(temp_val, options, wb.opts.Date1904)
-                    addcell({c: val.c, r: val.r}, temp_val, options)
-                }
+                    addcell({ c: val.c, r: val.r }, temp_val, options)
                     break
-                case 'RK': {
-                    temp_val = {ixfe: val.ixfe, XF: XFs[val.ixfe], v: val.rknum, t: 'n'}
+
+                case 'RK':
+                    temp_val = { ixfe: val.ixfe, XF: XFs[val.ixfe], v: val.rknum, t: 'n' }
                     safe_format_xf(temp_val, options, wb.opts.Date1904)
-                    addcell({c: val.c, r: val.r}, temp_val, options)
-                }
+                    addcell({ c: val.c, r: val.r }, temp_val, options)
                     break
-                case 'MulRk': {
+
+                case 'MulRk':
                     for (let j = val.c; j <= val.C; ++j) {
                         const ixfe = val.rkrec[j - val.c][0]
-                        temp_val = {ixfe, XF: XFs[ixfe], v: val.rkrec[j - val.c][1], t: 'n'}
+                        temp_val = { ixfe, XF: XFs[ixfe], v: val.rkrec[j - val.c][1], t: 'n' }
                         safe_format_xf(temp_val, options, wb.opts.Date1904)
-                        addcell({c: j, r: val.r}, temp_val, options)
+                        addcell({ c: j, r: val.r }, temp_val, options)
                     }
-                }
                     break
-                case 'Formula': {
+
+                case 'Formula':
                     if (val.val == 'String') {
                         last_formula = val
                         break
                     }
-                    temp_val = {v: val.val, ixfe: val.cell.ixfe, t: val.tt}
+                    temp_val = { v: val.val, ixfe: val.cell.ixfe, t: val.tt }
                     /*:any*/
                     temp_val.XF = XFs[temp_val.ixfe]
                     if (options.cellFormula) {
@@ -570,7 +660,7 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
                         if (_f && _f[0] && _f[0][0] && _f[0][0][0] == 'PtgExp') {
                             const _fr = _f[0][0][1][0]
                             const _fc = _f[0][0][1][1]
-                            const _fe = encode_cell({r: _fr, c: _fc})
+                            const _fe = encode_cell({ r: _fr, c: _fc })
                             if (shared_formulae[_fe]) {
                                 temp_val.f = `${stringify_formula(val.formula, range, val.cell, supbooks, opts)}`
                             } else {
@@ -583,13 +673,13 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
                     safe_format_xf(temp_val, options, wb.opts.Date1904)
                     addcell(val.cell, temp_val, options)
                     last_formula = val
-                }
                     break
-                case 'String': {
+
+                case 'String':
                     if (last_formula) {
                         /* technically always true */
                         last_formula.val = val
-                        temp_val = {v: val, ixfe: last_formula.cell.ixfe, t: 's'}
+                        temp_val = { v: val, ixfe: last_formula.cell.ixfe, t: 's' }
                         /*:any*/
                         temp_val.XF = XFs[temp_val.ixfe]
                         if (options.cellFormula) {
@@ -601,54 +691,68 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
                     } else {
                         throw new Error('String record expects Formula')
                     }
-                }
                     break
-                case 'Array': {
+
+                case 'Array':
                     array_formulae.push(val)
                     const _arraystart = encode_cell(val[0].s)
                     cc = options.dense ? (out[val[0].s.r] || [])[val[0].s.c] : out[_arraystart]
                     if (options.cellFormula && cc) {
-                        if (!last_formula) break
+                        if (!last_formula) {
+                            break
+                        }
                         /* technically unreachable */
-                        if (!_arraystart || !cc) break
+                        if (!_arraystart || !cc) {
+                            break
+                        }
                         cc.f = `${stringify_formula(val[1], range, val[0], supbooks, opts)}`
                         cc.F = encode_range(val[0])
                     }
-                }
                     break
-                case 'ShrFmla': {
-                    if (!cell_valid) break
-                    if (!options.cellFormula) break
+
+                case 'ShrFmla':
+                    if (!cell_valid) {
+                        break
+                    }
+                    if (!options.cellFormula) {
+                        break
+                    }
                     if (last_cell) {
                         /* TODO: capture range */
-                        if (!last_formula) break
+                        if (!last_formula) {
+                            break
+                        }
                         /* technically unreachable */
                         shared_formulae[encode_cell(last_formula.cell)] = val[0]
-                        cc = options.dense ? (out[last_formula.cell.r] || [])[last_formula.cell.c] : out[encode_cell(last_formula.cell)];
+                        cc = options.dense
+                            ? (out[last_formula.cell.r] || [])[last_formula.cell.c]
+                            : out[encode_cell(last_formula.cell)];
                         (cc || {}).f = `${stringify_formula(val[0], range, lastcell, supbooks, opts)}`
                     }
-                }
                     break
+
                 case 'LabelSst':
                     temp_val = make_cell(sst[val.isst].t, val.ixfe, 's')
                     temp_val.XF = XFs[temp_val.ixfe]
                     safe_format_xf(temp_val, options, wb.opts.Date1904)
-                    addcell({c: val.c, r: val.r}, temp_val, options)
+                    addcell({ c: val.c, r: val.r }, temp_val, options)
                     break
+
                 case 'Blank':
                     if (options.sheetStubs) {
-                        temp_val = {ixfe: val.ixfe, XF: XFs[val.ixfe], t: 'z'}
+                        temp_val = { ixfe: val.ixfe, XF: XFs[val.ixfe], t: 'z' }
                         safe_format_xf(temp_val, options, wb.opts.Date1904)
-                        addcell({c: val.c, r: val.r}, temp_val, options)
+                        addcell({ c: val.c, r: val.r }, temp_val, options)
                     }
                     break
+
                 case 'MulBlank':
                     if (options.sheetStubs) {
                         for (let _j = val.c; _j <= val.C; ++_j) {
                             const _ixfe = val.ixfe[_j - val.c]
-                            temp_val = {ixfe: _ixfe, XF: XFs[_ixfe], t: 'z'}
+                            temp_val = { ixfe: _ixfe, XF: XFs[_ixfe], t: 'z' }
                             safe_format_xf(temp_val, options, wb.opts.Date1904)
-                            addcell({c: _j, r: val.r}, temp_val, options)
+                            addcell({ c: _j, r: val.r }, temp_val, options)
                         }
                     }
                     break
@@ -658,26 +762,27 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
                     temp_val = make_cell(val.val, val.ixfe, 's')
                     temp_val.XF = XFs[temp_val.ixfe]
                     safe_format_xf(temp_val, options, wb.opts.Date1904)
-                    addcell({c: val.c, r: val.r}, temp_val, options)
+                    addcell({ c: val.c, r: val.r }, temp_val, options)
                     break
 
-                case 'Dimensions': {
-                    if (file_depth === 1) range = val
+                case 'Dimensions':
+                    if (file_depth === 1) {
+                        range = val
+                    }
                     /* TODO: stack */
-                }
                     break
-                case 'SST': {
+
+                case 'SST':
                     sst = val
-                }
                     break
-                case 'Format': {
+
+                case 'Format':
                     /* val = [id, fmt] */
                     SSF.load(val[1], val[0])
-                }
                     break
-                case 'BIFF2FORMAT': {
+
+                case 'BIFF2FORMAT':
                     SSF.load(val, BIFF2Fmt++)
-                }
                     break
 
                 case 'MergeCells':
@@ -691,36 +796,44 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
                     opts.lastobj.TxO = val
                     break
 
-                case 'HLink': {
+                case 'HLink':
                     for (rngR = val[0].s.r; rngR <= val[0].e.r; ++rngR) {
                         for (rngC = val[0].s.c; rngC <= val[0].e.c; ++rngC) {
-                            cc = options.dense ? (out[rngR] || [])[rngC] : out[encode_cell({c: rngC, r: rngR})]
-                            if (cc) cc.l = val[1]
+                            cc = options.dense ? (out[rngR] || [])[rngC] : out[encode_cell({ c: rngC, r: rngR })]
+                            if (cc) {
+                                cc.l = val[1]
+                            }
                         }
                     }
-                }
                     break
-                case 'HLinkTooltip': {
+
+                case 'HLinkTooltip':
                     for (rngR = val[0].s.r; rngR <= val[0].e.r; ++rngR) {
                         for (rngC = val[0].s.c; rngC <= val[0].e.c; ++rngC) {
-                            cc = options.dense ? (out[rngR] || [])[rngC] : out[encode_cell({c: rngC, r: rngR})]
-                            if (cc) cc.l.Tooltip = val[1]
+                            cc = options.dense ? (out[rngR] || [])[rngC] : out[encode_cell({ c: rngC, r: rngR })]
+                            if (cc) {
+                                cc.l.Tooltip = val[1]
+                            }
                         }
                     }
-                }
                     break
 
                 /* Comments */
-                case 'Note': {
-                    if (opts.biff <= 5 && opts.biff >= 2) break
+                case 'Note':
+                    if (opts.biff <= 5 && opts.biff >= 2) {
+                        break
+                    }
                     /* TODO: BIFF5 */
                     cc = options.dense ? (out[val[0].r] || [])[val[0].c] : out[encode_cell(val[0])]
                     const noteobj = objects[val[2]]
-                    if (!cc) break
-                    if (!cc.c) cc.c = []
-                    cmnt = {a: val[1], t: noteobj.TxO.t}
+                    if (!cc) {
+                        break
+                    }
+                    if (!cc.c) {
+                        cc.c = []
+                    }
+                    cmnt = { a: val[1], t: noteobj.TxO.t }
                     cc.c.push(cmnt)
-                }
                     break
 
                 default:
@@ -738,18 +851,20 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
                             defheight = val[1]
                             break // TODO: flags
 
-                        case 'ColInfo': {
-                            if (!opts.cellStyles) break
+                        case 'ColInfo':
+                            if (!opts.cellStyles) {
+                                break
+                            }
                             while (val.e >= val.s) {
-                                colinfo[val.e--] = {width: val.w / 256}
+                                colinfo[val.e--] = { width: val.w / 256 }
                                 if (!seencol) {
                                     seencol = true
                                     find_mdw_colw(val.w / 256)
                                 }
                                 process_col(colinfo[val.e + 1])
                             }
-                        }
                             break
+
                         case 'Row':
                             const rowobj = {}
                             if (val.hidden) {
@@ -768,7 +883,9 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
                         case 'RightMargin':
                         case 'TopMargin':
                         case 'BottomMargin':
-                            if (!out['!margins']) default_margins(out['!margins'] = {})
+                            if (!out['!margins']) {
+                                default_margins(out['!margins'] = {})
+                            }
                             switch (Rn) {
                                 case 'LeftMargin':
                                     out['!margins'].left = val
@@ -787,7 +904,9 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
 
                         case 'Setup':
                             // TODO
-                            if (!out['!margins']) default_margins(out['!margins'] = {})
+                            if (!out['!margins']) {
+                                default_margins(out['!margins'] = {})
+                            }
                             out['!margins'].header = val.header
                             out['!margins'].footer = val.footer
                             break
@@ -936,33 +1055,32 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
                         case 'CRN':
                             break
 
-                        case 'Scl': {
+                        case 'Scl':
                             //console.log("Zoom Level:", val[0]/val[1],val);
-                        }
                             break
-                        case 'SheetExt': {
-                        }
+
+                        case 'SheetExt':
                             break
-                        case 'SheetExtOptional': {
-                        }
+
+                        case 'SheetExtOptional':
                             break
 
                         /* VBA */
-                        case 'ObNoMacros': {
-                        }
+                        case 'ObNoMacros':
                             break
-                        case 'ObProj': {
-                        }
+
+                        case 'ObProj':
                             break
-                        case 'CodeName': {
-                        }
+
+                        case 'CodeName':
                             break
-                        case 'GUIDTypeLib': {
-                        }
+
+                        case 'GUIDTypeLib':
                             break
 
                         case 'WOpt':
                             break // TODO: WTF?
+
                         case 'PhoneticInfo':
                             break
 
@@ -1255,7 +1373,9 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
     const sheetnames = sheetnamesraw.slice()
     wb.Directory = sheetnamesraw
     wb.SheetNames = sheetnamesraw
-    if (!options.bookSheets) wb.Sheets = Sheets
+    if (!options.bookSheets) {
+        wb.Sheets = Sheets
+    }
     if (wb.Sheets) {
         FilterDatabases.forEach(function (r, i) {
             wb.Sheets[wb.SheetNames[i]]['!autofilter'] = r
@@ -1264,10 +1384,16 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
     wb.Preamble = Preamble
     wb.Strings = sst
     wb.SSF = SSF.get_table()
-    if (opts.enc) wb.Encryption = opts.enc
+    if (opts.enc) {
+        wb.Encryption = opts.enc
+    }
     wb.Metadata = {}
-    if (country !== undefined) wb.Metadata.Country = country
-    if (supbooks.names.length > 0) Workbook.Names = supbooks.names
+    if (country !== undefined) {
+        wb.Metadata.Country = country
+    }
+    if (supbooks.names.length > 0) {
+        Workbook.Names = supbooks.names
+    }
     wb.Workbook = Workbook
     return wb
 }
@@ -1294,7 +1420,9 @@ function parse_props(cfb) {
 }
 
 export function parse_xlscfb(cfb /*:any*/, options /*:?ParseOpts*/) /*:Workbook*/ {
-    if (!options) options = {}
+    if (!options) {
+        options = {}
+    }
     fix_read_opts(options)
     reset_cp()
     let CompObj
@@ -1307,17 +1435,21 @@ export function parse_xlscfb(cfb /*:any*/, options /*:?ParseOpts*/) /*:Workbook*
         Workbook = cfb.find('/Workbook')
     } else {
         prep_blob(cfb, 0)
-        Workbook = {content: cfb}
+        Workbook = { content: cfb }
         /*:any*/
     }
 
-    if (!Workbook) Workbook = cfb.find('/Book')
+    if (!Workbook) {
+        Workbook = cfb.find('/Book')
+    }
     let CompObjP
     let SummaryP
     let WorkbookP
     /*:Workbook*/
 
-    if (CompObj) CompObjP = parse_compobj(CompObj)
+    if (CompObj) {
+        CompObjP = parse_compobj(CompObj)
+    }
     if (options.bookProps && !options.bookSheets) {
         WorkbookP = {}
         /*:any*/
@@ -1335,7 +1467,9 @@ export function parse_xlscfb(cfb /*:any*/, options /*:?ParseOpts*/) /*:Workbook*
         }
     }
 
-    if (cfb.FullPaths) parse_props(cfb)
+    if (cfb.FullPaths) {
+        parse_props(cfb)
+    }
 
     const props = {}
     for (let y in cfb.Summary) {
@@ -1346,7 +1480,9 @@ export function parse_xlscfb(cfb /*:any*/, options /*:?ParseOpts*/) /*:Workbook*
     }
     WorkbookP.Props = WorkbookP.Custprops = props
     /* TODO: split up properties */
-    if (options.bookFiles) WorkbookP.cfb = cfb
+    if (options.bookFiles) {
+        WorkbookP.cfb = cfb
+    }
     /*WorkbookP.CompObjP = CompObjP; // TODO: storage? */
     return WorkbookP
 }

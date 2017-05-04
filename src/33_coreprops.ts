@@ -88,8 +88,12 @@ export function parse_core_props(data) {
     for (let i = 0; i < CORE_PROPS.length; ++i) {
         const f = CORE_PROPS[i]
         const cur = data.match(CORE_PROPS_REGEX[i])
-        if (cur != null && cur.length > 0) p[f[1]] = cur[1]
-        if (f[2] === 'date' && p[f[1]]) p[f[1]] = parseDate(p[f[1]])
+        if (cur != null && cur.length > 0) {
+            p[f[1]] = cur[1]
+        }
+        if (f[2] === 'date' && p[f[1]]) {
+            p[f[1]] = parseDate(p[f[1]])
+        }
     }
 
     return p
@@ -105,7 +109,9 @@ const CORE_PROPS_XML_ROOT = writextag('cp:coreProperties', null, {
 })
 
 function cp_doit(f, g, h, o, p) {
-    if (p[f] != null || g == null || g === '') return
+    if (p[f] != null || g == null || g === '') {
+        return
+    }
     p[f] = g
     o[o.length] = h ? writextag(f, g, h) : writetag(f, g)
 }
@@ -114,14 +120,16 @@ export function write_core_props(cp, _opts) {
     const opts = _opts || {}
     const o = [XML_HEADER, CORE_PROPS_XML_ROOT]
     const p = {}
-    if (!cp && !opts.Props) return o.join('')
+    if (!cp && !opts.Props) {
+        return o.join('')
+    }
 
     if (cp) {
         if (cp.CreatedDate != null) {
             cp_doit(
                 'dcterms:created',
                 typeof cp.CreatedDate === 'string' ? cp.CreatedDate : write_w3cdtf(cp.CreatedDate, opts.WTF),
-                {'xsi:type': 'dcterms:W3CDTF'},
+                { 'xsi:type': 'dcterms:W3CDTF' },
                 o,
                 p,
             )
@@ -130,7 +138,7 @@ export function write_core_props(cp, _opts) {
             cp_doit(
                 'dcterms:modified',
                 typeof cp.ModifiedDate === 'string' ? cp.ModifiedDate : write_w3cdtf(cp.ModifiedDate, opts.WTF),
-                {'xsi:type': 'dcterms:W3CDTF'},
+                { 'xsi:type': 'dcterms:W3CDTF' },
                 o,
                 p,
             )

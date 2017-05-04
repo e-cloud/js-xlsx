@@ -20,18 +20,20 @@ export function get_sst_id(sst /*:SST*/, str /*:string*/) /*:number*/ {
             return i
         }
     }
-    sst[len] = {t: str}
+    sst[len] = { t: str }
     sst.Count++
     sst.Unique++
     return len
 }
 
 export function col_obj_w(C /*:number*/, col) {
-    const p = {min: C + 1, max: C + 1}
+    const p = { min: C + 1, max: C + 1 }
     /*:any*/
     /* wch (chars), wpx (pixels) */
     let wch = -1
-    if (col.MDW) setMDW(col.MDW)
+    if (col.MDW) {
+        setMDW(col.MDW)
+    }
     if (col.width != null) {
         p.customWidth = 1
     } else if (col.wpx != null) {
@@ -52,15 +54,31 @@ export function col_obj_w(C /*:number*/, col) {
 }
 
 export function default_margins(margins, mode?) {
-    if (!margins) return
+    if (!margins) {
+        return
+    }
     let defs = [0.7, 0.7, 0.75, 0.75, 0.3, 0.3]
-    if (mode == 'xlml') defs = [1, 1, 1, 1, 0.5, 0.5]
-    if (margins.left == null) margins.left = defs[0]
-    if (margins.right == null) margins.right = defs[1]
-    if (margins.top == null) margins.top = defs[2]
-    if (margins.bottom == null) margins.bottom = defs[3]
-    if (margins.header == null) margins.header = defs[4]
-    if (margins.footer == null) margins.footer = defs[5]
+    if (mode == 'xlml') {
+        defs = [1, 1, 1, 1, 0.5, 0.5]
+    }
+    if (margins.left == null) {
+        margins.left = defs[0]
+    }
+    if (margins.right == null) {
+        margins.right = defs[1]
+    }
+    if (margins.top == null) {
+        margins.top = defs[2]
+    }
+    if (margins.bottom == null) {
+        margins.bottom = defs[3]
+    }
+    if (margins.header == null) {
+        margins.header = defs[4]
+    }
+    if (margins.footer == null) {
+        margins.footer = defs[5]
+    }
 }
 
 export function get_cell_style(styles, cell, opts) {
@@ -83,7 +101,9 @@ export function get_cell_style(styles, cell, opts) {
 }
 
 export function safe_format(p, fmtid, fillid, opts, themes, styles) {
-    if (p.t === 'z') return
+    if (p.t === 'z') {
+        return
+    }
     if (p.t === 'd' && typeof p.v === 'string') {
         p.v = parseDate(p.v)
     }
@@ -92,7 +112,9 @@ export function safe_format(p, fmtid, fillid, opts, themes, styles) {
             p.z = SSF._table[fmtid]
         }
     } catch (e) {
-        if (opts.WTF) throw e
+        if (opts.WTF) {
+            throw e
+        }
     }
     if (!opts || opts.cellText !== false) {
         try {
@@ -123,7 +145,9 @@ export function safe_format(p, fmtid, fillid, opts, themes, styles) {
                 p.w = SSF.format(fmtid, p.v, _ssfopts)
             }
         } catch (e) {
-            if (opts.WTF) throw e
+            if (opts.WTF) {
+                throw e
+            }
         }
     }
     if (fillid) {
@@ -142,7 +166,9 @@ export function safe_format(p, fmtid, fillid, opts, themes, styles) {
                 }
             }
         } catch (e) {
-            if (opts.WTF) throw e
+            if (opts.WTF) {
+                throw e
+            }
         }
     }
 }

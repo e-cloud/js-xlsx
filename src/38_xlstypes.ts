@@ -11,27 +11,34 @@ import { VT_CUSTOM, VT_I2, VT_I4, VT_USTR, VT_VARIANT } from './29_xlsenum'
 function parse_FILETIME(blob) {
     const dwLowDateTime = blob.read_shift(4)
     const dwHighDateTime = blob.read_shift(4)
-    return new Date((dwHighDateTime / 1e7 * Math.pow(2, 32) + dwLowDateTime / 1e7 - 11644473600) * 1000).toISOString().replace(/\.000/, '')
+    return new Date((dwHighDateTime / 1e7 * Math.pow(2, 32) + dwLowDateTime / 1e7 - 11644473600) * 1000).toISOString()
+        .replace(/\.000/, '')
 }
 
 /* [MS-OSHARED] 2.3.3.1.4 Lpstr */
 function parse_lpstr(blob, type?, pad?) {
     const str = blob.read_shift(0, 'lpstr')
-    if (pad) blob.l += 4 - (str.length + 1 & 3) & 3
+    if (pad) {
+        blob.l += 4 - (str.length + 1 & 3) & 3
+    }
     return str
 }
 
 /* [MS-OSHARED] 2.3.3.1.6 Lpwstr */
 function parse_lpwstr(blob, type?, pad?) {
     const str = blob.read_shift(0, 'lpwstr')
-    if (pad) blob.l += 4 - (str.length + 1 & 3) & 3
+    if (pad) {
+        blob.l += 4 - (str.length + 1 & 3) & 3
+    }
     return str
 }
 
 /* [MS-OSHARED] 2.3.3.1.11 VtString */
 /* [MS-OSHARED] 2.3.3.1.12 VtUnalignedString */
 function parse_VtStringBase(blob, stringType, pad) {
-    if (stringType === 0x1F /*VT_LPWSTR*/) return parse_lpwstr(blob)
+    if (stringType === 0x1F /*VT_LPWSTR*/) {
+        return parse_lpwstr(blob)
+    }
     return parse_lpstr(blob, stringType, pad)
 }
 
@@ -39,7 +46,9 @@ function parse_VtString(blob, t, pad?) {
     return parse_VtStringBase(blob, t, pad === false ? 0 : 4)
 }
 function parse_VtUnalignedString(blob, t) {
-    if (!t) throw new Error('dafuq?')
+    if (!t) {
+        throw new Error('dafuq?')
+    }
     return parse_VtStringBase(blob, t, 0)
 }
 
@@ -101,7 +110,9 @@ function parse_dictionary(blob, CodePage) {
 function parse_BLOB(blob) {
     const size = blob.read_shift(4)
     const bytes = blob.slice(blob.l, blob.l + size)
-    if ((size & 3) > 0) blob.l += 4 - (size & 3) & 3
+    if ((size & 3) > 0) {
+        blob.l += 4 - (size & 3) & 3
+    }
     return bytes
 }
 
@@ -133,12 +144,18 @@ function parse_TypedPropertyValue(blob, type, _opts?) {
     let ret
     const opts = _opts || {}
     blob.l += 2
-    if (type !== VT_VARIANT) if (t !== type && !VT_CUSTOM.includes(type)) throw new Error(`Expected type ${type} saw ${t}`)
+    if (type !== VT_VARIANT) {
+        if (t !== type && !VT_CUSTOM.includes(type)) {
+            throw new Error(`Expected type ${type} saw ${t}`)
+        }
+    }
     switch (type === VT_VARIANT ? t : type) {
         case 0x02 /*VT_I2*/
         :
             ret = blob.read_shift(2, 'i')
-            if (!opts.raw) blob.l += 2
+            if (!opts.raw) {
+                blob.l += 2
+            }
             return ret
         case 0x03 /*VT_I4*/
         :
@@ -243,12 +260,16 @@ function parse_PropertySet(blob, PIDSI) {
                 fail = false
                 blob.l = Props[i][1]
             }
-            if (fail) throw new Error(`Read Error: Expected address ${Props[i][1]} at ${blob.l} :${i}`)
+            if (fail) {
+                throw new Error(`Read Error: Expected address ${Props[i][1]} at ${blob.l} :${i}`)
+            }
         }
         if (PIDSI) {
             const piddsi = PIDSI[Props[i][0]]
-            PropH[piddsi.n] = parse_TypedPropertyValue(blob, piddsi.t, {raw: true})
-            if (piddsi.p === 'version') PropH[piddsi.n] = `${String(PropH[piddsi.n] >> 16)}.${String(PropH[piddsi.n] & 0xFFFF)}`
+            PropH[piddsi.n] = parse_TypedPropertyValue(blob, piddsi.t, { raw: true })
+            if (piddsi.p === 'version') {
+                PropH[piddsi.n] = `${String(PropH[piddsi.n] >> 16)}.${String(PropH[piddsi.n] & 0xFFFF)}`
+            }
             if (piddsi.n == 'CodePage') {
                 switch (PropH[piddsi.n]) {
                     case 0:
@@ -389,7 +410,7 @@ export function parse_PropertySetStream(file, PIDSI) {
     }
     const PSet0 = parse_PropertySet(blob, PIDSI)
 
-    const rval = {SystemIdentifier}
+    const rval = { SystemIdentifier }
     /*:any*/
     for (let y in PSet0) {
         rval[y] = PSet0[y]
@@ -397,7 +418,9 @@ export function parse_PropertySetStream(file, PIDSI) {
     //rval.blob = blob;
     rval.FMTID = FMTID0
     //rval.PSet0 = PSet0;
-    if (NumSets === 1) return rval
+    if (NumSets === 1) {
+        return rval
+    }
     if (blob.l !== Offset1) {
         throw new Error(`Length mismatch 2: ${blob.l} !== ${Offset1}`)
     }
@@ -424,7 +447,9 @@ function parslurp(blob, length, cb) {
     while (blob.l < target) {
         arr.push(cb(blob, target - blob.l))
     }
-    if (target !== blob.l) throw new Error('Slurp error')
+    if (target !== blob.l) {
+        throw new Error('Slurp error')
+    }
     return arr
 }
 
@@ -458,7 +483,9 @@ export function parse_ShortXLUnicodeString(blob, length, opts) {
     let width = 1
     let encoding = 'sbcs-cont'
     const cp = current_codepage
-    if (opts && opts.biff >= 8) setCurrentCodepage(1200)
+    if (opts && opts.biff >= 8) {
+        setCurrentCodepage(1200)
+    }
     if (!opts || opts.biff == 8) {
         const fHighByte = blob.read_shift(1)
         if (fHighByte) {
@@ -487,12 +514,20 @@ export function parse_XLUnicodeRichExtendedString(blob) {
     let cRun = 0
     let cbExtRst
     const z = {}
-    if (fRichSt) cRun = blob.read_shift(2)
-    if (fExtSt) cbExtRst = blob.read_shift(4)
+    if (fRichSt) {
+        cRun = blob.read_shift(2)
+    }
+    if (fExtSt) {
+        cbExtRst = blob.read_shift(4)
+    }
     const encoding = flags & 0x1 ? 'dbcs-cont' : 'sbcs-cont'
     const msg = cch === 0 ? '' : blob.read_shift(cch, encoding)
-    if (fRichSt) blob.l += 4 * cRun //TODO: parse this
-    if (fExtSt) blob.l += cbExtRst //TODO: parse this
+    if (fRichSt) {
+        blob.l += 4 * cRun
+    } //TODO: parse this
+    if (fExtSt) {
+        blob.l += cbExtRst
+    } //TODO: parse this
     z.t = msg
     if (!fRichSt) {
         z.raw = `<t>${z.t}</t>`
@@ -506,8 +541,12 @@ export function parse_XLUnicodeRichExtendedString(blob) {
 export function parse_XLUnicodeStringNoCch(blob, cch, opts?) {
     let retval
     if (opts) {
-        if (opts.biff >= 2 && opts.biff <= 5) return blob.read_shift(cch, 'sbcs-cont')
-        if (opts.biff >= 12) return blob.read_shift(cch, 'dbcs-cont')
+        if (opts.biff >= 2 && opts.biff <= 5) {
+            return blob.read_shift(cch, 'sbcs-cont')
+        }
+        if (opts.biff >= 12) {
+            return blob.read_shift(cch, 'dbcs-cont')
+        }
     }
     const fHighByte = blob.read_shift(1)
     if (fHighByte === 0) {
@@ -529,7 +568,9 @@ export function parse_XLUnicodeString(blob, length, opts) {
 }
 /* BIFF5 override */
 export function parse_XLUnicodeString2(blob, length, opts) {
-    if (opts.biff > 5) return parse_XLUnicodeString(blob, length, opts)
+    if (opts.biff > 5) {
+        return parse_XLUnicodeString(blob, length, opts)
+    }
     const cch = blob.read_shift(1)
     if (cch === 0) {
         blob.l++
@@ -555,7 +596,9 @@ const parse_URLMoniker = function (blob, length) {
         blob.l = start
     }
     const url = blob.read_shift((extra ? len - 24 : len) >> 1, 'utf16le').replace(chr0, '')
-    if (extra) blob.l += 24
+    if (extra) {
+        blob.l += 24
+    }
     return url
 }
 
@@ -613,17 +656,33 @@ export const parse_Hyperlink = function (blob, length) {
     let location
     let guid
     let fileTime
-    if (flags & 0x0010) displayName = parse_HyperlinkString(blob, end - blob.l)
-    if (flags & 0x0080) targetFrameName = parse_HyperlinkString(blob, end - blob.l)
-    if ((flags & 0x0101) === 0x0101) moniker = parse_HyperlinkString(blob, end - blob.l)
-    if ((flags & 0x0101) === 0x0001) oleMoniker = parse_HyperlinkMoniker(blob, end - blob.l)
-    if (flags & 0x0008) location = parse_HyperlinkString(blob, end - blob.l)
-    if (flags & 0x0020) guid = blob.read_shift(16)
-    if (flags & 0x0040) fileTime = parse_FILETIME(blob, 8)
+    if (flags & 0x0010) {
+        displayName = parse_HyperlinkString(blob, end - blob.l)
+    }
+    if (flags & 0x0080) {
+        targetFrameName = parse_HyperlinkString(blob, end - blob.l)
+    }
+    if ((flags & 0x0101) === 0x0101) {
+        moniker = parse_HyperlinkString(blob, end - blob.l)
+    }
+    if ((flags & 0x0101) === 0x0001) {
+        oleMoniker = parse_HyperlinkMoniker(blob, end - blob.l)
+    }
+    if (flags & 0x0008) {
+        location = parse_HyperlinkString(blob, end - blob.l)
+    }
+    if (flags & 0x0020) {
+        guid = blob.read_shift(16)
+    }
+    if (flags & 0x0040) {
+        fileTime = parse_FILETIME(blob, 8)
+    }
     blob.l = end
     let target = targetFrameName || moniker || oleMoniker
-    if (location) target += `#${location}`
-    return {Target: target}
+    if (location) {
+        target += `#${location}`
+    }
+    return { Target: target }
 }
 
 /* 2.5.178 LongRGBA */

@@ -2,7 +2,9 @@ import { crefregex } from './61_fcommon'
 
 /* Part 3 TODO: actually parse formulae */
 export function ods_to_csf_formula(f /*:string*/) /*:string*/ {
-    if (f.substr(0, 3) == 'of:') f = f.substr(3)
+    if (f.substr(0, 3) == 'of:') {
+        f = f.substr(3)
+    }
     /* 5.2 Basic Expressions */
     if (f.charCodeAt(0) == 61) {
         f = f.substr(1)

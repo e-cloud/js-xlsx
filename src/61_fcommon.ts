@@ -3,22 +3,28 @@ import { decode_cell, decode_col, decode_range, decode_row, encode_col, encode_r
 
 export const rc_to_a1 = function () {
     const rcregex = /(^|[^A-Za-z])R(\[?)(-?\d+|)\]?C(\[?)(-?\d+|)\]?/g
-    let rcbase /*:Cell*/ = {r: 0, c: 0}
+    let rcbase /*:Cell*/ = { r: 0, c: 0 }
     /*:any*/
 
     function rcfunc($$, $1, $2, $3, $4, $5) {
         let R = $3.length > 0 ? parseInt($3, 10) | 0 : 0
         let C = $5.length > 0 ? parseInt($5, 10) | 0 : 0
-        if (C < 0 && $4.length === 0) C = 0
+        if (C < 0 && $4.length === 0) {
+            C = 0
+        }
         let cRel = false
         let rRel = false
-        if ($4.length > 0 || $5.length == 0) cRel = true
+        if ($4.length > 0 || $5.length == 0) {
+            cRel = true
+        }
         if (cRel) {
             C += rcbase.c
         } else {
             --C
         }
-        if ($2.length > 0 || $3.length == 0) rRel = true
+        if ($2.length > 0 || $3.length == 0) {
+            rRel = true
+        }
         if (rRel) {
             R += rcbase.r
         } else {
@@ -40,7 +46,7 @@ export const a1_to_rc = function () {
             /* TODO: handle fixcol / fixrow */
             const c = decode_col($3) - base.c
             const r = decode_row($5) - base.r
-            return `${$1}R${r == 0 ? '' : '[' + r + ']'}C${c == 0 ? '' : '[' + c + ']'}`
+            return `${$1}R${r == 0 ? '' : `[${r}]`}C${c == 0 ? '' : `[${c}]`}`
         })
     }
 }()
@@ -48,7 +54,9 @@ export const a1_to_rc = function () {
 /* no defined name can collide with a valid cell address A1:XFD1048576 ... except LOG10! */
 export function shift_formula_str(f /*:string*/, delta /*:Cell*/) /*:string*/ {
     return f.replace(crefregex, function ($0, $1, $2, $3, $4, $5, off, str) {
-        return $1 + ($2 == '$' ? $2 + $3 : encode_col(decode_col($3) + delta.c)) + ($4 == '$' ? $4 + $5 : encode_row(decode_row($5) + delta.r))
+        return $1 + ($2 == '$' ? $2 + $3 : encode_col(decode_col($3) + delta.c)) + ($4 == '$'
+                ? $4 + $5
+                : encode_row(decode_row($5) + delta.r))
     })
 }
 
@@ -56,6 +64,6 @@ export function shift_formula_xlsx(f /*:string*/, range /*:string*/, cell /*:str
     const r = decode_range(range)
     const s = r.s
     const c = decode_cell(cell)
-    const delta = {r: c.r - s.r, c: c.c - s.c}
+    const delta = { r: c.r - s.r, c: c.c - s.c }
     return shift_formula_str(f, delta)
 }

@@ -100,10 +100,16 @@ export const DBF = function () {
         let filedate = new Date()
         let nrow = 0
         let fpos = 0
-        if (ft == 0x02) nrow = d.read_shift(2)
+        if (ft == 0x02) {
+            nrow = d.read_shift(2)
+        }
         filedate = new Date(d.read_shift(1) + 1900, d.read_shift(1) - 1, d.read_shift(1))
-        if (ft != 0x02) nrow = d.read_shift(4)
-        if (ft != 0x02) fpos = d.read_shift(2)
+        if (ft != 0x02) {
+            nrow = d.read_shift(4)
+        }
+        if (ft != 0x02) {
+            fpos = d.read_shift(2)
+        }
         const rlen = d.read_shift(2)
 
         let flags = 0
@@ -111,10 +117,13 @@ export const DBF = function () {
         if (ft != 0x02) {
             d.l += 16
             flags = d.read_shift(1)
-            //if(memo && ((flags & 0x02) === 0)) throw new Error("DBF Flags " + flags.toString(16) + " ft " + ft.toString(16));
+            //if(memo && ((flags & 0x02) === 0)) throw new Error("DBF Flags " + flags.toString(16) + " ft " +
+            // ft.toString(16));
 
             /* codepage present in FoxPro */
-            if (d[d.l] !== 0) current_cp = dbf_codepage_map[d[d.l]]
+            if (d[d.l] !== 0) {
+                current_cp = dbf_codepage_map[d[d.l]]
+            }
             d.l += 1
 
             d.l += 2
@@ -127,12 +136,20 @@ export const DBF = function () {
             field.name = cptable.utils.decode(current_cp, d.slice(d.l, d.l + 10)).replace(/[\u0000\r\n].*$/g, '')
             d.l += 11
             field.type = String.fromCharCode(d.read_shift(1))
-            if (ft != 0x02) field.offset = d.read_shift(4)
+            if (ft != 0x02) {
+                field.offset = d.read_shift(4)
+            }
             field.len = d.read_shift(1)
-            if (ft == 0x02) field.offset = d.read_shift(2)
+            if (ft == 0x02) {
+                field.offset = d.read_shift(2)
+            }
             field.dec = d.read_shift(1)
-            if (field.name.length) fields.push(field)
-            if (ft != 0x02) d.l += 14
+            if (field.name.length) {
+                fields.push(field)
+            }
+            if (ft != 0x02) {
+                d.l += 14
+            }
             switch (field.type) {
                 // case 'B': break; // Binary
                 case 'C':
@@ -168,7 +185,9 @@ export const DBF = function () {
         }
         if (d[d.l] !== 0x0D) {
             d.l = fpos - 1
-        } else if (ft == 0x02) d.l = 0x209
+        } else if (ft == 0x02) {
+            d.l = 0x209
+        }
         if (ft != 0x02) {
             if (d.read_shift(1) !== 0x0D) {
                 throw new Error(`DBF Terminator not found ${d.l} ${d[d.l]}`)
@@ -181,7 +200,9 @@ export const DBF = function () {
 
         let C = 0
         out[0] = []
-        for (C = 0; C != fields.length; ++C) out[0][C] = fields[C].name;
+        for (C = 0; C != fields.length; ++C) {
+            out[0][C] = fields[C].name
+        }
         while (nrow-- > 0) {
             if (d[d.l] === 0x2A) {
                 d.l += rlen
@@ -251,7 +272,9 @@ export const DBF = function () {
                         out[R][C] = dd.read(4, 'i') / 1e4
                         break
                     case '0':
-                        if (fields[C].name === '_NullFlags') break
+                        if (fields[C].name === '_NullFlags') {
+                            break
+                        }
                     /* falls through */
                     default:
                         throw new Error(`DBF Unsupported data type ${fields[C].type}`)
@@ -268,7 +291,9 @@ export const DBF = function () {
 
     function dbf_to_sheet(buf, opts) /*:Worksheet*/ {
         const o = opts || {}
-        if (!o.dateNF) o.dateNF = 'yyyymmdd'
+        if (!o.dateNF) {
+            o.dateNF = 'yyyymmdd'
+        }
         return aoa_to_sheet(dbf_to_aoa(buf, o), o)
     }
 
@@ -276,9 +301,11 @@ export const DBF = function () {
         try {
             return sheet_to_workbook(dbf_to_sheet(buf, opts), opts)
         } catch (e) {
-            if (opts && opts.WTF) throw e
+            if (opts && opts.WTF) {
+                throw e
+            }
         }
-        return {SheetNames: [], Sheets: {}}
+        return { SheetNames: [], Sheets: {} }
     }
 
     return {
@@ -317,6 +344,7 @@ export const SYLK = function () {
         const colinfo = []
         let cw = []
         let Mval = 0
+        let j
         for (; ri !== records.length; ++ri) {
             Mval = 0
             const record = records[ri].trim().split(';')
@@ -335,7 +363,7 @@ export const SYLK = function () {
                             case 'Y':
                                 R = parseInt(record[rj].substr(1)) - 1
                                 C = 0
-                                for (let j = arr.length; j <= R; ++j) {
+                                for (j = arr.length; j <= R; ++j) {
                                     arr[j] = []
                                 }
                                 break
@@ -360,18 +388,22 @@ export const SYLK = function () {
                                 next_cell_format = null
                                 break
                             case 'P':
-                                if (RT !== 'F') break
+                                if (RT !== 'F') {
+                                    break
+                                }
                                 next_cell_format = formats[parseInt(record[rj].substr(1))]
                                 break
                             case 'M':
                                 Mval = parseInt(record[rj].substr(1)) / 20
                                 break
                             case 'W':
-                                if (RT !== 'F') break
+                                if (RT !== 'F') {
+                                    break
+                                }
                                 cw = record[rj].substr(1).split(' ')
-                                for (let j = parseInt(cw[0], 10); j <= parseInt(cw[1], 10); ++j) {
+                                for (j = parseInt(cw[0], 10); j <= parseInt(cw[1], 10); ++j) {
                                     Mval = parseInt(cw[2], 10)
-                                    colinfo[j - 1] = Mval == 0 ? {hidden: true} : {wch: Mval}
+                                    colinfo[j - 1] = Mval == 0 ? { hidden: true } : { wch: Mval }
                                     process_col(colinfo[j - 1])
                                 }
                                 break
@@ -391,8 +423,12 @@ export const SYLK = function () {
                     break
             }
         }
-        if (rowinfo.length > 0) sht['!rows'] = rowinfo
-        if (colinfo.length > 0) sht['!cols'] = colinfo
+        if (rowinfo.length > 0) {
+            sht['!rows'] = rowinfo
+        }
+        if (colinfo.length > 0) {
+            sht['!cols'] = colinfo
+        }
         arr[arr.length] = sht
         return arr
     }
@@ -417,7 +453,7 @@ export const SYLK = function () {
             case 'n':
                 o += (cell.v || 0)
                 if (cell.f && !cell.F) {
-                    o += ';E' + a1_to_rc(cell.f, {r: R, c: C})
+                    o += ';E' + a1_to_rc(cell.f, { r: R, c: C })
                 }
                 break
             case 'b':
@@ -438,15 +474,23 @@ export const SYLK = function () {
 
     function write_ws_cols_sylk(out, cols) {
         cols.forEach(function (col, i) {
-            let rec = 'F;W' + (i + 1) + ' ' + (i + 1) + ' '
+            let rec = `F;W${i + 1} ${i + 1} `
             if (col.hidden) {
                 rec += '0'
             } else {
-                if (typeof col.width == 'number') col.wpx = width2px(col.width)
-                if (typeof col.wpx == 'number') col.wch = px2char(col.wpx)
-                if (typeof col.wch == 'number') rec += Math.round(col.wch)
+                if (typeof col.width == 'number') {
+                    col.wpx = width2px(col.width)
+                }
+                if (typeof col.wpx == 'number') {
+                    col.wch = px2char(col.wpx)
+                }
+                if (typeof col.wch == 'number') {
+                    rec += Math.round(col.wch)
+                }
             }
-            if (rec.charAt(rec.length - 1) != ' ') out.push(rec)
+            if (rec.charAt(rec.length - 1) != ' ') {
+                out.push(rec)
+            }
         })
     }
 
@@ -456,12 +500,12 @@ export const SYLK = function () {
             if (row.hidden) {
                 rec += 'M0;'
             } else if (row.hpt) {
-                rec += 'M' + 20 * row.hpt + ';'
+                rec += `M${20 * row.hpt};`
             } else if (row.hpx) {
-                rec += 'M' + 20 * px2pt(row.hpx) + ';'
+                rec += `M${20 * px2pt(row.hpx)};`
             }
             if (rec.length > 2) {
-                out.push(rec + 'R' + (i + 1))
+                out.push(`${rec}R${i + 1}`)
             }
         })
     }
@@ -478,14 +522,20 @@ export const SYLK = function () {
 
         preamble.push('P;PGeneral')
         preamble.push('F;P0;DG0G8;M255')
-        if (ws['!cols']) write_ws_cols_sylk(preamble, ws['!cols'])
-        if (ws['!rows']) write_ws_rows_sylk(preamble, ws['!rows'])
+        if (ws['!cols']) {
+            write_ws_cols_sylk(preamble, ws['!cols'])
+        }
+        if (ws['!rows']) {
+            write_ws_rows_sylk(preamble, ws['!rows'])
+        }
 
         for (let R = r.s.r; R <= r.e.r; ++R) {
             for (let C = r.s.c; C <= r.e.c; ++C) {
-                const coord = encode_cell({r: R, c: C})
+                const coord = encode_cell({ r: R, c: C })
                 cell = dense ? (ws[R] || [])[C] : ws[coord]
-                if (!cell || cell.v == null && (!cell.f || cell.F)) continue
+                if (!cell || cell.v == null && (!cell.f || cell.F)) {
+                    continue
+                }
                 o.push(write_ws_cell_sylk(cell, ws, R, C, opts))
             }
         }
@@ -526,7 +576,9 @@ export const DIF = function () {
                 C = 0
                 continue
             }
-            if (R < 0) continue
+            if (R < 0) {
+                continue
+            }
             const metadata = records[ri].trim().split(',')
             const type = metadata[0]
             const value = metadata[1]
@@ -561,7 +613,9 @@ export const DIF = function () {
                     arr[R][C++] = data !== '' ? data : null
                     break
             }
-            if (data === 'EOD') break
+            if (data === 'EOD') {
+                break
+            }
         }
         return arr
     }
@@ -606,7 +660,7 @@ export const DIF = function () {
             for (let R = r.s.r; R <= r.e.r; ++R) {
                 push_value(o, -1, 0, 'BOT')
                 for (let C = r.s.c; C <= r.e.c; ++C) {
-                    const coord = encode_cell({r: R, c: C})
+                    const coord = encode_cell({ r: R, c: C })
                     cell = dense ? (ws[R] || [])[C] : ws[coord]
                     if (!cell) {
                         push_value(o, 1, 0, '')
@@ -615,10 +669,12 @@ export const DIF = function () {
                     switch (cell.t) {
                         case 'n':
                             let val = DIF_XL ? cell.w : cell.v
-                            if (!val && cell.v != null) val = cell.v
+                            if (!val && cell.v != null) {
+                                val = cell.v
+                            }
                             if (val == null) {
                                 if (DIF_XL && cell.f && !cell.F) {
-                                    push_value(o, 1, 0, '=' + cell.f)
+                                    push_value(o, 1, 0, `=${cell.f}`)
                                 } else {
                                     push_value(o, 1, 0, '')
                                 }
@@ -631,10 +687,12 @@ export const DIF = function () {
                             push_value(o, 0, cell.v ? 1 : 0, cell.v ? 'TRUE' : 'FALSE')
                             break
                         case 's':
-                            push_value(o, 1, 0, (!DIF_XL || isNaN(cell.v)) ? cell.v : '="' + cell.v + '"')
+                            push_value(o, 1, 0, (!DIF_XL || isNaN(cell.v)) ? cell.v : `="${cell.v}"`)
                             break
                         case 'd':
-                            if (!cell.w) cell.w = SSF.format(cell.z || SSF._table[14], datenum(parseDate(cell.v)))
+                            if (!cell.w) {
+                                cell.w = SSF.format(cell.z || SSF._table[14], datenum(parseDate(cell.v)))
+                            }
                             if (DIF_XL) {
                                 push_value(o, 0, cell.w, 'V')
                             } else {
@@ -677,10 +735,14 @@ export const PRN = function () {
     function prn_to_aoa_str(f /*:string*/, opts) /*:AOA*/ {
         const arr /*:AOA*/ = []
         /*:any*/
-        if (!f || f.length === 0) return arr
+        if (!f || f.length === 0) {
+            return arr
+        }
         const lines = f.split(/[\r\n]/)
         let L = lines.length - 1
-        while (L >= 0 && lines[L].length === 0) --L
+        while (L >= 0 && lines[L].length === 0) {
+            --L
+        }
         let start = 10
         let idx = 0
         let R = 0
@@ -713,7 +775,7 @@ export const PRN = function () {
         }
         const ws /*:Worksheet*/ = o.dense ? [] /*:any*/ : {}
         /*:any*/
-        const range /*:Range*/ = {s: {c: 0, r: 0}, e: {c: 0, r: 0}}
+        const range /*:Range*/ = { s: { c: 0, r: 0 }, e: { c: 0, r: 0 } }
         /*:any*/
 
         /* known sep */
@@ -743,7 +805,9 @@ export const PRN = function () {
                     break
                 case sepcc:
                 case 0x0a:
-                    if (instr) break
+                    if (instr) {
+                        break
+                    }
                     const s = str.slice(start, end)
                     const cell = {}
                     /*:any*/
@@ -765,14 +829,20 @@ export const PRN = function () {
                         cell.v = s.replace(/^"/, '').replace(/"$/, '').replace(/""/g, '"')
                     }
                     if (o.dense) {
-                        if (!ws[R]) ws[R] = []
+                        if (!ws[R]) {
+                            ws[R] = []
+                        }
                         ws[R][C] = cell
                     } else {
-                        ws[encode_cell({c: C, r: R})] = cell
+                        ws[encode_cell({ c: C, r: R })] = cell
                     }
                     start = end + 1
-                    if (range.e.c < C) range.e.c = C
-                    if (range.e.r < R) range.e.r = R
+                    if (range.e.c < C) {
+                        range.e.c = C
+                    }
+                    if (range.e.r < R) {
+                        range.e.r = R
+                    }
                     if (cc == sepcc) {
                         ++C
                     } else {
@@ -790,8 +860,12 @@ export const PRN = function () {
     }
 
     function prn_to_sheet_str(str /*:string*/, opts) /*:Worksheet*/ {
-        if (str.substr(0, 4) == 'sep=') return dsv_to_sheet_str(str, opts)
-        if (str.includes('\t') || str.includes(',')) return dsv_to_sheet_str(str, opts)
+        if (str.substr(0, 4) == 'sep=') {
+            return dsv_to_sheet_str(str, opts)
+        }
+        if (str.includes('\t') || str.includes(',')) {
+            return dsv_to_sheet_str(str, opts)
+        }
         return aoa_to_sheet(prn_to_aoa_str(str, opts), opts)
     }
 
@@ -822,14 +896,16 @@ export const PRN = function () {
         for (let R = r.s.r; R <= r.e.r; ++R) {
             const oo = []
             for (let C = r.s.c; C <= r.e.c; ++C) {
-                const coord = encode_cell({r: R, c: C})
+                const coord = encode_cell({ r: R, c: C })
                 cell = dense ? (ws[R] || [])[C] : ws[coord]
                 if (!cell || cell.v == null) {
                     oo.push('          ')
                     continue
                 }
                 let w = (cell.w || (format_cell(cell), cell.w) || '').substr(0, 10)
-                while (w.length < 10) w += ' '
+                while (w.length < 10) {
+                    w += ' '
+                }
                 oo.push(w + (C == 0 ? ' ' : ''))
             }
             o.push(oo.join(''))

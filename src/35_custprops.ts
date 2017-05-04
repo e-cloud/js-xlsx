@@ -68,7 +68,9 @@ export function parse_cust_props(data /*:string*/, opts) {
                                 }
                         }
                     } else if (x.substr(0, 2) === '</') {
-                    } else if (opts.WTF) throw new Error(x)
+                    } else if (opts.WTF) {
+                        throw new Error(x)
+                    }
             }
         }
     }
@@ -82,7 +84,9 @@ const CUST_PROPS_XML_ROOT = writextag('Properties', null, {
 
 export function write_cust_props(cp, opts) /*:string*/ {
     const o = [XML_HEADER, CUST_PROPS_XML_ROOT]
-    if (!cp) return o.join('')
+    if (!cp) {
+        return o.join('')
+    }
     let pid = 1
     keys(cp).forEach(function custprop(k) {
         ++pid
