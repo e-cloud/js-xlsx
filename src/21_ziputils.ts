@@ -3,21 +3,39 @@ import { has_buf } from './05_buf'
 import { cc2str, keys, str2cc } from './20_jsutils'
 
 export function getdatastr(data) /*:?string*/ {
-    if (!data) return null
-    if (data.data) return debom(data.data)
-    if (data.asNodeBuffer && has_buf) return debom(data.asNodeBuffer().toString('binary'))
-    if (data.asBinary) return debom(data.asBinary())
-    if (data._data && data._data.getContent) return debom(cc2str(Array.prototype.slice.call(data._data.getContent(), 0)))
+    if (!data) {
+        return null
+    }
+    if (data.data) {
+        return debom(data.data)
+    }
+    if (data.asNodeBuffer && has_buf) {
+        return debom(data.asNodeBuffer().toString('binary'))
+    }
+    if (data.asBinary) {
+        return debom(data.asBinary())
+    }
+    if (data._data && data._data.getContent) {
+        return debom(cc2str(Array.prototype.slice.call(data._data.getContent(), 0)))
+    }
     return null
 }
 
 export function getdatabin(data) {
-    if (!data) return null
-    if (data.data) return char_codes(data.data)
-    if (data.asNodeBuffer && has_buf) return data.asNodeBuffer()
+    if (!data) {
+        return null
+    }
+    if (data.data) {
+        return char_codes(data.data)
+    }
+    if (data.asNodeBuffer && has_buf) {
+        return data.asNodeBuffer()
+    }
     if (data._data && data._data.getContent) {
         const o = data._data.getContent()
-        if (typeof o == 'string') return str2cc(o)
+        if (typeof o == 'string') {
+            return str2cc(o)
+        }
         return Array.prototype.slice.call(o)
     }
     return null
@@ -35,20 +53,28 @@ export function safegetzipfile(zip, file /*:string*/) {
     const g = f.replace(/\//g, '\\')
     for (let i = 0; i < k.length; ++i) {
         const n = k[i].toLowerCase()
-        if (f == n || g == n) return zip.files[k[i]]
+        if (f == n || g == n) {
+            return zip.files[k[i]]
+        }
     }
     return null
 }
 
 export function getzipfile(zip, file /*:string*/) {
     const o = safegetzipfile(zip, file)
-    if (o == null) throw new Error(`Cannot find file ${file} in zip`)
+    if (o == null) {
+        throw new Error(`Cannot find file ${file} in zip`)
+    }
     return o
 }
 
 export function getzipdata(zip, file /*:string*/, safe? /*:?boolean*/) {
-    if (!safe) return getdata(getzipfile(zip, file))
-    if (!file) return null
+    if (!safe) {
+        return getdata(getzipfile(zip, file))
+    }
+    if (!file) {
+        return null
+    }
     try {
         return getzipdata(zip, file)
     } catch (e) {
@@ -57,8 +83,12 @@ export function getzipdata(zip, file /*:string*/, safe? /*:?boolean*/) {
 }
 
 export function getzipstr(zip, file /*:string*/, safe? /*:?boolean*/) /*:?string*/ {
-    if (!safe) return getdatastr(getzipfile(zip, file))
-    if (!file) return null
+    if (!safe) {
+        return getdatastr(getzipfile(zip, file))
+    }
+    if (!file) {
+        return null
+    }
     try {
         return getzipstr(zip, file)
     } catch (e) {
@@ -68,13 +98,17 @@ export function getzipstr(zip, file /*:string*/, safe? /*:?boolean*/) /*:?string
 
 export function resolve_path(path /*:string*/, base /*:string*/) /*:string*/ {
     const result = base.split('/')
-    if (base.slice(-1) != '/') result.pop() // folder path
+    if (base.slice(-1) != '/') {
+        result.pop()
+    } // folder path
     const target = path.split('/')
     while (target.length !== 0) {
         const step = target.shift()
         if (step === '..') {
             result.pop()
-        } else if (step !== '.') result.push(step)
+        } else if (step !== '.') {
+            result.push(step)
+        }
     }
     return result.join('/')
 }

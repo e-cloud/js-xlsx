@@ -33,7 +33,7 @@ export const parse_content_xml = function () {
         let tmp
         let tag
         /*:: = {}*/
-        let NFtag = {name: ''}
+        let NFtag = { name: '' }
         let NF = ''
         let pidx = 0
         let sheetag
@@ -47,14 +47,14 @@ export const parse_content_xml = function () {
         let Rn
         let q
         /*:: = ({t:"", v:null, z:null, w:"",c:[]}:any)*/
-        let ctag = {value: ''}
+        let ctag = { value: '' }
         let textp = ''
         let textpidx = 0
         let textptag
         /*:: = {}*/
         let R = -1
         let C = -1
-        const range = {s: {r: 1000000, c: 10000000}, e: {r: 0, c: 0}}
+        const range = { s: { r: 1000000, c: 10000000 }, e: { r: 0, c: 0 } }
         const number_format_map = {}
         let merges = []
         let mrange = {}
@@ -100,7 +100,9 @@ export const parse_content_xml = function () {
                 case 'table-row':
                 case '\u884C':
                     // 9.1.3 <table:table-row>
-                    if (Rn[1] === '/') break
+                    if (Rn[1] === '/') {
+                        break
+                    }
                     rowtag = parsexmltag(Rn[0], false)
                     if (rowtag['\u884C\u53F7']) {
                         R = rowtag['\u884C\u53F7'] - 1
@@ -114,10 +116,12 @@ export const parse_content_xml = function () {
                     ++C
                     if (opts.sheetStubs) {
                         if (opts.dense) {
-                            if (!ws[R]) ws[R] = []
-                            ws[R][C] = {t: 'z'}
+                            if (!ws[R]) {
+                                ws[R] = []
+                            }
+                            ws[R][C] = { t: 'z' }
                         } else {
-                            ws[encode_cell({r: R, c: C})] = {t: 'z'}
+                            ws[encode_cell({ r: R, c: C })] = { t: 'z' }
                         }
                     }
                     break /* stub */
@@ -133,10 +137,18 @@ export const parse_content_xml = function () {
                     } else if (Rn[1] !== '/') {
                         ++C
                         rept = 1
-                        if (C > range.e.c) range.e.c = C
-                        if (R > range.e.r) range.e.r = R
-                        if (C < range.s.c) range.s.c = C
-                        if (R < range.s.r) range.s.r = R
+                        if (C > range.e.c) {
+                            range.e.c = C
+                        }
+                        if (R > range.e.r) {
+                            range.e.r = R
+                        }
+                        if (C < range.s.c) {
+                            range.s.c = C
+                        }
+                        if (R < range.s.r) {
+                            range.s.r = R
+                        }
                         ctag = parsexmltag(Rn[0], false)
                         comments = []
                         comment = {}
@@ -152,7 +164,7 @@ export const parse_content_xml = function () {
                             if (ctag['number-matrix-columns-spanned'] && ctag['number-matrix-rows-spanned']) {
                                 mR = parseInt(ctag['number-matrix-rows-spanned'], 10) || 0
                                 mC = parseInt(ctag['number-matrix-columns-spanned'], 10) || 0
-                                mrange = {s: {r: R, c: C}, e: {r: R + mR - 1, c: C + mC - 1}}
+                                mrange = { s: { r: R, c: C }, e: { r: R + mR - 1, c: C + mC - 1 } }
                                 q.F = encode_range(mrange)
                                 arrayf.push([mrange, q.F])
                             }
@@ -171,7 +183,7 @@ export const parse_content_xml = function () {
                         if (ctag['number-columns-spanned'] || ctag['number-rows-spanned']) {
                             mR = parseInt(ctag['number-rows-spanned'], 10) || 0
                             mC = parseInt(ctag['number-columns-spanned'], 10) || 0
-                            mrange = {s: {r: R, c: C}, e: {r: R + mR - 1, c: C + mC - 1}}
+                            mrange = { s: { r: R, c: C }, e: { r: R + mR - 1, c: C + mC - 1 } }
                             merges.push(mrange)
                         }
 
@@ -235,28 +247,34 @@ export const parse_content_xml = function () {
                             q.c = comments
                             comments = []
                         }
-                        if (textp && opts.cellText !== false) q.w = textp
+                        if (textp && opts.cellText !== false) {
+                            q.w = textp
+                        }
                         if (!isstub || opts.sheetStubs) {
                             if (!(opts.sheetRows && opts.sheetRows < R)) {
                                 if (opts.dense) {
-                                    if (!ws[R]) ws[R] = []
+                                    if (!ws[R]) {
+                                        ws[R] = []
+                                    }
                                     ws[R][C] = q
                                     while (--rept > 0) {
                                         ws[R][++C] = dup(q)
                                     }
                                 } else {
-                                    ws[encode_cell({r: R, c: C})] = q
+                                    ws[encode_cell({ r: R, c: C })] = q
                                     while (--rept > 0) {
-                                        ws[encode_cell({r: R, c: ++C})] = dup(q)
+                                        ws[encode_cell({ r: R, c: ++C })] = dup(q)
                                     }
                                 }
-                                if (range.e.c <= C) range.e.c = C
+                                if (range.e.c <= C) {
+                                    range.e.c = C
+                                }
                             }
                         } else {
                             C += rept
                             rept = 0
                         }
-                        q = {/*:: t:"", v:null, z:null, w:"",c:[]*/}
+                        q = { /*:: t:"", v:null, z:null, w:"",c:[]*/ }
                         textp = ''
                     }
                     break // 9.1.4 <table:table-cell>
@@ -272,14 +290,20 @@ export const parse_content_xml = function () {
                 case 'font-face-decls':
                     // 3.14 <office:font-face-decls>
                     if (Rn[1] === '/') {
-                        if ((tmp = state.pop())[0] !== Rn[3]) throw `Bad state: ${tmp}`
-                    } else if (Rn[0].charAt(Rn[0].length - 2) !== '/') state.push([Rn[3], true])
+                        if ((tmp = state.pop())[0] !== Rn[3]) {
+                            throw `Bad state: ${tmp}`
+                        }
+                    } else if (Rn[0].charAt(Rn[0].length - 2) !== '/') {
+                        state.push([Rn[3], true])
+                    }
                     break
 
                 case 'annotation':
                     // 14.1 <office:annotation>
                     if (Rn[1] === '/') {
-                        if ((tmp = state.pop())[0] !== Rn[3]) throw `Bad state: ${tmp}`
+                        if ((tmp = state.pop())[0] !== Rn[3]) {
+                            throw `Bad state: ${tmp}`
+                        }
                         comment.t = textp
                         comment.a = creator
                         comments.push(comment)
@@ -346,7 +370,9 @@ export const parse_content_xml = function () {
                     // 16.27.18 <number:time-style>
                     if (Rn[1] === '/') {
                         number_format_map[NFtag.name] = NF
-                        if ((tmp = state.pop())[0] !== Rn[3]) throw `Bad state: ${tmp}`
+                        if ((tmp = state.pop())[0] !== Rn[3]) {
+                            throw `Bad state: ${tmp}`
+                        }
                     } else if (Rn[0].charAt(Rn[0].length - 2) !== '/') {
                         NF = ''
                         NFtag = parsexmltag(Rn[0], false)
@@ -482,7 +508,9 @@ export const parse_content_xml = function () {
                 case 'p':
                 case '\u6587\u672C\u4E32':
                     if (Rn[1] === '/') {
-                        textp = (textp.length > 0 ? textp + '\n' : '') + parse_text_p(str.slice(textpidx, Rn.index), textptag)
+                        textp = (textp.length > 0
+                                ? textp + '\n'
+                                : '') + parse_text_p(str.slice(textpidx, Rn.index), textptag)
                     } else {
                         textptag = parsexmltag(Rn[0], false)
                         textpidx = Rn.index + Rn[0].length
@@ -491,10 +519,12 @@ export const parse_content_xml = function () {
 
                 case 'database-range':
                     // 9.4.15 <table:database-range>
-                    if (Rn[1] === '/') break
+                    if (Rn[1] === '/') {
+                        break
+                    }
                     try {
                         const AutoFilter = ods_to_csf_range_3D(parsexmltag(Rn[0])['target-range-address'])
-                        Sheets[AutoFilter[0]]['!autofilter'] = {ref: AutoFilter[1]}
+                        Sheets[AutoFilter[0]]['!autofilter'] = { ref: AutoFilter[1] }
                     } catch (e) {
                     }
                     break
@@ -634,15 +664,33 @@ export const parse_content_xml = function () {
                 case 'data-pilot-grand-total':
                     break // <table:
                 default:
-                    if (Rn[2] === 'dc:') break // TODO: properties
-                    if (Rn[2] === 'draw:') break // TODO: drawing
-                    if (Rn[2] === 'style:') break // TODO: styles
-                    if (Rn[2] === 'calcext:') break // ignore undocumented extensions
-                    if (Rn[2] === 'loext:') break // ignore undocumented extensions
-                    if (Rn[2] === 'uof:') break // TODO: uof
-                    if (Rn[2] === '\u8868:') break // TODO: uof
-                    if (Rn[2] === '\u5B57:') break // TODO: uof
-                    if (opts.WTF) throw new Error(Rn)
+                    if (Rn[2] === 'dc:') {
+                        break
+                    } // TODO: properties
+                    if (Rn[2] === 'draw:') {
+                        break
+                    } // TODO: drawing
+                    if (Rn[2] === 'style:') {
+                        break
+                    } // TODO: styles
+                    if (Rn[2] === 'calcext:') {
+                        break
+                    } // ignore undocumented extensions
+                    if (Rn[2] === 'loext:') {
+                        break
+                    } // ignore undocumented extensions
+                    if (Rn[2] === 'uof:') {
+                        break
+                    } // TODO: uof
+                    if (Rn[2] === '\u8868:') {
+                        break
+                    } // TODO: uof
+                    if (Rn[2] === '\u5B57:') {
+                        break
+                    } // TODO: uof
+                    if (opts.WTF) {
+                        throw new Error(Rn)
+                    }
             }
         }
         const out = {

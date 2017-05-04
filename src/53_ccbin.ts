@@ -10,8 +10,12 @@ export function parse_BrtCalcChainItem$(data, length) {
     cell.c = data.read_shift(4)
     out.r = encode_cell(cell)
     const flags = data.read_shift(1)
-    if (flags & 0x2) out.l = '1'
-    if (flags & 0x8) out.a = '1'
+    if (flags & 0x2) {
+        out.l = '1'
+    }
+    if (flags & 0x8) {
+        out.a = '1'
+    }
     return out
 }
 

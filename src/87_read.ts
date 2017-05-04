@@ -31,7 +31,9 @@ function firstbyte(f /*:RawData*/, o /*:?TypeOpts*/) /*:Array<number>*/ {
 }
 
 export function read_cfb(cfb, opts /*:?ParseOpts*/) /*:Workbook*/ {
-    if (cfb.find('EncryptedPackage')) return parse_xlsxcfb(cfb, opts)
+    if (cfb.find('EncryptedPackage')) {
+        return parse_xlsxcfb(cfb, opts)
+    }
     return parse_xlscfb(cfb, opts)
 }
 
@@ -46,11 +48,11 @@ export function read_zip(data /*:RawData*/, opts /*:?ParseOpts*/) /*:Workbook*/ 
     }
     switch (o.type) {
         case 'base64':
-            zip = new JSZip(d, {base64: true})
+            zip = new JSZip(d, { base64: true })
             break
         case 'binary':
         case 'array':
-            zip = new JSZip(d, {base64: false})
+            zip = new JSZip(d, { base64: false })
             break
         case 'buffer':
             zip = new JSZip(d)

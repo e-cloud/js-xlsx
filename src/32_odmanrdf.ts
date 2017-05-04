@@ -27,7 +27,9 @@ export function parse_manifest(d, opts) {
                 // 4.7 <manifest:key-derivation>
                 throw new Error('Unsupported ODS Encryption')
             default:
-                if (opts && opts.WTF) throw Rn
+                if (opts && opts.WTF) {
+                    throw Rn
+                }
         }
     }
 }

@@ -18,7 +18,9 @@ function rgb2HSL(rgb) {
     const M = Math.max(R, G, B)
     const m = Math.min(R, G, B)
     const C = M - m
-    if (C === 0) return [0, 0, R]
+    if (C === 0) {
+        return [0, 0, R]
+    }
 
     let H6 = 0
     let S = 0
@@ -91,7 +93,9 @@ function hsl2RGB(hsl) {
 
 /* 18.8.3 bgColor tint algorithm */
 export function rgb_tint(hex, tint) {
-    if (tint === 0) return hex
+    if (tint === 0) {
+        return hex
+    }
     const hsl = rgb2HSL(hex2RGB(hex))
     if (tint < 0) {
         hsl[2] = hsl[2] * (1 + tint)
@@ -158,7 +162,9 @@ export function find_mdw_wpx(wpx) {
     for (MDW = MIN_MDW; MDW < MAX_MDW; ++MDW) {
         guess = char2width_(px2char_(wpx)) * 256
         guess = guess % 1
-        if (guess > 0.5) guess--
+        if (guess > 0.5) {
+            guess--
+        }
         if (Math.abs(guess) < delta) {
             delta = Math.abs(guess)
             _MDW = MDW

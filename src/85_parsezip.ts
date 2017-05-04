@@ -33,19 +33,33 @@ import { parse_ods } from './83_ods'
 import { fix_read_opts } from './84_defaults'
 
 function get_sheet_type(n) {
-    if (RELS.WS.includes(n)) return 'sheet'
-    if (RELS.CS && n == RELS.CS) return 'chart'
-    if (RELS.DS && n == RELS.DS) return 'dialog'
-    if (RELS.MS && n == RELS.MS) return 'macro'
-    if (!n || !n.length) return 'sheet'
+    if (RELS.WS.includes(n)) {
+        return 'sheet'
+    }
+    if (RELS.CS && n == RELS.CS) {
+        return 'chart'
+    }
+    if (RELS.DS && n == RELS.DS) {
+        return 'dialog'
+    }
+    if (RELS.MS && n == RELS.MS) {
+        return 'macro'
+    }
+    if (!n || !n.length) {
+        return 'sheet'
+    }
     return n
 }
 
 function safe_parse_wbrels(wbrels, sheets) {
-    if (!wbrels) return 0
+    if (!wbrels) {
+        return 0
+    }
     try {
         wbrels = sheets.map(function pwbr(w) {
-            if (!w.id) w.id = w.strRelID
+            if (!w.id) {
+                w.id = w.strRelID
+            }
             return [w.name, wbrels['!id'][w.id].Target, get_sheet_type(wbrels['!id'][w.id].Type)]
         })
     } catch (e) {
@@ -80,7 +94,9 @@ function safe_parse_sheet(
             case 'chart':
                 let cs = parse_cs(data, path, opts, sheetRels[sheet], wb, themes, styles)
                 sheets[sheet] = cs
-                if (!cs || !cs['!chart']) break
+                if (!cs || !cs['!chart']) {
+                    break
+                }
                 const dfile = resolve_path(cs['!chart'].Target, path)
                 const drelsp = get_rels_path(dfile)
                 const draw = parse_drawing(getzipstr(zip, dfile, true), parse_rels(getzipstr(zip, drelsp, true), dfile))
@@ -96,7 +112,9 @@ function safe_parse_sheet(
                 break
         }
     } catch (e) {
-        if (opts.WTF) throw e
+        if (opts.WTF) {
+            throw e
+        }
     }
 }
 
@@ -138,8 +156,12 @@ export function parse_zip(zip /*:ZIP*/, opts /*:?ParseOpts*/) /*:Workbook*/ {
         dir.workbooks.push(binname)
         xlsb = true
     }
-    if (dir.workbooks[0].slice(-3) == 'bin') xlsb = true
-    if (xlsb) setCurrentCodepage(1200)
+    if (dir.workbooks[0].slice(-3) == 'bin') {
+        xlsb = true
+    }
+    if (xlsb) {
+        setCurrentCodepage(1200)
+    }
 
     let themes = {}
     /*:any*/
@@ -167,7 +189,9 @@ export function parse_zip(zip /*:ZIP*/, opts /*:?ParseOpts*/) /*:Workbook*/ {
 
     if (dir.coreprops.length !== 0) {
         propdata = getzipstr(zip, dir.coreprops[0].replace(/^\//, ''), true)
-        if (propdata) props = parse_core_props(propdata)
+        if (propdata) {
+            props = parse_core_props(propdata)
+        }
         if (dir.extprops.length !== 0) {
             propdata = getzipstr(zip, dir.extprops[0].replace(/^\//, ''), true)
             if (propdata) {
@@ -220,7 +244,6 @@ export function parse_zip(zip /*:ZIP*/, opts /*:?ParseOpts*/) /*:Workbook*/ {
     let path
     let relsPath
 
-
     const wbsheets = wb.Sheets
     props.Worksheets = wbsheets.length
     props.SheetNames = []
@@ -228,11 +251,12 @@ export function parse_zip(zip /*:ZIP*/, opts /*:?ParseOpts*/) /*:Workbook*/ {
         props.SheetNames[j] = wbsheets[j].name
     }
 
-
     const wbext = xlsb ? 'bin' : 'xml'
     const wbrelsfile = `xl/_rels/workbook.${wbext}.rels`
     let wbrels = parse_rels(getzipstr(zip, wbrelsfile, true), wbrelsfile)
-    if (wbrels) wbrels = safe_parse_wbrels(wbrels, wb.Sheets)
+    if (wbrels) {
+        wbrels = safe_parse_wbrels(wbrels, wb.Sheets)
+    }
     /* Numbers iOS hack */
     const nmode = getzipdata(zip, 'xl/worksheets/sheet.xml', true) ? 1 : 0
     for (i = 0; i != props.Worksheets; ++i) {

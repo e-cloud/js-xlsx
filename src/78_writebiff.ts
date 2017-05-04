@@ -26,7 +26,9 @@ export function write_BOF(wb /*:Workbook*/, o) {
 }
 
 export function write_BIFF2Cell(out, r /*:number*/, c /*:number*/) {
-    if (!out) out = new_buf(7)
+    if (!out) {
+        out = new_buf(7)
+    }
     out.write_shift(2, r)
     out.write_shift(2, c)
     out.write_shift(1, 0)
@@ -106,10 +108,14 @@ export function write_biff_ws(ba /*:BufArray*/, ws /*:Worksheet*/, idx /*:number
     for (let R = range.s.r; R <= range.e.r; ++R) {
         rr = encode_row(R)
         for (let C = range.s.c; C <= range.e.c; ++C) {
-            if (R === range.s.r) cols[C] = encode_col(C)
+            if (R === range.s.r) {
+                cols[C] = encode_col(C)
+            }
             ref = cols[C] + rr
             const cell = dense ? ws[R][C] : ws[ref]
-            if (!cell) continue
+            if (!cell) {
+                continue
+            }
             /* write cell */
             write_ws_biff_cell(ba, cell, R, C, opts)
         }
@@ -119,10 +125,16 @@ export function write_biff_ws(ba /*:BufArray*/, ws /*:Worksheet*/, idx /*:number
 /* Based on test files */
 export function write_biff_buf(wb /*:Workbook*/, opts /*:WriteOpts*/) {
     const o = opts || {}
-    if (DENSE != null && o.dense == null) o.dense = DENSE
+    if (DENSE != null && o.dense == null) {
+        o.dense = DENSE
+    }
     const ba = buf_array()
     let idx = 0
-    for (let i = 0; i < wb.SheetNames.length; ++i) if (wb.SheetNames[i] == o.sheet) idx = i
+    for (let i = 0; i < wb.SheetNames.length; ++i) {
+        if (wb.SheetNames[i] == o.sheet) {
+            idx = i
+        }
+    }
     if (idx == 0 && !!o.sheet && wb.SheetNames[0] != o.sheet) {
         throw new Error(`Sheet not found: ${o.sheet}`)
     }

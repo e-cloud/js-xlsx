@@ -3,7 +3,7 @@ import { evert_num } from './20_jsutils'
 import { __double, __readInt32LE, new_buf } from './23_binutils'
 
 function parse_StrRun(data, length? /*:?number*/) {
-    return {ich: data.read_shift(2), ifnt: data.read_shift(2)}
+    return { ich: data.read_shift(2), ifnt: data.read_shift(2) }
 }
 
 /* [MS-XLSB] 2.1.7.121 */
@@ -12,7 +12,7 @@ export function parse_RichStr(data, length /*:number*/) /*:XLString*/ {
     const flags = data.read_shift(1)
     const str = parse_XLWideString(data)
     const rgsStrRun = []
-    const z = {t: str, h: str}
+    const z = { t: str, h: str }
     /*:any*/
     if ((flags & 1) !== 0) {
         /* fRichStr */
@@ -23,7 +23,7 @@ export function parse_RichStr(data, length /*:number*/) /*:XLString*/ {
         }
         z.r = rgsStrRun
     } else {
-        z.r = [{ich: 0, ifnt: 0}]
+        z.r = [{ ich: 0, ifnt: 0 }]
     }
     //if((flags & 2) !== 0) { /* fExtStr */
     //	/* TODO: phonetic string */
@@ -50,10 +50,12 @@ export function parse_XLSBCell(data) /*:any*/ {
     let iStyleRef = data.read_shift(2)
     iStyleRef += data.read_shift(1) << 16
     const fPhShow = data.read_shift(1)
-    return {c: col, iStyleRef}
+    return { c: col, iStyleRef }
 }
 export function write_XLSBCell(cell /*:any*/, o /*:?Block*/) {
-    if (o == null) o = new_buf(8)
+    if (o == null) {
+        o = new_buf(8)
+    }
     o.write_shift(-4, cell.c)
     o.write_shift(3, cell.iStyleRef || cell.s)
     o.write_shift(1, 0)
@@ -77,7 +79,9 @@ export function write_XLNullableWideString(data /*:string*/, o) {
         o = new_buf(127)
     }
     o.write_shift(4, data.length > 0 ? data.length : 0xFFFFFFFF)
-    if (data.length > 0) o.write_shift(0, data, 'dbcs')
+    if (data.length > 0) {
+        o.write_shift(0, data, 'dbcs')
+    }
     return _null ? o.slice(0, o.l) : o
 }
 
@@ -94,7 +98,9 @@ export function write_XLWideString(data /*:string*/, o?) {
         o = new_buf(4 + 2 * data.length)
     }
     o.write_shift(4, data.length)
-    if (data.length > 0) o.write_shift(0, data, 'dbcs')
+    if (data.length > 0) {
+        o.write_shift(0, data, 'dbcs')
+    }
     return _null ? o.slice(0, o.l) : o
 }
 
@@ -118,7 +124,9 @@ export function parse_RkNumber(data) /*:number*/ {
     return fX100 ? RK / 100 : RK
 }
 export function write_RkNumber(data /*:number*/, o) {
-    if (o == null) o = new_buf(4)
+    if (o == null) {
+        o = new_buf(4)
+    }
     let fX100 = 0
     let fInt = 0
     const d100 = data * 100
@@ -137,7 +145,7 @@ export function write_RkNumber(data /*:number*/, o) {
 
 /* [MS-XLSB] 2.5.117 RfX */
 export function parse_RfX(data) /*:Range*/ {
-    const cell /*:Range*/ = {s: {}, e: {}}
+    const cell /*:Range*/ = { s: {}, e: {} }
     /*:any*/
     cell.s.r = data.read_shift(4)
     cell.e.r = data.read_shift(4)
@@ -147,7 +155,9 @@ export function parse_RfX(data) /*:Range*/ {
 }
 
 function write_RfX(r /*:Range*/, o) {
-    if (!o) o = new_buf(16)
+    if (!o) {
+        o = new_buf(16)
+    }
     o.write_shift(4, r.s.r)
     o.write_shift(4, r.e.r)
     o.write_shift(4, r.s.c)

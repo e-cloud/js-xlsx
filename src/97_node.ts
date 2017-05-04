@@ -25,7 +25,9 @@ const write_csv_stream = function (sheet /*:Worksheet*/, opts /*:?Sheet2CSVOpts*
     }
     let R = r.s.r
     stream._read = function () {
-        if (R > r.e.r) return stream.push(null)
+        if (R > r.e.r) {
+            return stream.push(null)
+        }
         while (R <= r.e.r) {
             row = make_csv_row(sheet, r, R, cols, fs, rs, FS, o)
             if (row == null) {

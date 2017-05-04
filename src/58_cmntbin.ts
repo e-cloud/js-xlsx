@@ -23,7 +23,9 @@ export function parse_BrtBeginComment(data, length) {
 }
 
 export function write_BrtBeginComment(data, o?) {
-    if (o == null) o = new_buf(36)
+    if (o == null) {
+        o = new_buf(36)
+    }
     o.write_shift(4, data[1].iauthor)
     write_UncheckedRfX(data[0] /*:any*/, o)
     o.write_shift(4, 0)
@@ -65,8 +67,12 @@ export function parse_comments_bin(data, opts) {
                 /* 'BrtEndComment' */
                 c.author = authors[c.iauthor]
                 delete c.iauthor
-                if (opts.sheetRows && opts.sheetRows <= c.rfx.r) break
-                if (!c.t) c.t = ''
+                if (opts.sheetRows && opts.sheetRows <= c.rfx.r) {
+                    break
+                }
+                if (!c.t) {
+                    c.t = ''
+                }
                 delete c.rfx
                 out.push(c)
                 break
@@ -108,20 +114,21 @@ export function write_comments_bin(data, opts) {
     write_record(ba, 'BrtBeginCommentAuthors')
     data.forEach(function (comment) {
         comment[1].forEach(function (c) {
-            if (iauthor.includes(c.a)) return
+            if (iauthor.includes(c.a)) {
+                return
+            }
             iauthor.push(c.a.substr(0, 54))
             write_record(ba, 'BrtCommentAuthor', write_XLWideString(c.a.substr(0, 54)))
         })
     })
     write_record(ba, 'BrtEndCommentAuthors')
 
-
     /* COMMENTLIST */
     write_record(ba, 'BrtBeginCommentList')
     data.forEach(function (comment) {
         comment[1].forEach(function (c) {
             c.iauthor = iauthor.indexOf(c.a)
-            const range = {s: decode_cell(comment[0]), e: decode_cell(comment[0])}
+            const range = { s: decode_cell(comment[0]), e: decode_cell(comment[0]) }
             write_record(ba, 'BrtBeginComment', write_BrtBeginComment([range, c]))
             if (c.t && c.t.length > 0) {
                 write_record(ba, 'BrtCommentText', write_RichStr(c))

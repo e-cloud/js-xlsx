@@ -44,12 +44,16 @@ export function parse_BrtRowHdr(data, length) {
     const tgt = data.l + length
     z.r = data.read_shift(4)
     data.l += 4 // TODO: ixfe
-    var miyRw = data.read_shift(2)
+    const miyRw = data.read_shift(2)
     data.l += 1 // TODO: top/bot padding
-    var flags = data.read_shift(1)
+    const flags = data.read_shift(1)
     data.l = tgt
-    if (flags & 0x10) z.hidden = true
-    if (flags & 0x20) z.hpt = miyRw / 20
+    if (flags & 0x10) {
+        z.hidden = true
+    }
+    if (flags & 0x20) {
+        z.hpt = miyRw / 20
+    }
     return z
 }
 
@@ -90,9 +94,11 @@ export function write_BrtRowHdr(R /*:number*/, range, ws) {
     const lcs = o.l
     o.l += 4
 
-    const caddr = {r: R, c: 0}
+    const caddr = { r: R, c: 0 }
     for (let i = 0; i < 16; ++i) {
-        if (range.s.c > i + 1 << 10 || range.e.c < i << 10) continue
+        if (range.s.c > i + 1 << 10 || range.e.c < i << 10) {
+            continue
+        }
         let first = -1
         let last = -1
         for (let j = i << 10; j < i + 1 << 10; ++j) {
@@ -105,7 +111,9 @@ export function write_BrtRowHdr(R /*:number*/, range, ws) {
                 last = j
             }
         }
-        if (first < 0) continue
+        if (first < 0) {
+            continue
+        }
         ++ncolspan
         o.write_shift(4, first)
         o.write_shift(4, last)
@@ -156,7 +164,9 @@ export function parse_BrtCellBlank(data, length) {
     return [cell]
 }
 export function write_BrtCellBlank(cell, ncell, o?) {
-    if (o == null) o = new_buf(8)
+    if (o == null) {
+        o = new_buf(8)
+    }
     return write_XLSBCell(ncell, o)
 }
 
@@ -167,7 +177,9 @@ export function parse_BrtCellBool(data, length) {
     return [cell, fBool, 'b']
 }
 export function write_BrtCellBool(cell, ncell, o?) {
-    if (o == null) o = new_buf(9)
+    if (o == null) {
+        o = new_buf(9)
+    }
     write_XLSBCell(ncell, o)
     o.write_shift(1, cell.v ? 1 : 0)
     return o
@@ -188,7 +200,9 @@ export function parse_BrtCellIsst(data, length) {
 }
 
 export function write_BrtCellIsst(cell, ncell, o?) {
-    if (o == null) o = new_buf(12)
+    if (o == null) {
+        o = new_buf(12)
+    }
     write_XLSBCell(ncell, o)
     o.write_shift(4, ncell.v)
     return o
@@ -202,7 +216,9 @@ export function parse_BrtCellReal(data, length) {
 }
 
 export function write_BrtCellReal(cell, ncell, o?) {
-    if (o == null) o = new_buf(16)
+    if (o == null) {
+        o = new_buf(16)
+    }
     write_XLSBCell(ncell, o)
     write_Xnum(cell.v, o)
     return o
@@ -332,14 +348,14 @@ export function parse_BrtHLink(data, length, opts) {
     const tooltip = parse_XLWideString(data)
     const display = parse_XLWideString(data)
     data.l = end
-    return {rfx, relId, loc, Tooltip: tooltip, display}
+    return { rfx, relId, loc, Tooltip: tooltip, display }
 }
 
 export function write_BrtHLink(l, rId, o?) {
     if (o == null) {
         o = new_buf(50 + 4 * l[1].Target.length)
     }
-    write_UncheckedRfX({s: decode_cell(l[0]), e: decode_cell(l[0])}, o)
+    write_UncheckedRfX({ s: decode_cell(l[0]), e: decode_cell(l[0]) }, o)
     write_RelID(`rId${rId}`, o)
     const locidx = l[1].Target.indexOf('#')
     const location = locidx == -1 ? '' : l[1].Target.substr(locidx + 1)
@@ -392,8 +408,12 @@ export function write_BrtColInfo(C /*:number*/, col, o?) {
     o.write_shift(4, (p.width || 10) * 256)
     o.write_shift(4, 0/*ixfe*/) // style
     let flags = 0
-    if (col.hidden) flags |= 0x01
-    if (typeof p.width == 'number') flags |= 0x02
+    if (col.hidden) {
+        flags |= 0x01
+    }
+    if (typeof p.width == 'number') {
+        flags |= 0x02
+    }
     o.write_shift(1, flags) // bit flag
     o.write_shift(1, 0) // bit flag
     return o
@@ -426,7 +446,9 @@ export function write_BrtMargins(margins, o?) {
 
 /* [MS-XLSB] 2.4.292 BrtBeginWsView */
 function write_BrtBeginWsView(ws, o) {
-    if (o == null) o = new_buf(30)
+    if (o == null) {
+        o = new_buf(30)
+    }
     o.write_shift(2, 924) // bit flag
     o.write_shift(4, 0)
     o.write_shift(4, 0) // view first row
@@ -481,14 +503,16 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
         return data
     }
     const opts = _opts || {}
-    if (!rels) rels = {'!id': {}}
+    if (!rels) {
+        rels = { '!id': {} }
+    }
     if (DENSE != null && opts.dense == null) {
         opts.dense = DENSE
     }
     const s = opts.dense ? [] : {}
 
     let ref
-    const refguess = {s: {r: 2000000, c: 2000000}, e: {r: 0, c: 0}}
+    const refguess = { s: { r: 2000000, c: 2000000 }, e: { r: 0, c: 0 } }
 
     let pass = false
     let end = false
@@ -518,7 +542,9 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
             return x.name
         })
     opts.supbooks = supbooks
-    for (let i = 0; i < wb.Names.length; ++i) supbooks[0][i + 1] = wb.Names[i];
+    for (let i = 0; i < wb.Names.length; ++i) {
+        supbooks[0][i + 1] = wb.Names[i]
+    }
 
     const colinfo = []
     const rowinfo = []
@@ -527,7 +553,9 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
     let seencol = false
 
     recordhopper(data, function ws_parse(val, R_n, RT) {
-        if (end) return
+        if (end) {
+            return
+        }
         switch (RT) {
             case 0x0094:
                 /* 'BrtWsDim' */
@@ -542,7 +570,9 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
                 rr = encode_row(R = row.r)
                 opts['!row'] = row.r
                 if (val.hidden || val.hpt) {
-                    if (val.hpt) val.hpx = pt2px(val.hpt)
+                    if (val.hpt) {
+                        val.hpx = pt2px(val.hpt)
+                    }
                     rowinfo[val.r] = val
                 }
                 break
@@ -558,7 +588,7 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
             case 0x000A: /* 'BrtFmlaBool' */
             case 0x000B:
                 /* 'BrtFmlaError' */
-                p = {t: val[2]}
+                p = { t: val[2] }
                 /*:any*/
                 switch (val[2]) {
                     case 'n':
@@ -588,7 +618,9 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
                 }
                 C = val[0].c
                 if (opts.dense) {
-                    if (!s[R]) s[R] = []
+                    if (!s[R]) {
+                        s[R] = []
+                    }
                     s[R][C] = p
                 } else {
                     s[encode_col(C) + rr] = p
@@ -604,12 +636,22 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
                             }
                         }
                     }
-                    if (!af && val.length > 3) p.f = val[3]
+                    if (!af && val.length > 3) {
+                        p.f = val[3]
+                    }
                 }
-                if (refguess.s.r > row.r) refguess.s.r = row.r
-                if (refguess.s.c > C) refguess.s.c = C
-                if (refguess.e.r < row.r) refguess.e.r = row.r
-                if (refguess.e.c < C) refguess.e.c = C
+                if (refguess.s.r > row.r) {
+                    refguess.s.r = row.r
+                }
+                if (refguess.s.c > C) {
+                    refguess.s.c = C
+                }
+                if (refguess.e.r < row.r) {
+                    refguess.e.r = row.r
+                }
+                if (refguess.e.c < C) {
+                    refguess.e.c = C
+                }
                 if (opts.cellDates && cf && p.t == 'n' && SSF.is_date(SSF._table[cf.ifmt])) {
                     const _d = SSF.parse_date_code(p.v)
                     if (_d) {
@@ -621,8 +663,10 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
 
             case 0x0001:
                 /* 'BrtCellBlank' */
-                if (!opts.sheetStubs) break
-                p = {t: 'z', v: undefined}
+                if (!opts.sheetStubs) {
+                    break
+                }
+                p = { t: 'z', v: undefined }
                 /*:any*/
                 C = val[0].c
                 if (opts.dense) {
@@ -633,10 +677,18 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
                 } else {
                     s[encode_col(C) + rr] = p
                 }
-                if (refguess.s.r > row.r) refguess.s.r = row.r
-                if (refguess.s.c > C) refguess.s.c = C
-                if (refguess.e.r < row.r) refguess.e.r = row.r
-                if (refguess.e.c < C) refguess.e.c = C
+                if (refguess.s.r > row.r) {
+                    refguess.s.r = row.r
+                }
+                if (refguess.s.c > C) {
+                    refguess.s.c = C
+                }
+                if (refguess.e.r < row.r) {
+                    refguess.e.r = row.r
+                }
+                if (refguess.e.c < C) {
+                    refguess.e.c = C
+                }
                 break
 
             case 0x00B0:
@@ -649,7 +701,9 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
                 const rel = rels['!id'][val.relId]
                 if (rel) {
                     val.Target = rel.Target
-                    if (val.loc) val.Target += `#${val.loc}`
+                    if (val.loc) {
+                        val.Target += `#${val.loc}`
+                    }
                     val.Rel = rel
                 }
                 for (R = val.rfx.s.r; R <= val.rfx.e.r; ++R) {
@@ -659,13 +713,13 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
                                 s[R] = []
                             }
                             if (!s[R][C]) {
-                                s[R][C] = {t: 'z', v: undefined}
+                                s[R][C] = { t: 'z', v: undefined }
                             }
                             s[R][C].l = val
                         } else {
-                            addr = encode_cell({c: C, r: R})
+                            addr = encode_cell({ c: C, r: R })
                             if (!s[addr]) {
-                                s[addr] = {t: 'z', v: undefined}
+                                s[addr] = { t: 'z', v: undefined }
                             }
                             s[addr].l = val
                         }
@@ -675,26 +729,32 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
 
             case 0x01AA:
                 /* 'BrtArrFmla' */
-                if (!opts.cellFormula) break
+                if (!opts.cellFormula) {
+                    break
+                }
                 array_formulae.push(val)
                 cell = opts.dense ? s[R][C] : s[encode_col(C) + rr]
-                cell.f = stringify_formula(val[1], refguess, {r: row.r, c: C}, supbooks, opts)
+                cell.f = stringify_formula(val[1], refguess, { r: row.r, c: C }, supbooks, opts)
                 cell.F = encode_range(val[0])
                 break
             case 0x01AB:
                 /* 'BrtShrFmla' */
-                if (!opts.cellFormula) break
+                if (!opts.cellFormula) {
+                    break
+                }
                 shared_formulae[encode_cell(val[0].s)] = val[1]
                 cell = opts.dense ? s[R][C] : s[encode_col(C) + rr]
-                cell.f = stringify_formula(val[1], refguess, {r: row.r, c: C}, supbooks, opts)
+                cell.f = stringify_formula(val[1], refguess, { r: row.r, c: C }, supbooks, opts)
                 break
 
             /* identical to 'ColInfo' in XLS */
             case 0x003C:
                 /* 'BrtColInfo' */
-                if (!opts.cellStyles) break
+                if (!opts.cellStyles) {
+                    break
+                }
                 while (val.e >= val.s) {
-                    colinfo[val.e--] = {width: val.w / 256, hidden: !!(val.flags & 0x01)}
+                    colinfo[val.e--] = { width: val.w / 256, hidden: !!(val.flags & 0x01) }
                     if (!seencol) {
                         seencol = true
                         find_mdw_colw(val.w / 256)
@@ -705,7 +765,7 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
 
             case 0x00A1:
                 /* 'BrtBeginAFilter' */
-                s['!autofilter'] = {ref: encode_range(val)}
+                s['!autofilter'] = { ref: encode_range(val) }
                 break
 
             case 0x01DC:
@@ -805,23 +865,39 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
         const tmpref = safe_decode_range(s['!ref'])
         if (opts.sheetRows < +tmpref.e.r) {
             tmpref.e.r = opts.sheetRows - 1
-            if (tmpref.e.r > refguess.e.r) tmpref.e.r = refguess.e.r
-            if (tmpref.e.r < tmpref.s.r) tmpref.s.r = tmpref.e.r
-            if (tmpref.e.c > refguess.e.c) tmpref.e.c = refguess.e.c
-            if (tmpref.e.c < tmpref.s.c) tmpref.s.c = tmpref.e.c
+            if (tmpref.e.r > refguess.e.r) {
+                tmpref.e.r = refguess.e.r
+            }
+            if (tmpref.e.r < tmpref.s.r) {
+                tmpref.s.r = tmpref.e.r
+            }
+            if (tmpref.e.c > refguess.e.c) {
+                tmpref.e.c = refguess.e.c
+            }
+            if (tmpref.e.c < tmpref.s.c) {
+                tmpref.s.c = tmpref.e.c
+            }
             s['!fullref'] = s['!ref']
             s['!ref'] = encode_range(tmpref)
         }
     }
-    if (mergecells.length > 0) s['!merges'] = mergecells
-    if (colinfo.length > 0) s['!cols'] = colinfo
-    if (rowinfo.length > 0) s['!rows'] = rowinfo
+    if (mergecells.length > 0) {
+        s['!merges'] = mergecells
+    }
+    if (colinfo.length > 0) {
+        s['!cols'] = colinfo
+    }
+    if (rowinfo.length > 0) {
+        s['!rows'] = rowinfo
+    }
     return s
 }
 
 /* TODO: something useful -- this is a stub */
 function write_ws_bin_cell(ba /*:BufArray*/, cell /*:Cell*/, R /*:number*/, C /*:number*/, opts, ws /*:Worksheet*/) {
-    if (cell.v === undefined) return ''
+    if (cell.v === undefined) {
+        return ''
+    }
     let vv = ''
     let olddate = null
     switch (cell.t) {
@@ -844,12 +920,16 @@ function write_ws_bin_cell(ba /*:BufArray*/, cell /*:Cell*/, R /*:number*/, C /*
             vv = cell.v
             break
     }
-    const o /*:any*/ = {r: R, c: C}
+    const o /*:any*/ = { r: R, c: C }
     /*:any*/
     /* TODO: cell style */
     //o.s = get_cell_style(opts.cellXfs, cell, opts);
-    if (cell.l) ws['!links'].push([encode_cell(o), cell.l])
-    if (cell.c) ws['!comments'].push([encode_cell(o), cell.c])
+    if (cell.l) {
+        ws['!links'].push([encode_cell(o), cell.l])
+    }
+    if (cell.c) {
+        ws['!comments'].push([encode_cell(o), cell.c])
+    }
     switch (cell.t) {
         case 's':
         case 'str':
@@ -901,10 +981,14 @@ function write_CELLTABLE(ba, ws /*:Worksheet*/, idx /*:number*/, opts, wb /*:Wor
         write_row_header(ba, ws, range, R)
         for (let C = range.s.c; C <= range.e.c; ++C) {
             /* *16384CELL */
-            if (R === range.s.r) cols[C] = encode_col(C)
+            if (R === range.s.r) {
+                cols[C] = encode_col(C)
+            }
             ref = cols[C] + rr
             const cell = dense ? (ws[R] || [])[C] : ws[ref]
-            if (!cell) continue
+            if (!cell) {
+                continue
+            }
             /* write cell */
             write_ws_bin_cell(ba, cell, R, C, opts, ws)
         }
@@ -913,7 +997,9 @@ function write_CELLTABLE(ba, ws /*:Worksheet*/, idx /*:number*/, opts, wb /*:Wor
 }
 
 function write_MERGECELLS(ba, ws /*:Worksheet*/) {
-    if (!ws || !ws['!merges']) return
+    if (!ws || !ws['!merges']) {
+        return
+    }
     write_record(ba, 'BrtBeginMergeCells', write_BrtBeginMergeCells(ws['!merges'].length))
     ws['!merges'].forEach(function (m) {
         write_record(ba, 'BrtMergeCell', write_BrtMergeCell(m))
@@ -922,10 +1008,14 @@ function write_MERGECELLS(ba, ws /*:Worksheet*/) {
 }
 
 function write_COLINFOS(ba, ws /*:Worksheet*/, idx /*:number*/, opts, wb /*:Workbook*/) {
-    if (!ws || !ws['!cols']) return
+    if (!ws || !ws['!cols']) {
+        return
+    }
     write_record(ba, 'BrtBeginColInfos')
     ws['!cols'].forEach(function (m, i) {
-        if (m) write_record(ba, 'BrtColInfo', write_BrtColInfo(i, m))
+        if (m) {
+            write_record(ba, 'BrtColInfo', write_BrtColInfo(i, m))
+        }
     })
     write_record(ba, 'BrtEndColInfos')
 }
@@ -933,7 +1023,9 @@ function write_COLINFOS(ba, ws /*:Worksheet*/, idx /*:number*/, opts, wb /*:Work
 function write_HLINKS(ba, ws /*:Worksheet*/, rels) {
     /* *BrtHLink */
     ws['!links'].forEach(function (l) {
-        if (!l[1].Target) return
+        if (!l[1].Target) {
+            return
+        }
         const rId = add_rels(rels, -1, l[1].Target.replace(/#.*$/, ''), RELS.HLINK)
         write_record(ba, 'BrtHLink', write_BrtHLink(l, rId))
     })
@@ -949,7 +1041,9 @@ function write_LEGACYDRAWING(ba, ws /*:Worksheet*/, idx /*:number*/, rels) {
 }
 
 function write_AUTOFILTER(ba, ws) {
-    if (!ws['!autofilter']) return
+    if (!ws['!autofilter']) {
+        return
+    }
     write_record(ba, 'BrtBeginAFilter', write_UncheckedRfX(decode_range(ws['!autofilter'].ref)))
     /* *FILTERCOLUMN */
     /* [SORTSTATE] */
@@ -972,9 +1066,10 @@ function write_WSVIEWS2(ba, ws) {
     write_record(ba, 'BrtEndWsViews')
 }
 
-
 function write_SHEETPROTECT(ba, ws) {
-    if (!ws['!protect']) return
+    if (!ws['!protect']) {
+        return
+    }
     /* [BrtSheetProtectionIso] */
     write_record(ba, 'BrtSheetProtection', write_BrtSheetProtection(ws['!protect']))
 }
@@ -1008,7 +1103,9 @@ export function write_ws_bin(idx /*:number*/, opts, wb /*:Workbook*/, rels) {
     /* [DVALS] */
     write_HLINKS(ba, ws, rels)
     /* [BrtPrintOptions] */
-    if (ws['!margins']) write_record(ba, 'BrtMargins', write_BrtMargins(ws['!margins']))
+    if (ws['!margins']) {
+        write_record(ba, 'BrtMargins', write_BrtMargins(ws['!margins']))
+    }
     /* [BrtPageSetup] */
     /* [HEADERFOOTER] */
     /* [RWBRK] */

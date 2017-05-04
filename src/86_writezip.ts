@@ -52,9 +52,11 @@ export function write_zip(wb /*:Workbook*/, opts /*:WriteOpts*/) /*:ZIP*/ {
     let rId = 0
 
     opts.cellXfs = []
-    get_cell_style(opts.cellXfs, {}, {revssf: {'General': 0}})
+    get_cell_style(opts.cellXfs, {}, { revssf: { 'General': 0 } })
 
-    if (!wb.Props) wb.Props = {}
+    if (!wb.Props) {
+        wb.Props = {}
+    }
 
     f = 'docProps/core.xml'
     zip.file(f, write_core_props(wb.Props, opts))
@@ -94,7 +96,7 @@ export function write_zip(wb /*:Workbook*/, opts /*:WriteOpts*/) /*:ZIP*/ {
     add_rels(opts.rels, 1, f, RELS.WB)
 
     for (rId = 1; rId <= wb.SheetNames.length; ++rId) {
-        const wsrels = {'!id': {}}
+        const wsrels = { '!id': {} }
         const ws = wb.Sheets[wb.SheetNames[rId - 1]]
         const _type = (ws || {})['!type'] || 'sheet'
         switch (_type) {

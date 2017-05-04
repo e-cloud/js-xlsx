@@ -12,7 +12,7 @@ export function parse_BrtFmt(data, length /*:number*/) {
 
 /* [MS-XLSB] 2.4.653 BrtFont TODO */
 export function parse_BrtFont(data, length /*:number*/) {
-    const out = {flags: {}}
+    const out = { flags: {} }
     /*:any*/
     out.dyHeight = data.read_shift(2)
     out.grbit = parse_FontFlags(data, 2)
@@ -43,7 +43,7 @@ export function parse_BrtXF(data, length /*:number*/) {
     const ixfeParent = data.read_shift(2)
     const ifmt = data.read_shift(2)
     parsenoop(data, length - 4)
-    return {ixfe: ixfeParent, ifmt}
+    return { ixfe: ixfeParent, ifmt }
 }
 
 /* [MS-XLSB] 2.1.7.50 Styles */

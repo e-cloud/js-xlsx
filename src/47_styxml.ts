@@ -152,12 +152,22 @@ function parse_fills(t, styles, themes, opts) {
 
             /* 18.8.3 bgColor CT_Color */
             case '<bgColor':
-                if (!fill.bgColor) fill.bgColor = {}
-                if (y.indexed) fill.bgColor.indexed = parseInt(y.indexed, 10)
-                if (y.theme) fill.bgColor.theme = parseInt(y.theme, 10)
-                if (y.tint) fill.bgColor.tint = parseFloat(y.tint)
+                if (!fill.bgColor) {
+                    fill.bgColor = {}
+                }
+                if (y.indexed) {
+                    fill.bgColor.indexed = parseInt(y.indexed, 10)
+                }
+                if (y.theme) {
+                    fill.bgColor.theme = parseInt(y.theme, 10)
+                }
+                if (y.tint) {
+                    fill.bgColor.tint = parseFloat(y.tint)
+                }
                 /* Excel uses ARGB strings */
-                if (y.rgb) fill.bgColor.rgb = y.rgb.slice(-6)
+                if (y.rgb) {
+                    fill.bgColor.rgb = y.rgb.slice(-6)
+                }
                 break
             case '<bgColor/>':
             case '</bgColor>':
@@ -165,11 +175,19 @@ function parse_fills(t, styles, themes, opts) {
 
             /* 18.8.19 fgColor CT_Color */
             case '<fgColor':
-                if (!fill.fgColor) fill.fgColor = {}
-                if (y.theme) fill.fgColor.theme = parseInt(y.theme, 10)
-                if (y.tint) fill.fgColor.tint = parseFloat(y.tint)
+                if (!fill.fgColor) {
+                    fill.fgColor = {}
+                }
+                if (y.theme) {
+                    fill.fgColor.theme = parseInt(y.theme, 10)
+                }
+                if (y.tint) {
+                    fill.fgColor.tint = parseFloat(y.tint)
+                }
                 /* Excel uses ARGB strings */
-                if (y.rgb) fill.fgColor.rgb = y.rgb.slice(-6)
+                if (y.rgb) {
+                    fill.fgColor.rgb = y.rgb.slice(-6)
+                }
                 break
             case '<fgColor/>':
             case '</fgColor>':
@@ -270,7 +288,9 @@ function parse_fonts(t, styles, themes, opts) {
 
             /* 18.4.11 sz CT_FontSize */
             case '<sz':
-                if (y.val) font.sz = y.val
+                if (y.val) {
+                    font.sz = y.val
+                }
                 break
             case '<sz/>':
             case '</sz>':
@@ -278,7 +298,9 @@ function parse_fonts(t, styles, themes, opts) {
 
             /* 18.4.14 vertAlign CT_VerticalAlignFontProperty */
             case '<vertAlign':
-                if (y.val) font.vertAlign = y.val
+                if (y.val) {
+                    font.vertAlign = y.val
+                }
                 break
             case '<vertAlign/>':
             case '</vertAlign>':
@@ -286,7 +308,9 @@ function parse_fonts(t, styles, themes, opts) {
 
             /* 18.8.18 family CT_FontFamily */
             case '<family':
-                if (y.val) font.family = y.val
+                if (y.val) {
+                    font.family = y.val
+                }
                 break
             case '<family/>':
             case '</family>':
@@ -294,7 +318,9 @@ function parse_fonts(t, styles, themes, opts) {
 
             /* 18.8.35 scheme CT_FontScheme */
             case '<scheme':
-                if (y.val) font.scheme = y.val
+                if (y.val) {
+                    font.scheme = y.val
+                }
                 break
             case '<scheme/>':
             case '</scheme>':
@@ -302,19 +328,29 @@ function parse_fonts(t, styles, themes, opts) {
 
             /* 18.4.1 charset CT_IntProperty TODO */
             case '<charset':
-                if (y.val == '1') break
+                if (y.val == '1') {
+                    break
+                }
                 y.codepage = CS2CP[parseInt(y.val, 10)]
                 break
 
             /* 18.?.? color CT_Color TODO */
             case '<color':
-                if (!font.color) font.color = {}
-                if (y.theme) font.color.theme = y.theme
-                if (y.tint) font.color.tint = y.tint
+                if (!font.color) {
+                    font.color = {}
+                }
+                if (y.theme) {
+                    font.color.theme = y.theme
+                }
+                if (y.tint) {
+                    font.color.tint = y.tint
+                }
                 if (y.theme && themes.themeElements && themes.themeElements.clrScheme) {
                     font.color.rgb = rgb_tint(themes.themeElements.clrScheme[font.color.theme].rgb, font.color.tint || 0)
                 }
-                if (y.rgb) font.color.rgb = y.rgb
+                if (y.rgb) {
+                    font.color.rgb = y.rgb
+                }
                 break
             case '<color/>':
             case '</color>':
@@ -337,7 +373,9 @@ function parse_numFmts(t, styles, opts) {
         styles.NumberFmt[k[i]] = SSF._table[k[i]]
     }
     const m = t[0].match(tagregex)
-    if (!m) return
+    if (!m) {
+        return
+    }
     for (let i = 0; i < m.length; ++i) {
         const y = parsexmltag(m[i])
         switch (y[0]) {
@@ -350,7 +388,9 @@ function parse_numFmts(t, styles, opts) {
                 const f = unescapexml(utf8read(y.formatCode))
                 const j = parseInt(y.numFmtId, 10)
                 styles.NumberFmt[j] = f
-                if (j > 0) SSF.load(f, j)
+                if (j > 0) {
+                    SSF.load(f, j)
+                }
             }
                 break
             case '</numFmt>':
@@ -375,9 +415,11 @@ function write_numFmts(NF /*:{[n:number]:string}*/, opts?) {
             }
         }
     })
-    if (o.length === 1) return ''
+    if (o.length === 1) {
+        return ''
+    }
     o[o.length] = '</numFmts>'
-    o[0] = writextag('numFmts', null, {count: o.length - 2}).replace('/>', '>')
+    o[0] = writextag('numFmts', null, { count: o.length - 2 }).replace('/>', '>')
     return o.join('')
 }
 
@@ -398,8 +440,12 @@ function parse_cellXfs(t, styles, opts) {
             case '<xf':
                 xf = y
                 delete xf[0]
-                if (xf.numFmtId) xf.numFmtId = parseInt(xf.numFmtId, 10)
-                if (xf.fillId) xf.fillId = parseInt(xf.fillId, 10)
+                if (xf.numFmtId) {
+                    xf.numFmtId = parseInt(xf.numFmtId, 10)
+                }
+                if (xf.fillId) {
+                    xf.fillId = parseInt(xf.fillId, 10)
+                }
                 styles.CellXf.push(xf)
                 break
             case '</xf>':
@@ -409,11 +455,21 @@ function parse_cellXfs(t, styles, opts) {
             case '<alignment':
             case '<alignment/>':
                 const alignment = {}
-                if (y.vertical) alignment.vertical = y.vertical
-                if (y.horizontal) alignment.horizontal = y.horizontal
-                if (y.textRotation != null) alignment.textRotation = y.textRotation
-                if (y.indent) alignment.indent = y.indent
-                if (y.wrapText) alignment.wrapText = y.wrapText
+                if (y.vertical) {
+                    alignment.vertical = y.vertical
+                }
+                if (y.horizontal) {
+                    alignment.horizontal = y.horizontal
+                }
+                if (y.textRotation != null) {
+                    alignment.textRotation = y.textRotation
+                }
+                if (y.indent) {
+                    alignment.indent = y.indent
+                }
+                if (y.wrapText) {
+                    alignment.wrapText = y.wrapText
+                }
                 xf.alignment = alignment
                 break
             case '</alignment>':
@@ -446,8 +502,10 @@ function write_cellXfs(cellXfs) /*:string*/ {
         o[o.length] = writextag('xf', null, c)
     })
     o[o.length] = '</cellXfs>'
-    if (o.length === 2) return ''
-    o[0] = writextag('cellXfs', null, {count: o.length - 2}).replace('/>', '>')
+    if (o.length === 2) {
+        return ''
+    }
+    o[0] = writextag('cellXfs', null, { count: o.length - 2 }).replace('/>', '>')
     return o.join('')
 }
 
@@ -461,26 +519,38 @@ export const parse_sty_xml = function make_pstyx() {
 
     return function parse_sty_xml(data, themes, opts) {
         const styles = {}
-        if (!data) return styles
+        if (!data) {
+            return styles
+        }
         /* 18.8.39 styleSheet CT_Stylesheet */
         let t
 
         /* 18.8.31 numFmts CT_NumFmts ? */
-        if (t = data.match(numFmtRegex)) parse_numFmts(t, styles, opts)
+        if (t = data.match(numFmtRegex)) {
+            parse_numFmts(t, styles, opts)
+        }
 
         /* 18.8.23 fonts CT_Fonts ? */
-        if (t = data.match(fontsRegex)) parse_fonts(t, styles, themes, opts)
+        if (t = data.match(fontsRegex)) {
+            parse_fonts(t, styles, themes, opts)
+        }
 
         /* 18.8.21 fills CT_Fills */
-        if (t = data.match(fillsRegex)) parse_fills(t, styles, themes, opts)
+        if (t = data.match(fillsRegex)) {
+            parse_fills(t, styles, themes, opts)
+        }
 
         /* 18.8.5 borders CT_Borders ? */
-        if (t = data.match(bordersRegex)) parse_borders(t, styles, themes, opts)
+        if (t = data.match(bordersRegex)) {
+            parse_borders(t, styles, themes, opts)
+        }
 
         /* 18.8.9 cellStyleXfs CT_CellStyleXfs ? */
 
         /* 18.8.10 cellXfs CT_CellXfs ? */
-        if (t = data.match(cellXfRegex)) parse_cellXfs(t, styles, opts)
+        if (t = data.match(cellXfRegex)) {
+            parse_cellXfs(t, styles, opts)
+        }
 
         /* 18.8.15 dxfs CT_Dxfs ? */
         /* 18.8.42 tableStyles CT_TableStyles ? */
@@ -501,12 +571,16 @@ RELS.STY = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/
 export function write_sty_xml(wb /*:Workbook*/, opts) /*:string*/ {
     const o = [XML_HEADER, STYLES_XML_ROOT]
     let w
-    if (wb.SSF && (w = write_numFmts(wb.SSF)) != null) o[o.length] = w
+    if (wb.SSF && (w = write_numFmts(wb.SSF)) != null) {
+        o[o.length] = w
+    }
     o[o.length] = '<fonts count="1"><font><sz val="12"/><color theme="1"/><name val="Calibri"/><family val="2"/><scheme val="minor"/></font></fonts>'
     o[o.length] = '<fills count="2"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill></fills>'
     o[o.length] = '<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
     o[o.length] = '<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
-    if (w = write_cellXfs(opts.cellXfs)) o[o.length] = w
+    if (w = write_cellXfs(opts.cellXfs)) {
+        o[o.length] = w
+    }
     o[o.length] = '<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>'
     o[o.length] = '<dxfs count="0"/>'
     o[o.length] = '<tableStyles count="0" defaultTableStyle="TableStyleMedium9" defaultPivotStyle="PivotStyleMedium4"/>'

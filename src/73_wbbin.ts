@@ -26,7 +26,9 @@ export function parse_BrtBundleSh(data, length /*:number*/) {
 }
 
 export function write_BrtBundleSh(data, o?) {
-    if (!o) o = new_buf(127)
+    if (!o) {
+        o = new_buf(127)
+    }
     o.write_shift(4, data.Hidden)
     o.write_shift(4, data.iTabID)
     write_RelID(data.strRelID, o)
@@ -43,7 +45,9 @@ export function parse_BrtWbProp(data, length) {
 }
 
 export function write_BrtWbProp(data, o) {
-    if (!o) o = new_buf(68)
+    if (!o) {
+        o = new_buf(68)
+    }
     o.write_shift(4, 0)
     o.write_shift(4, 0)
     write_XLSBCodeName('ThisWorkbook', o)
@@ -74,19 +78,23 @@ export function parse_BrtName(data, length, opts) {
     // unusedstring2: XLNullableWideString
     //}
     data.l = end
-    const out = {Name: name, Ptg: formula, Comment: comment}
+    const out = { Name: name, Ptg: formula, Comment: comment }
     /*:any*/
-    if (itab < 0xFFFFFFF) out.Sheet = itab
+    if (itab < 0xFFFFFFF) {
+        out.Sheet = itab
+    }
     return out
 }
 
 /* [MS-XLSB] 2.1.7.60 Workbook */
 export function parse_wb_bin(data, opts) /*:WorkbookFile*/ {
-    const wb = {AppVersion: {}, WBProps: {}, WBView: [], Sheets: [], CalcPr: {}, xmlns: ''}
+    const wb = { AppVersion: {}, WBProps: {}, WBView: [], Sheets: [], CalcPr: {}, xmlns: '' }
     let pass = false
     let z
 
-    if (!opts) opts = {}
+    if (!opts) {
+        opts = {}
+    }
     opts.biff = 12
 
     const Names = []
@@ -190,7 +198,7 @@ export function write_BUNDLESHS(ba, wb, opts) {
     write_record(ba, 'BrtBeginBundleShs')
     for (let idx = 0; idx != wb.SheetNames.length; ++idx) {
         const viz = wb.Workbook && wb.Workbook.Sheets && wb.Workbook.Sheets[idx] && wb.Workbook.Sheets[idx].Hidden || 0
-        const d = {Hidden: viz, iTabID: idx + 1, strRelID: `rId${idx + 1}`, name: wb.SheetNames[idx]}
+        const d = { Hidden: viz, iTabID: idx + 1, strRelID: `rId${idx + 1}`, name: wb.SheetNames[idx] }
         write_record(ba, 'BrtBundleSh', write_BrtBundleSh(d))
     }
     write_record(ba, 'BrtEndBundleShs')
@@ -198,8 +206,12 @@ export function write_BUNDLESHS(ba, wb, opts) {
 
 /* [MS-XLSB] 2.4.643 BrtFileVersion */
 export function write_BrtFileVersion(data, o) {
-    if (!o) o = new_buf(127)
-    for (let i = 0; i != 4; ++i) o.write_shift(4, 0);
+    if (!o) {
+        o = new_buf(127)
+    }
+    for (let i = 0; i != 4; ++i) {
+        o.write_shift(4, 0)
+    }
     write_XLWideString('SheetJS', o)
     write_XLWideString(version, o)
     write_XLWideString(version, o)
@@ -210,7 +222,9 @@ export function write_BrtFileVersion(data, o) {
 
 /* [MS-XLSB] 2.4.298 BrtBookView */
 export function write_BrtBookView(idx, o?) {
-    if (!o) o = new_buf(29)
+    if (!o) {
+        o = new_buf(29)
+    }
     o.write_shift(-4, 0)
     o.write_shift(-4, 460)
     o.write_shift(4, 28800)
@@ -226,7 +240,9 @@ export function write_BrtBookView(idx, o?) {
 /* [MS-XLSB] 2.1.7.60 Workbook */
 export function write_BOOKVIEWS(ba, wb, opts) {
     /* required if hidden tab appears before visible tab */
-    if (!wb.Workbook || !wb.Workbook.Sheets) return
+    if (!wb.Workbook || !wb.Workbook.Sheets) {
+        return
+    }
     const sheets = wb.Workbook.Sheets
     let i = 0
     let vistab = -1
@@ -234,9 +250,13 @@ export function write_BOOKVIEWS(ba, wb, opts) {
     for (; i < sheets.length; ++i) {
         if (!sheets[i] || !sheets[i].Hidden && vistab == -1) {
             vistab = i
-        } else if (sheets[i].Hidden == 1 && hidden == -1) hidden = i
+        } else if (sheets[i].Hidden == 1 && hidden == -1) {
+            hidden = i
+        }
     }
-    if (hidden > vistab) return
+    if (hidden > vistab) {
+        return
+    }
     write_record(ba, 'BrtBeginBookViews')
     write_record(ba, 'BrtBookView', write_BrtBookView(vistab))
     /* 1*(BrtBookView *FRT) */
@@ -245,7 +265,9 @@ export function write_BOOKVIEWS(ba, wb, opts) {
 
 /* [MS-XLSB] 2.4.302 BrtCalcProp */
 export function write_BrtCalcProp(data, o) {
-    if (!o) o = new_buf(26)
+    if (!o) {
+        o = new_buf(26)
+    }
     o.write_shift(4, 0)
     /* force recalc */
     o.write_shift(4, 1)
@@ -259,7 +281,9 @@ export function write_BrtCalcProp(data, o) {
 
 /* [MS-XLSB] 2.4.640 BrtFileRecover */
 export function write_BrtFileRecover(data, o) {
-    if (!o) o = new_buf(1)
+    if (!o) {
+        o = new_buf(1)
+    }
     o.write_shift(1, 0)
     return o
 }

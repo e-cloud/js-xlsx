@@ -5,15 +5,23 @@ import { encode_cell, encode_col, encode_row, fix_col, fix_row } from './27_csfu
 export function shift_cell_xls(cell, tgt /*:any*/, opts? /*:?any*/) {
     const out = dup(cell)
     if (tgt.s) {
-        if (out.cRel) out.c += tgt.s.c
-        if (out.rRel) out.r += tgt.s.r
+        if (out.cRel) {
+            out.c += tgt.s.c
+        }
+        if (out.rRel) {
+            out.r += tgt.s.r
+        }
     } else {
         out.c += tgt.c
         out.r += tgt.r
     }
     if (!opts || opts.biff < 12) {
-        while (out.c >= 0x100) out.c -= 0x100
-        while (out.r >= 0x10000) out.r -= 0x10000
+        while (out.c >= 0x100) {
+            out.c -= 0x100
+        }
+        while (out.r >= 0x10000) {
+            out.r -= 0x10000
+        }
     }
     return out
 }
@@ -27,8 +35,12 @@ export function shift_range_xls(cell, range, opts) {
 
 export function encode_cell_xls(c) /*:string*/ {
     let s = encode_cell(c)
-    if (c.cRel === 0) s = fix_col(s)
-    if (c.rRel === 0) s = fix_row(s)
+    if (c.cRel === 0) {
+        s = fix_col(s)
+    }
+    if (c.rRel === 0) {
+        s = fix_row(s)
+    }
     return s
 }
 

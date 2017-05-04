@@ -3,7 +3,9 @@ import { evert_RE, XLSBRecordEnum } from './77_parsetab'
 
 /* [MS-XLSB] 2.1.4 Record */
 export function recordhopper(data, cb /*:RecordHopperCB*/, opts? /*:?any*/) {
-    if (!data) return
+    if (!data) {
+        return
+    }
     let tmpbyte
     let cntbyte
     let length
@@ -26,7 +28,9 @@ export function recordhopper(data, cb /*:RecordHopperCB*/, opts? /*:?any*/) {
         tgt = data.l + length
         const d = R.f(data, length, opts)
         data.l = tgt
-        if (cb(d, R.n, RT)) return
+        if (cb(d, R.n, RT)) {
+            return
+        }
     }
 }
 
@@ -44,14 +48,22 @@ export function buf_array() /*:BufArray*/ {
     let curbuf = newblk(blksz)
 
     const endbuf = function ba_endbuf() {
-        if (!curbuf) return
-        if (curbuf.length > curbuf.l) curbuf = curbuf.slice(0, curbuf.l)
-        if (curbuf.length > 0) bufs.push(curbuf)
+        if (!curbuf) {
+            return
+        }
+        if (curbuf.length > curbuf.l) {
+            curbuf = curbuf.slice(0, curbuf.l)
+        }
+        if (curbuf.length > 0) {
+            bufs.push(curbuf)
+        }
         curbuf = null
     }
 
     const next = function ba_next(sz) {
-        if (curbuf && sz < curbuf.length - curbuf.l) return curbuf
+        if (curbuf && sz < curbuf.length - curbuf.l) {
+            return curbuf
+        }
         endbuf()
         return curbuf = newblk(Math.max(sz + 1, blksz))
     }
@@ -67,19 +79,29 @@ export function buf_array() /*:BufArray*/ {
         next(blksz)
     }
 
-    return {next, push, end, _bufs: bufs}
+    return { next, push, end, _bufs: bufs }
     /*:any*/
 }
 
 export function write_record(ba /*:BufArray*/, type /*:string*/, payload, length? /*:?number*/) {
     const t /*:number*/ = Number(evert_RE[type])
     let l
-    if (isNaN(t)) return // TODO: throw something here?
-    if (!length) length = XLSBRecordEnum[t].p || (payload || []).length || 0
+    if (isNaN(t)) {
+        return
+    } // TODO: throw something here?
+    if (!length) {
+        length = XLSBRecordEnum[t].p || (payload || []).length || 0
+    }
     l = 1 + (t >= 0x80 ? 1 : 0) + 1 + length
-    if (length >= 0x80) ++l
-    if (length >= 0x4000) ++l
-    if (length >= 0x200000) ++l
+    if (length >= 0x80) {
+        ++l
+    }
+    if (length >= 0x4000) {
+        ++l
+    }
+    if (length >= 0x200000) {
+        ++l
+    }
     const o = ba.next(l)
     if (t <= 0x7F) {
         o.write_shift(1, t)
@@ -96,5 +118,7 @@ export function write_record(ba /*:BufArray*/, type /*:string*/, payload, length
             break
         }
     }
-    if (/*:: length != null &&*/length > 0 && is_buf(payload)) ba.push(payload)
+    if (/*:: length != null &&*/length > 0 && is_buf(payload)) {
+        ba.push(payload)
+    }
 }

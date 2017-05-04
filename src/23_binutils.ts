@@ -117,29 +117,39 @@ export let is_buf = function is_buf_a(a) {
 
 if (has_buf /*:: && typeof Buffer != 'undefined'*/) {
     __utf16le = function utf16le_b(b, s, e) {
-        if (!Buffer.isBuffer(b)) return ___utf16le(b, s, e)
+        if (!Buffer.isBuffer(b)) {
+            return ___utf16le(b, s, e)
+        }
         return b.toString('utf16le', s, e)
     }
     __hexlify = function (b, s, l) {
         return Buffer.isBuffer(b) ? b.toString('hex', s, s + l) : ___hexlify(b, s, l)
     }
     __lpstr = function lpstr_b(b, i) {
-        if (!Buffer.isBuffer(b)) return ___lpstr(b, i)
+        if (!Buffer.isBuffer(b)) {
+            return ___lpstr(b, i)
+        }
         const len = b.readUInt32LE(i)
         return len > 0 ? b.toString('utf8', i + 4, i + 4 + len - 1) : ''
     }
     __lpwstr = function lpwstr_b(b, i) {
-        if (!Buffer.isBuffer(b)) return ___lpwstr(b, i)
+        if (!Buffer.isBuffer(b)) {
+            return ___lpwstr(b, i)
+        }
         const len = 2 * b.readUInt32LE(i)
         return b.toString('utf16le', i + 4, i + 4 + len - 1)
     }
     __lpp4 = function lpp4_b(b, i) {
-        if (!Buffer.isBuffer(b)) return ___lpp4(b, i)
+        if (!Buffer.isBuffer(b)) {
+            return ___lpp4(b, i)
+        }
         const len = b.readUInt32LE(i)
         return b.toString('utf16le', i + 4, i + 4 + len)
     }
     __8lpp4 = function lpp4_8b(b, i) {
-        if (!Buffer.isBuffer(b)) return ___8lpp4(b, i)
+        if (!Buffer.isBuffer(b)) {
+            return ___8lpp4(b, i)
+        }
         const len = b.readUInt32LE(i)
         return b.toString('utf8', i + 4, i + 4 + len)
     }
@@ -153,7 +163,9 @@ if (has_buf /*:: && typeof Buffer != 'undefined'*/) {
         return Buffer.isBuffer(bufs[0]) ? Buffer.concat(bufs) : [].concat(...bufs)
     }
     __double = function double_(b, i) {
-        if (Buffer.isBuffer(b) /*::&& b instanceof Buffer*/) return b.readDoubleLE(i)
+        if (Buffer.isBuffer(b) /*::&& b instanceof Buffer*/) {
+            return b.readDoubleLE(i)
+        }
         return ___double(b, i)
     }
     is_buf = function is_buf_b(a) {
@@ -262,19 +274,25 @@ export function ReadShift(size /*:number*/, t /*:?string*/) {
         case 'lpwstr':
             o = __lpwstr(this, this.l)
             size = 5 + o.length
-            if (o[o.length - 1] == '\0') size += 2
+            if (o[o.length - 1] == '\0') {
+                size += 2
+            }
             break
         /* [MS-OFFCRYPTO] 2.1.2 Length-Prefixed Padded Unicode String (UNICODE-LP-P4) */
         case 'lpp4':
             size = 4 + __readUInt32LE(this, this.l)
             o = __lpp4(this, this.l)
-            if (size & 0x02) size += 2
+            if (size & 0x02) {
+                size += 2
+            }
             break
         /* [MS-OFFCRYPTO] 2.1.3 Length-Prefixed UTF-8 String (UTF-8-LP-P4) */
         case '8lpp4':
             size = 4 + __readUInt32LE(this, this.l)
             o = __8lpp4(this, this.l)
-            if (size & 0x03) size += 4 - (size & 0x03)
+            if (size & 0x03) {
+                size += 4 - (size & 0x03)
+            }
             break
 
         case 'cstr':
@@ -443,7 +461,9 @@ export function WriteShift(t /*:number*/, val /*:string|number*/, f /*:?string*/
 
 export function CheckField(hexstr, fld) {
     const m = __hexlify(this, this.l, hexstr.length >> 1)
-    if (m !== hexstr) throw `${fld}Expected ${hexstr} saw ${m}`
+    if (m !== hexstr) {
+        throw `${fld}Expected ${hexstr} saw ${m}`
+    }
     this.l += hexstr.length >> 1
 }
 

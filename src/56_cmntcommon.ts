@@ -10,7 +10,9 @@ export function parse_comments(zip, dirComments, sheets, sheetRels, opts) {
     for (let i = 0; i != dirComments.length; ++i) {
         const canonicalpath = dirComments[i]
         const comments = parse_cmnt(getzipdata(zip, canonicalpath.replace(/^\//, ''), true), canonicalpath, opts)
-        if (!comments || !comments.length) continue
+        if (!comments || !comments.length) {
+            continue
+        }
         // find the sheets targeted by these comments
         const sheetNames = keys(sheets)
         for (let j = 0; j != sheetNames.length; ++j) {
@@ -33,7 +35,9 @@ export function insertCommentsIntoSheet(sheetName, sheet, comments) {
     comments.forEach(function (comment) {
         if (dense) {
             r = decode_cell(comment.ref)
-            if (!sheet[r.r]) sheet[r.r] = []
+            if (!sheet[r.r]) {
+                sheet[r.r] = []
+            }
             cell = sheet[r.r][r.c]
         } else {
             cell = sheet[comment.ref]
@@ -47,16 +51,28 @@ export function insertCommentsIntoSheet(sheetName, sheet, comments) {
             }
             const range = safe_decode_range(sheet['!ref'] || 'BDWGO1000001:A1')
             const thisCell = decode_cell(comment.ref)
-            if (range.s.r > thisCell.r) range.s.r = thisCell.r
-            if (range.e.r < thisCell.r) range.e.r = thisCell.r
-            if (range.s.c > thisCell.c) range.s.c = thisCell.c
-            if (range.e.c < thisCell.c) range.e.c = thisCell.c
+            if (range.s.r > thisCell.r) {
+                range.s.r = thisCell.r
+            }
+            if (range.e.r < thisCell.r) {
+                range.e.r = thisCell.r
+            }
+            if (range.s.c > thisCell.c) {
+                range.s.c = thisCell.c
+            }
+            if (range.e.c < thisCell.c) {
+                range.e.c = thisCell.c
+            }
             const encoded = encode_range(range)
-            if (encoded !== sheet['!ref']) sheet['!ref'] = encoded
+            if (encoded !== sheet['!ref']) {
+                sheet['!ref'] = encoded
+            }
         }
 
-        if (!cell.c) cell.c = []
-        const o = {a: comment.author, t: comment.t, r: comment.r}
+        if (!cell.c) {
+            cell.c = []
+        }
+        const o = { a: comment.author, t: comment.t, r: comment.r }
         /*:any*/
         if (comment.h) {
             o.h = comment.h

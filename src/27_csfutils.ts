@@ -50,7 +50,7 @@ export function split_cell(cstr /*:string*/) /*:Array<string>*/ {
 
 export function decode_cell(cstr /*:string*/) /*:CellAddress*/ {
     const splt = split_cell(cstr)
-    return {c: decode_col(splt[0]), r: decode_row(splt[1])}
+    return { c: decode_col(splt[0]), r: decode_row(splt[1]) }
 }
 
 export function encode_cell(cell /*:CellAddress*/) /*:string*/ {
@@ -67,7 +67,7 @@ export function unfix_cell(cstr /*:string*/) /*:string*/ {
 
 export function decode_range(range /*:string*/) /*:Range*/ {
     const x = range.split(':').map(decode_cell)
-    return {s: x[0], e: x[x.length - 1]}
+    return { s: x[0], e: x[x.length - 1] }
 }
 
 /*# if only one arg, it is assumed to be a Range.  If 2 args, both are cell addresses */
@@ -77,27 +77,35 @@ export function encode_range(cs /*:CellAddrSpec|Range*/, ce? /*:?CellAddrSpec*/)
         return encode_range(cs.s, cs.e)
     }
     /*:: if((cs instanceof Range)) throw "unreachable"; */
-    if (typeof cs !== 'string') cs = encode_cell(cs /*:any*/)
-    if (typeof ce !== 'string') ce = encode_cell(ce /*:any*/)
+    if (typeof cs !== 'string') {
+        cs = encode_cell(cs /*:any*/)
+    }
+    if (typeof ce !== 'string') {
+        ce = encode_cell(ce /*:any*/)
+    }
     /*:: if(typeof cs !== 'string') throw "unreachable"; */
     /*:: if(typeof ce !== 'string') throw "unreachable"; */
     return cs == ce ? cs : `${cs}:${ce}`
 }
 
 export function safe_decode_range(range /*:string*/) /*:Range*/ {
-    const o = {s: {c: 0, r: 0}, e: {c: 0, r: 0}}
+    const o = { s: { c: 0, r: 0 }, e: { c: 0, r: 0 } }
     let idx = 0
     let i = 0
     let cc = 0
     const len = range.length
     for (idx = 0; i < len; ++i) {
-        if ((cc = range.charCodeAt(i) - 64) < 1 || cc > 26) break
+        if ((cc = range.charCodeAt(i) - 64) < 1 || cc > 26) {
+            break
+        }
         idx = 26 * idx + cc
     }
     o.s.c = --idx
 
     for (idx = 0; i < len; ++i) {
-        if ((cc = range.charCodeAt(i) - 48) < 0 || cc > 9) break
+        if ((cc = range.charCodeAt(i) - 48) < 0 || cc > 9) {
+            break
+        }
         idx = 10 * idx + cc
     }
     o.s.r = --idx
@@ -109,13 +117,17 @@ export function safe_decode_range(range /*:string*/) /*:Range*/ {
     }
 
     for (idx = 0; i != len; ++i) {
-        if ((cc = range.charCodeAt(i) - 64) < 1 || cc > 26) break
+        if ((cc = range.charCodeAt(i) - 64) < 1 || cc > 26) {
+            break
+        }
         idx = 26 * idx + cc
     }
     o.e.c = --idx
 
     for (idx = 0; i != len; ++i) {
-        if ((cc = range.charCodeAt(i) - 48) < 0 || cc > 9) break
+        if ((cc = range.charCodeAt(i) - 48) < 0 || cc > 9) {
+            break
+        }
         idx = 10 * idx + cc
     }
     o.e.r = --idx
@@ -139,10 +151,18 @@ export function safe_format_cell(cell /*:Cell*/, v /*:any*/) {
 }
 
 export function format_cell(cell /*:Cell*/, v? /*:any*/, o? /*:any*/) {
-    if (cell == null || cell.t == null || cell.t == 'z') return ''
-    if (cell.w !== undefined) return cell.w
-    if (cell.t == 'd' && !cell.z && o && o.dateNF) cell.z = o.dateNF
-    if (v == undefined) return safe_format_cell(cell, cell.v)
+    if (cell == null || cell.t == null || cell.t == 'z') {
+        return ''
+    }
+    if (cell.w !== undefined) {
+        return cell.w
+    }
+    if (cell.t == 'd' && !cell.z && o && o.dateNF) {
+        cell.z = o.dateNF
+    }
+    if (v == undefined) {
+        return safe_format_cell(cell, cell.v)
+    }
     return safe_format_cell(cell, v)
 }
 
@@ -150,27 +170,41 @@ export function sheet_to_workbook(sheet /*:Worksheet*/, opts) /*:Workbook*/ {
     const n = opts && opts.sheet ? opts.sheet : 'Sheet1'
     const sheets = {}
     sheets[n] = sheet
-    return {SheetNames: [n], Sheets: sheets}
+    return { SheetNames: [n], Sheets: sheets }
 }
 
 export function aoa_to_sheet(data /*:AOA*/, opts /*:?any*/) /*:Worksheet*/ {
     const o = opts || {}
-    if (DENSE != null && o.dense == null) o.dense = DENSE
+    if (DENSE != null && o.dense == null) {
+        o.dense = DENSE
+    }
     const ws /*:Worksheet*/ = o.dense ? [] /*:any*/ : {}
     /*:any*/
-    const range /*:Range*/ = {s: {c: 10000000, r: 10000000}, e: {c: 0, r: 0}}
+    const range /*:Range*/ = { s: { c: 10000000, r: 10000000 }, e: { c: 0, r: 0 } }
     /*:any*/
     for (let R = 0; R != data.length; ++R) {
         for (let C = 0; C != data[R].length; ++C) {
-            if (typeof data[R][C] === 'undefined') continue
-            const cell /*:Cell*/ = {v: data[R][C]}
+            if (typeof data[R][C] === 'undefined') {
+                continue
+            }
+            const cell /*:Cell*/ = { v: data[R][C] }
             /*:any*/
-            if (range.s.r > R) range.s.r = R
-            if (range.s.c > C) range.s.c = C
-            if (range.e.r < R) range.e.r = R
-            if (range.e.c < C) range.e.c = C
+            if (range.s.r > R) {
+                range.s.r = R
+            }
+            if (range.s.c > C) {
+                range.s.c = C
+            }
+            if (range.e.r < R) {
+                range.e.r = R
+            }
+            if (range.e.c < C) {
+                range.e.c = C
+            }
             if (cell.v === null) {
-                if (!o.cellStubs) continue
+                if (!o.cellStubs) {
+                    continue
+                }
                 cell.t = 'z'
             } else if (typeof cell.v === 'number') {
                 cell.t = 'n'
@@ -190,14 +224,18 @@ export function aoa_to_sheet(data /*:AOA*/, opts /*:?any*/) /*:Worksheet*/ {
                 cell.t = 's'
             }
             if (o.dense) {
-                if (!ws[R]) ws[R] = []
+                if (!ws[R]) {
+                    ws[R] = []
+                }
                 ws[R][C] = cell
             } else {
-                const cell_ref = encode_cell({c: C, r: R} /*:any*/)
+                const cell_ref = encode_cell({ c: C, r: R } /*:any*/)
                 ws[cell_ref] = cell
             }
         }
     }
-    if (range.s.c < 10000000) ws['!ref'] = encode_range(range)
+    if (range.s.c < 10000000) {
+        ws['!ref'] = encode_range(range)
+    }
     return ws
 }

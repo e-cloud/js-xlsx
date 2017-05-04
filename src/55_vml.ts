@@ -22,16 +22,16 @@ export function write_comments_vml(rId, comments) {
         writextag('o:shapelayout', writextag('o:idmap', null, {
             'v:ext': 'edit',
             'data': rId,
-        }), {'v:ext': 'edit'}),
+        }), { 'v:ext': 'edit' }),
         writextag('v:shapetype',
             [
-                writextag('v:stroke', null, {joinstyle: 'miter'}),
+                writextag('v:stroke', null, { joinstyle: 'miter' }),
                 writextag('v:path', null, {
                     gradientshapeok: 't',
                     'o:connecttype': 'rect',
                 }),
             ].join(''),
-            {id: '_x0000_t202', 'o:spt': 202, coordsize: csize.join(','), path: bbox},
+            { id: '_x0000_t202', 'o:spt': 202, coordsize: csize.join(','), path: bbox },
         ),
     ]
 
@@ -53,12 +53,12 @@ export function write_comments_vml(rId, comments) {
             writextag('v:fill', writextag('o:fill', null, {
                 type: 'gradientUnscaled',
                 'v:ext': 'view',
-            }), {'color2': '#BEFF82', 'angle': '-180', 'type': 'gradient'}),
+            }), { 'color2': '#BEFF82', 'angle': '-180', 'type': 'gradient' }),
             writextag('v:shadow', null, {
                 on: 't',
                 'obscured': 't',
             }),
-            writextag('v:path', null, {'o:connecttype': 'none'}),
+            writextag('v:path', null, { 'o:connecttype': 'none' }),
             '<v:textbox><div style="text-align:left"></div></v:textbox>',
             '<x:ClientData ObjectType="Note">',
             '<x:MoveWithCells/>',

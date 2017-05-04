@@ -16,8 +16,12 @@ export function parsexmltag(tag /*:string*/, skip_root? /*:?boolean*/) /*:any*/ 
             break
         }
     }
-    if (!skip_root) z[0] = tag.substr(0, eq)
-    if (eq === tag.length) return z
+    if (!skip_root) {
+        z[0] = tag.substr(0, eq)
+    }
+    if (eq === tag.length) {
+        return z
+    }
     const m = tag.match(attregexg)
     let j = 0
     let v = ''
@@ -29,13 +33,17 @@ export function parsexmltag(tag /*:string*/, skip_root? /*:?boolean*/) /*:any*/ 
         for (i = 0; i != m.length; ++i) {
             cc = m[i]
             for (c = 0; c != cc.length; ++c) {
-                if (cc.charCodeAt(c) === 61) break
+                if (cc.charCodeAt(c) === 61) {
+                    break
+                }
             }
             q = cc.substr(0, c)
             quot = (eq = cc.charCodeAt(c + 1)) == 34 || eq == 39 ? 1 : 0
             v = cc.substring(c + 1 + quot, cc.length - quot)
             for (j = 0; j != q.length; ++j) {
-                if (q.charCodeAt(j) === 58) break
+                if (q.charCodeAt(j) === 58) {
+                    break
+                }
             }
             if (j === q.length) {
                 if (q.indexOf('_') > 0) {
@@ -207,12 +215,16 @@ if (has_buf) {
         return out.toString('ucs2')
     }
     const corpus = 'foo bar baz\xE2\x98\x83\xF0\x9F\x8D\xA3'
-    if (utf8read(corpus) == utf8readb(corpus)) utf8read = utf8readb
+    if (utf8read(corpus) == utf8readb(corpus)) {
+        utf8read = utf8readb
+    }
     // $FlowIgnore
     const utf8readc = function utf8readc(data) {
         return new Buffer(data, 'binary').toString('utf8')
     }
-    if (utf8read(corpus) == utf8readc(corpus)) utf8read = utf8readc
+    if (utf8read(corpus) == utf8readc(corpus)) {
+        utf8read = utf8readc
+    }
 }
 
 // matches <foo>...</foo> extracts content
@@ -221,7 +233,9 @@ export const matchtag = function () {
     /*:any*/
     return function matchtag(f, g? /*:?string*/) /*:RegExp*/ {
         const t = `${f}|${g || ''}`
-        if (mtcache[t]) return mtcache[t]
+        if (mtcache[t]) {
+            return mtcache[t]
+        }
         return mtcache[t] = new RegExp(`<(?:\\w+:)?${f}(?: xml:space="preserve")?(?:[^>]*)>([^\u2603]*)</(?:\\w+:)?${f}>`, g || '')
     }
 }()
@@ -229,7 +243,9 @@ export const matchtag = function () {
 const vtregex = function () {
     const vt_cache = {}
     return function vt_regex(bt) {
-        if (vt_cache[bt] !== undefined) return vt_cache[bt]
+        if (vt_cache[bt] !== undefined) {
+            return vt_cache[bt]
+        }
         return vt_cache[bt] = new RegExp(`<(?:vt:)?${bt}>(.*?)</(?:vt:)?${bt}>`, 'g')
     }
 }()
@@ -245,7 +261,7 @@ export function parseVector(data) {
     const res = []
     matches.forEach(function (x) {
         const v = x.replace(vtvregex, '').match(vtmregex)
-        res.push({v: utf8read(v[2]), t: v[1]})
+        res.push({ v: utf8read(v[2]), t: v[1] })
     })
     return res
 }
@@ -260,14 +276,18 @@ export function wxt_helper(h) /*:string*/ {
 }
 
 export function writextag(f, g, h?) {
-    return `<${f}${isval(h) /*:: && h */ ? wxt_helper(h) : ''}${isval(g) /*:: && g */ ? (g.match(wtregex) ? ' xml:space="preserve"' : '') + `>${g}</${f}` : '/'}>`
+    return `<${f}${isval(h) /*:: && h */ ? wxt_helper(h) : ''}${isval(g) /*:: && g */ ? (g.match(wtregex)
+            ? ' xml:space="preserve"'
+            : '') + `>${g}</${f}` : '/'}>`
 }
 
 export function write_w3cdtf(d /*:Date*/, t? /*:?boolean*/) /*:string*/ {
     try {
         return d.toISOString().replace(/\.\d*/, '')
     } catch (e) {
-        if (t) throw e
+        if (t) {
+            throw e
+        }
     }
     return ''
 }

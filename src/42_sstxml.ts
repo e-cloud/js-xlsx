@@ -67,7 +67,9 @@ const parse_rs = function parse_rs_factory() {
                     /* 18.8.36 shadow CT_BooleanProperty */
                     /* ** not required . */
                     case '<shadow':
-                        if (!y.val) break
+                        if (!y.val) {
+                            break
+                        }
                     /* falls through */
                     case '<shadow>':
                     case '<shadow/>':
@@ -78,13 +80,17 @@ const parse_rs = function parse_rs_factory() {
 
                     /* 18.4.1 charset CT_IntProperty TODO */
                     case '<charset':
-                        if (y.val == '1') break
+                        if (y.val == '1') {
+                            break
+                        }
                         cp = CS2CP[parseInt(y.val, 10)]
                         break
 
                     /* 18.4.2 outline CT_BooleanProperty TODO */
                     case '<outline':
-                        if (!y.val) break
+                        if (!y.val) {
+                            break
+                        }
                     /* falls through */
                     case '<outline>':
                     case '<outline/>':
@@ -105,7 +111,9 @@ const parse_rs = function parse_rs_factory() {
 
                     /* 18.4.10 strike CT_BooleanProperty */
                     case '<strike':
-                        if (!y.val) break
+                        if (!y.val) {
+                            break
+                        }
                     /* falls through */
                     case '<strike>':
                     case '<strike/>':
@@ -116,7 +124,9 @@ const parse_rs = function parse_rs_factory() {
 
                     /* 18.4.13 u CT_UnderlineProperty */
                     case '<u':
-                        if (!y.val) break
+                        if (!y.val) {
+                            break
+                        }
                         switch (y.val) {
                             case 'double':
                                 font.uval = 'double'
@@ -138,7 +148,9 @@ const parse_rs = function parse_rs_factory() {
 
                     /* 18.8.2 b */
                     case '<b':
-                        if (y.val == '0') break
+                        if (y.val == '0') {
+                            break
+                        }
                     /* falls through */
                     case '<b>':
                     case '<b/>':
@@ -149,7 +161,9 @@ const parse_rs = function parse_rs_factory() {
 
                     /* 18.8.26 i */
                     case '<i':
-                        if (y.val == '0') break
+                        if (y.val == '0') {
+                            break
+                        }
                     /* falls through */
                     case '<i>':
                     case '<i/>':
@@ -160,7 +174,9 @@ const parse_rs = function parse_rs_factory() {
 
                     /* 18.3.1.15 color CT_Color TODO: tint, theme, auto, indexed */
                     case '<color':
-                        if (y.rgb) font.color = y.rgb.substr(2, 6)
+                        if (y.rgb) {
+                            font.color = y.rgb.substr(2, 6)
+                        }
                         break
 
                     /* 18.8.18 family ST_FontFamily */
@@ -186,11 +202,21 @@ const parse_rs = function parse_rs_factory() {
         }
         const style = []
 
-        if (font.u) style.push('text-decoration: underline;')
-        if (font.uval) style.push(`text-underline-style:${font.uval};`)
-        if (font.sz) style.push(`font-size:${font.sz};`)
-        if (font.outline) style.push('text-effect: outline;')
-        if (font.shadow) style.push('text-shadow: auto;')
+        if (font.u) {
+            style.push('text-decoration: underline;')
+        }
+        if (font.uval) {
+            style.push(`text-underline-style:${font.uval};`)
+        }
+        if (font.sz) {
+            style.push(`font-size:${font.sz};`)
+        }
+        if (font.outline) {
+            style.push('text-effect: outline;')
+        }
+        if (font.shadow) {
+            style.push('text-shadow: auto;')
+        }
         intro.push(`<span style="${style.join('')}">`)
 
         if (font.b) {
@@ -208,7 +234,9 @@ const parse_rs = function parse_rs_factory() {
 
         if (align == 'superscript') {
             align = 'sup'
-        } else if (align == 'subscript') align = 'sub'
+        } else if (align == 'subscript') {
+            align = 'sub'
+        }
         if (align != '') {
             intro.push(`<${align}>`)
             outro.push(`</${align}>`)
@@ -232,7 +260,9 @@ const parse_rs = function parse_rs_factory() {
         terms[1] = t[1]
 
         const rpr = r.match(rpregex)
-        if (isval(rpr) /*:: && rpr*/) cp = parse_rpr(rpr[1], terms[0], terms[2])
+        if (isval(rpr) /*:: && rpr*/) {
+            cp = parse_rpr(rpr[1], terms[0], terms[2])
+        }
 
         return terms[0].join('') + terms[1].replace(nlregex, '<br/>') + terms[2].join('')
     }
@@ -250,14 +280,18 @@ const sirphregex = /<(?:\w+:)?rPh.*?>(.*?)<\/(?:\w+:)?rPh>/g
 export function parse_si(x, opts?) {
     const html = opts ? opts.cellHTML : true
     const z = {}
-    if (!x) return null
+    if (!x) {
+        return null
+    }
     let y
     /* 18.4.12 t ST_Xstring (Plaintext String) */
     // TODO: is whitespace actually valid here?
     if (x.match(/^\s*<(?:\w+:)?t[^>]*>/)) {
         z.t = utf8read(unescapexml(x.substr(x.indexOf('>') + 1).split(/<\/(?:\w+:)?t>/)[0]))
         z.r = utf8read(x)
-        if (html) z.h = escapehtml(z.t)
+        if (html) {
+            z.h = escapehtml(z.t)
+        }
     }
     /* 18.4.4 r CT_RElt (Rich Text Run) */
     else if (y = x.match(sirregex)) {
@@ -280,7 +314,9 @@ export function parse_sst_xml(data /*:string*/, opts) /*:SST*/ {
     const s /*:SST*/ = []
     /*:any*/
     let ss = ''
-    if (!data) return s
+    if (!data) {
+        return s
+    }
     /* 18.4.9 sst CT_Sst */
     let sst = data.match(sstr0)
     if (isval(sst) /*:: && sst*/) {
@@ -302,7 +338,9 @@ RELS.SST = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/
 const straywsregex = /^\s|\s$|[\t\n\r]/
 
 export function write_sst_xml(sst /*:SST*/, opts) /*:string*/ {
-    if (!opts.bookSST) return ''
+    if (!opts.bookSST) {
+        return ''
+    }
     const o = [XML_HEADER]
     o[o.length] = writextag('sst', null, {
         xmlns: XMLNS.main[0],
@@ -310,15 +348,21 @@ export function write_sst_xml(sst /*:SST*/, opts) /*:string*/ {
         uniqueCount: sst.Unique,
     })
     for (let i = 0; i != sst.length; ++i) {
-        if (sst[i] == null) continue
+        if (sst[i] == null) {
+            continue
+        }
         const s /*:XLString*/ = sst[i]
         let sitag = '<si>'
         if (s.r) {
             sitag += s.r
         } else {
             sitag += '<t'
-            if (!s.t) s.t = ''
-            if (s.t.match(straywsregex)) sitag += ' xml:space="preserve"'
+            if (!s.t) {
+                s.t = ''
+            }
+            if (s.t.match(straywsregex)) {
+                sitag += ' xml:space="preserve"'
+            }
             sitag += `>${escapexml(s.t)}</t>`
         }
         sitag += '</si>'
