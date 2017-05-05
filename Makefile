@@ -1,22 +1,23 @@
 SHELL=/bin/bash
-LIB=xlsx
-FMT=xlsx xlsm xlsb ods xls xml misc full
+LibName=xlsx
+Format=xlsx xlsm xlsb ods xls xml misc full
 REQS=jszip.js
-ADDONS=dist/cpexcel.js
-AUXTARGETS=
-CMDS=bin/xlsx.njs
-HTMLLINT=index.html
+Addons=dist/cpexcel.js
+AuxTargets=
+Commands=bin/xlsx.njs
+HtmlLint=index.html
 
-# upper-cased LIB
-ULIB=$(shell echo $(LIB) | tr a-z A-Z)
-DEPS=$(sort $(wildcard bits/*.js))
-TARGET=$(LIB).js
-FLOWTARGET=$(LIB).flow.js
-FLOWAUX=$(patsubst %.js,%.flow.js,$(AUXTARGETS))
-AUXSCPTS=xlsxworker1.js xlsxworker2.js xlsxworker.js
-FLOWTGTS=$(TARGET) $(AUXTARGETS) $(AUXSCPTS)
-UGLIFYOPTS=--support-ie8
-CLOSURE=/usr/local/lib/node_modules/google-closure-compiler/compiler.jar
+# upper-cased LibName
+ULIB=$(shell echo $(LibName) | tr a-z A-Z)
+
+SourceBits=$(sort $(wildcard bits/*.js))
+Target=$(LibName).js
+FlowTarget=$(LibName).flow.js
+FlowAux=$(patsubst %.js,%.flow.js,$(AuxTargets))
+AuxScripts=xlsxworker1.js xlsxworker2.js xlsxworker.js
+FlowTargets=$(Target) $(AuxTargets) $(AuxScripts)
+UglifyOpts=--support-ie8
+Closure=/usr/local/lib/node_modules/google-closure-compiler/compiler.jar
 
 ## Main Targets
 
@@ -24,14 +25,15 @@ CLOSURE=/usr/local/lib/node_modules/google-closure-compiler/compiler.jar
 # build xlsx.js
 # ----------------------------------
 .PHONY: all
-all: $(TARGET) $(AUXTARGETS) $(AUXSCPTS) ## Build library and auxiliary scripts
+all: $(Target) $(AuxTargets) $(AuxScripts) ## Build library and auxiliary scripts
 
-$(FLOWTGTS): %.js : %.flow.js
+# convert *.flow.js to *.js
+$(FlowTargets): %.js : %.flow.js
 	node -e 'process.stdout.write(require("fs").readFileSync("$<","utf8").replace(/^[ \t]*\/\*[:#][^*]*\*\/\s*(\n)?/gm,"").replace(/\/\*[:#][^*]*\*\//gm,""))' > $@
 
 
 # concat all files in "bits/"" and generate as "xlsx.js"
-$(FLOWTARGET): $(DEPS)
+$(FlowTarget): $(SourceBits)
 	cat $^ | tr -d '\15\32' > $@
 
 # pick the version from "package.json" to update version in "bits/01_version.js"
@@ -48,7 +50,7 @@ bits/18_cfb.js: node_modules/cfb/xlscfb.flow.js
 # remove "xlsx.js"
 .PHONY: clean
 clean: ## Remove targets and build artifacts
-	rm -f $(TARGET) $(FLOWTARGET)
+	rm -f $(Target) $(FlowTarget)
 
 # remove temporary files under repo root
 .PHONY: clean-data
@@ -72,16 +74,16 @@ init: ## Initial setup for development
 # ----------------------------------
 # minify the output files in dist folder
 .PHONY: dist
-dist: dist-deps $(TARGET) bower.json ## Prepare JS files for distribution
-	cp $(TARGET) dist/
+dist: dist-deps $(Target) bower.json ## Prepare JS files for distribution
+	cp $(Target) dist/
 	cp LICENSE dist/
-	uglifyjs $(UGLIFYOPTS) $(TARGET) -o dist/$(LIB).min.js --source-map dist/$(LIB).min.map --preamble "$$(head -n 1 bits/00_header.js)"
-	misc/strip_sourcemap.sh dist/$(LIB).min.js
-	uglifyjs $(UGLIFYOPTS) $(REQS) $(TARGET) -o dist/$(LIB).core.min.js --source-map dist/$(LIB).core.min.map --preamble "$$(head -n 1 bits/00_header.js)"
-	misc/strip_sourcemap.sh dist/$(LIB).core.min.js
-	uglifyjs $(UGLIFYOPTS) $(REQS) $(ADDONS) $(TARGET) $(AUXTARGETS) -o dist/$(LIB).full.min.js --source-map dist/$(LIB).full.min.map --preamble "$$(head -n 1 bits/00_header.js)"
-	misc/strip_sourcemap.sh dist/$(LIB).full.min.js
-	cat <(head -n 1 bits/00_header.js) $(REQS) $(ADDONS) $(TARGET) $(AUXTARGETS) > demos/requirejs/$(LIB).full.js
+	uglifyjs $(UglifyOpts) $(Target) -o dist/$(LibName).min.js --source-map dist/$(LibName).min.map --preamble "$$(head -n 1 bits/00_header.js)"
+	misc/strip_sourcemap.sh dist/$(LibName).min.js
+	uglifyjs $(UglifyOpts) $(REQS) $(Target) -o dist/$(LibName).core.min.js --source-map dist/$(LibName).core.min.map --preamble "$$(head -n 1 bits/00_header.js)"
+	misc/strip_sourcemap.sh dist/$(LibName).core.min.js
+	uglifyjs $(UglifyOpts) $(REQS) $(Addons) $(Target) $(AuxTargets) -o dist/$(LibName).full.min.js --source-map dist/$(LibName).full.min.map --preamble "$$(head -n 1 bits/00_header.js)"
+	misc/strip_sourcemap.sh dist/$(LibName).full.min.js
+	cat <(head -n 1 bits/00_header.js) $(REQS) $(Addons) $(Target) $(AuxTargets) > demos/requirejs/$(LibName).full.js
 
 # cp some deps into dist folder
 .PHONY: dist-deps
@@ -94,11 +96,13 @@ dist-deps: ## Copy dependencies for distribution
 # ----------------------------------
 # concat "odsbits/*.js" and generate as "ods.js"
 .PHONY: aux
-aux: $(AUXTARGETS)
+aux: $(AuxTargets)
 
 .PHONY: bytes
 bytes: ## display minified and gzipped file sizes
-	for i in dist/xlsx.min.js dist/xlsx.{core,full}.min.js; do printj "%-30s %7d %10d" $$i $$(wc -c < $$i) $$(gzip --best --stdout $$i | wc -c); done
+	for i in dist/xlsx.min.js dist/xlsx.{core,full}.min.js; do
+		printj "%-30s %7d %10d" $$i $$(wc -c < $$i) $$(gzip --best --stdout $$i | wc -c);
+	done
 
 .PHONY: graph
 graph: formats.png legend.png ## Rebuild format conversion graph
@@ -120,9 +124,9 @@ xlsx.exe: bin/xlsx.njs xlsx.js
 test mocha: test.js ## Run test suite
 	mocha -R spec -t 20000
 
-#* To run tests for one format, make test_<fmt>
+#* To run tests for one format, make test_<Format>
 #* To run the core test suite, make test_misc
-TESTFMT=$(patsubst %,test_%,$(FMT))
+TESTFMT=$(patsubst %,test_%,$(Format))
 .PHONY: $(TESTFMT)
 $(TESTFMT): test_%:
 	FMTS=$* make test
@@ -172,18 +176,18 @@ demo-systemjs: ## Run systemjs demo build
 # linting files
 # ----------------------------------
 .PHONY: lint
-lint: $(TARGET) $(AUXTARGETS) ## Run eslint checks
-	@eslint --ext .js,.njs,.json,.html,.htm $(TARGET) $(AUXTARGETS) $(CMDS) $(HTMLLINT) package.json bower.json
-	if [ -e $(CLOSURE) ]; then java -jar $(CLOSURE) $(REQS) $(FLOWTARGET) --jscomp_warning=reportUnknownTypes >/dev/null; fi
+lint: $(Target) $(AuxTargets) ## Run eslint checks
+	@eslint --ext .js,.njs,.json,.html,.htm $(Target) $(AuxTargets) $(Commands) $(HtmlLint) package.json bower.json
+	if [ -e $(Closure) ]; then java -jar $(Closure) $(REQS) $(FlowTarget) --jscomp_warning=reportUnknownTypes >/dev/null; fi
 
 .PHONY: old-lint
-old-lint: $(TARGET) $(AUXTARGETS) ## Run jshint and jscs checks
-	@jshint --show-non-errors $(TARGET) $(AUXTARGETS)
-	@jshint --show-non-errors $(CMDS)
+old-lint: $(Target) $(AuxTargets) ## Run jshint and jscs checks
+	@jshint --show-non-errors $(Target) $(AuxTargets)
+	@jshint --show-non-errors $(Commands)
 	@jshint --show-non-errors package.json bower.json
-	@jshint --show-non-errors --extract=always $(HTMLLINT)
-	@jscs $(TARGET) $(AUXTARGETS)
-	if [ -e $(CLOSURE) ]; then java -jar $(CLOSURE) $(REQS) $(FLOWTARGET) --jscomp_warning=reportUnknownTypes >/dev/null; fi
+	@jshint --show-non-errors --extract=always $(HtmlLint)
+	@jscs $(Target) $(AuxTargets)
+	if [ -e $(Closure) ]; then java -jar $(Closure) $(REQS) $(FlowTarget) --jscomp_warning=reportUnknownTypes >/dev/null; fi
 
 .PHONY: flow
 flow: lint ## Run flow checker
@@ -196,13 +200,13 @@ flow: lint ## Run flow checker
 .PHONY: cov
 cov: misc/coverage.html ## Run coverage test
 
-#* To run coverage tests for one format, make cov_<fmt>
-COVFMT=$(patsubst %,cov_%,$(FMT))
+#* To run coverage tests for one format, make cov_<Format>
+COVFMT=$(patsubst %,cov_%,$(Format))
 .PHONY: $(COVFMT)
 $(COVFMT): cov_%:
 	FMTS=$* make cov
 
-misc/coverage.html: $(TARGET) test.js
+misc/coverage.html: $(Target) test.js
 	mocha --require blanket -R html-cov -t 20000 > $@
 
 # generate coverage report for all formats
