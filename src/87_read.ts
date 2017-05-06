@@ -6,7 +6,7 @@ import { has_buf, s2a } from './05_buf'
 import * as CFB from './18_cfb'
 import { DBF, DIF, PRN, SYLK } from './40_harb'
 import { WK_ } from './41_lotus'
-import { _ssfopts } from './66_wscommon'
+import { _ssfopts, resetSSFOpts } from './66_wscommon'
 import { parse_xlml } from './75_xlml'
 import { parse_xlscfb } from './76_xls'
 import { parse_xlsxcfb, parse_zip } from './85_parsezip'
@@ -81,7 +81,7 @@ export function readSync(data /*:RawData*/, opts /*:?ParseOpts*/) /*:Workbook*/ 
     let d = data
     let n = [0]
     const o = opts || {}
-    _ssfopts = {}
+    resetSSFOpts({})
     if (o.dateNF) {
         _ssfopts.dateNF = o.dateNF
     }

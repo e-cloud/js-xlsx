@@ -1,4 +1,4 @@
-import { SSF } from './10_ssf'
+import * as SSF from './10_ssf'
 import { datenum, parseDate } from './20_jsutils'
 import { BErr } from './28_binstructs'
 import { RELS } from './31_rels'
@@ -6,6 +6,10 @@ import { char2width, px2char, rgb_tint, setMDW } from './45_styutils'
 
 export const strs = {} // shared strings
 export let _ssfopts = {} // spreadsheet formatting options
+
+export function resetSSFOpts (val) {
+    _ssfopts = val
+}
 
 RELS.WS = [
     'http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet',

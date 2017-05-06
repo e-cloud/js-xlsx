@@ -1,4 +1,4 @@
-import { SSF } from './10_ssf'
+import * as SSF from './10_ssf'
 
 /* map from xlml named formats to SSF TODO: localize */
 export const XLMLFormatMap /*{[string]:string}*/ = {

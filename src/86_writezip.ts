@@ -1,5 +1,5 @@
 import * as JSZip from 'jszip'
-import { make_ssf, SSF } from './10_ssf'
+import * as SSF from './10_ssf'
 import { evert_num, keys } from './20_jsutils'
 import { write_ct } from './30_ctype'
 import { add_rels, get_rels_path, RELS, write_rels } from './31_rels'
@@ -23,7 +23,7 @@ export function write_zip(wb /*:Workbook*/, opts /*:WriteOpts*/) /*:ZIP*/ {
     }
     if (wb && wb.SSF) {
         // $FlowIgnore
-        make_ssf(SSF)
+        SSF.make_ssf()
         SSF.load_table(wb.SSF)
         // $FlowIgnore
         opts.revssf = evert_num(wb.SSF)

@@ -1,7 +1,7 @@
 import { reset_cp, setCurrentCodepage } from './02_codepage'
 import { DENSE } from './03_consts'
 import { bconcat } from './05_buf'
-import { SSF } from './10_ssf'
+import * as SSF from './10_ssf'
 /* [MS-OLEDS] 2.3.8 CompObjStream */
 import { __lpstr, __readUInt16LE, __readUInt32LE, prep_blob } from './23_binutils'
 import { encode_cell, encode_range } from './27_csfutils'

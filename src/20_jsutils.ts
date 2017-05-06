@@ -1,4 +1,4 @@
-import { SSF } from './10_ssf'
+import * as SSF from './10_ssf'
 
 export function isval(x /*:?any*/) /*:boolean*/ {
     return x !== undefined && x !== null

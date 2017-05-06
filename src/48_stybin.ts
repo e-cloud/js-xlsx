@@ -1,4 +1,4 @@
-import { SSF } from './10_ssf'
+import * as SSF from './10_ssf'
 import { parsenoop } from './23_binutils'
 import { buf_array, recordhopper, write_record } from './24_hoppers'
 import { parse_BrtColor, parse_FontFlags, parse_XLWideString } from './28_binstructs'

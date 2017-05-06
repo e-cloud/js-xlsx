@@ -3,7 +3,7 @@ import { char_codes, debom } from './02_codepage'
 import { DENSE } from './03_consts'
 import * as Base64 from './04_base64'
 import { has_buf } from './05_buf'
-import { make_ssf, SSF } from './10_ssf'
+import * as SSF from './10_ssf'
 import { XLMLFormatMap } from './11_ssfutils'
 import { dup, parseDate } from './20_jsutils'
 import {
@@ -319,7 +319,7 @@ export function xlml_normalize(d) /*:string*/ {
 export const xlmlregex = /<(\/?)([^\s?>!\/:]*:|)([^\s?>]*[^\s?>\/])[^>]*>/mg
 //var xlmlregex = /<(\/?)([a-z0-9]*:|)(\w+)[^>]*>/mg;
 export function parse_xlml_xml(d, opts) /*:Workbook*/ {
-    make_ssf(SSF)
+    SSF.make_ssf()
     let str = debom(xlml_normalize(d))
     if (opts && opts.type == 'binary' && typeof cptable !== 'undefined') {
         str = cptable.utils.decode(65001, char_codes(str))

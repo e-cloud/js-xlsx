@@ -1,5 +1,5 @@
 import { reset_cp, setCurrentCodepage } from './02_codepage'
-import { make_ssf, SSF } from './10_ssf'
+import * as SSF from './10_ssf'
 import { keys } from './20_jsutils'
 import { getzipdata, getzipfile, getzipstr, resolve_path, safegetzipfile } from './21_ziputils'
 import { parse_ct } from './30_ctype'
@@ -12,7 +12,7 @@ import {
     parse_DataSpaceMap,
     parse_DataSpaceVersionInfo,
     parse_EncryptionInfo,
-    parse_Primary
+    parse_Primary,
 } from './44_offcrypto'
 import { parse_drawing } from './54_drawing'
 import { parse_comments } from './56_cmntcommon'
@@ -27,7 +27,7 @@ import {
     parse_sty,
     parse_theme,
     parse_wb,
-    parse_ws
+    parse_ws,
 } from './74_xmlbin'
 import { parse_ods } from './83_ods'
 import { fix_read_opts } from './84_defaults'
@@ -123,7 +123,7 @@ const nodirs = function nodirs(x /*:string*/) /*:boolean*/ {
 }
 
 export function parse_zip(zip /*:ZIP*/, opts /*:?ParseOpts*/) /*:Workbook*/ {
-    make_ssf(SSF)
+    SSF.make_ssf()
     opts = opts || {}
     fix_read_opts(opts)
     reset_cp()

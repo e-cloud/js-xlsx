@@ -1,4 +1,4 @@
-import { SSF } from './10_ssf'
+import * as SSF from './10_ssf'
 import * as CFB from './18_cfb'
 import { parse_xlscfb } from './76_xls'
 import { parse_fods, parse_ods, write_ods } from './83_ods'

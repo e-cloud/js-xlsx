@@ -1,5 +1,5 @@
 import { DENSE } from './03_consts'
-import { SSF } from './10_ssf'
+import * as SSF from './10_ssf'
 import { datenum, dup, parseDate } from './20_jsutils'
 import {
     escapehtml,

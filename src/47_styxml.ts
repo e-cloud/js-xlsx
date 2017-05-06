@@ -1,4 +1,4 @@
-import { SSF } from './10_ssf'
+import * as SSF from './10_ssf'
 import { keys } from './20_jsutils'
 import { escapexml, parsexmltag, tagregex, unescapexml, utf8read, writextag, XML_HEADER, XMLNS } from './22_xmlutils'
 import { RELS } from './31_rels'

@@ -1,5 +1,5 @@
 import { DENSE } from './03_consts'
-import { SSF } from './10_ssf'
+import * as SSF from './10_ssf'
 import { datenum } from './20_jsutils'
 import { utf8read } from './22_xmlutils'
 /* [MS-XLSB] 2.4.718 BrtRowHdr */
