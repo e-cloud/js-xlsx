@@ -3,7 +3,7 @@ import { decode_cell } from './27_csfutils'
 import { parse_si } from './42_sstxml'
 
 /* 18.7 Comments */
-export function parse_comments_xml(data /*:string*/, opts) /*:Array<Comment>*/ {
+export function parse_comments_xml(data: string, opts): Array<Comment> {
     /* 18.7.6 CT_Comments */
     if (data.match(/<(?:\w+:)?comments *\/>/)) {
         return []
@@ -33,12 +33,12 @@ export function parse_comments_xml(data /*:string*/, opts) /*:Array<Comment>*/ {
                 return
             }
             const y = parsexmltag(cm[0])
-            const comment /*:Comment*/ = {
+            const comment: Comment = {
                 author: y.authorId && authors[y.authorId] ? authors[y.authorId] : 'sheetjsghost',
                 ref: y.ref,
                 guid: y.guid,
             }
-            /*:any*/
+
             const cell = decode_cell(y.ref)
             if (opts.sheetRows && opts.sheetRows <= cell.r) {
                 return

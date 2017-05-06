@@ -281,7 +281,7 @@ export function parse_date_code(v: number, opts?: any, b2?: boolean) {
     let time = Math.floor(86400 * (v - date))
     let dow = 0
     let dout = []
-    const out = {D: date, T: time, u: 86400 * (v - date) - time, y: 0, m: 0, d: 0, H: 0, M: 0, S: 0, q: 0}
+    const out = { D: date, T: time, u: 86400 * (v - date) - time, y: 0, m: 0, d: 0, H: 0, M: 0, S: 0, q: 0 }
     if (Math.abs(out.u) < 1e-6) {
         out.u = 0
     }
@@ -1132,7 +1132,7 @@ function eval_fmt(fmt: string, v: any, opts: any, flen: number) {
                 if (!isgeneral(fmt, i)) {
                     throw new Error(`unrecognized character ${c} in ${fmt}`)
                 }
-                out[out.length] = {t: 'G', v: 'General'}
+                out[out.length] = { t: 'G', v: 'General' }
                 i += 7
                 break
             case '"':
@@ -1140,22 +1140,22 @@ function eval_fmt(fmt: string, v: any, opts: any, flen: number) {
                 for (o = ''; (cc = fmt.charCodeAt(++i)) !== 34 && i < fmt.length;) {
                     o += String.fromCharCode(cc)
                 }
-                out[out.length] = {t: 't', v: o}
+                out[out.length] = { t: 't', v: o }
                 ++i
                 break
             case '\\':
                 const w = fmt.charAt(++i)
                 const t = w === '(' || w === ')' ? w : 't'
-                out[out.length] = {t, v: w}
+                out[out.length] = { t, v: w }
                 ++i
                 break
             case '_':
-                out[out.length] = {t: 't', v: ' '}
+                out[out.length] = { t: 't', v: ' ' }
                 i += 2
                 break
             case '@':
                 /* Text Placeholder */
-                out[out.length] = {t: 'T', v}
+                out[out.length] = { t: 'T', v }
                 ++i
                 break
             case 'B':
@@ -1167,7 +1167,7 @@ function eval_fmt(fmt: string, v: any, opts: any, flen: number) {
                             return ''
                         }
                     }
-                    out[out.length] = {t: 'X', v: fmt.substr(i, 2)}
+                    out[out.length] = { t: 'X', v: fmt.substr(i, 2) }
                     lst = c
                     i += 2
                     break
@@ -1208,11 +1208,11 @@ function eval_fmt(fmt: string, v: any, opts: any, flen: number) {
                 if (c === 'h') {
                     c = hr
                 }
-                out[out.length] = {t: c, v: o}
+                out[out.length] = { t: c, v: o }
                 lst = c
                 break
             case 'A':
-                q = {t: c, v: 'A'}
+                q = { t: c, v: 'A' }
                 if (dt == null) {
                     dt = parse_date_code(v, opts)
                 }
@@ -1255,11 +1255,11 @@ function eval_fmt(fmt: string, v: any, opts: any, flen: number) {
                             return ''
                         }
                     }
-                    out[out.length] = {t: 'Z', v: o.toLowerCase()}
+                    out[out.length] = { t: 'Z', v: o.toLowerCase() }
                 } else if (o.includes('$')) {
                     o = (o.match(/\$([^-\[\]]*)/) || [])[1] || '$'
                     if (!fmt_is_date(fmt)) {
-                        out[out.length] = {t: 't', v: o}
+                        out[out.length] = { t: 't', v: o }
                     }
                 }
                 break
@@ -1270,7 +1270,7 @@ function eval_fmt(fmt: string, v: any, opts: any, flen: number) {
                     while ((c = fmt.charAt(++i)) === '0') {
                         o += c
                     }
-                    out[out.length] = {t: 's', v: o}
+                    out[out.length] = { t: 's', v: o }
                     break
                 }
             /* falls through */
@@ -1283,14 +1283,14 @@ function eval_fmt(fmt: string, v: any, opts: any, flen: number) {
                 && '0#'.includes(fmt.charAt(i + 2))) {
                     o += c
                 }
-                out[out.length] = {t: 'n', v: o}
+                out[out.length] = { t: 'n', v: o }
                 break
             case '?':
                 o = c
                 while (fmt.charAt(++i) === c) {
                     o += c
                 }
-                q = {t: c, v: o}
+                q = { t: c, v: o }
                 out[out.length] = q
                 lst = c
                 break
@@ -1302,7 +1302,7 @@ function eval_fmt(fmt: string, v: any, opts: any, flen: number) {
                 break // **
             case '(':
             case ')':
-                out[out.length] = {t: flen === 1 ? 't' : c, v: c}
+                out[out.length] = { t: flen === 1 ? 't' : c, v: c }
                 ++i
                 break
             case '1':
@@ -1318,17 +1318,17 @@ function eval_fmt(fmt: string, v: any, opts: any, flen: number) {
                 while (i < fmt.length && '0123456789'.includes(fmt.charAt(++i))) {
                     o += fmt.charAt(i)
                 }
-                out[out.length] = {t: 'D', v: o}
+                out[out.length] = { t: 'D', v: o }
                 break
             case ' ':
-                out[out.length] = {t: c, v: c}
+                out[out.length] = { t: c, v: c }
                 ++i
                 break
             default:
                 if (!',$-+/():!^&\'~{}<>=\u20ACacfijklopqrtuvwxz'.includes(c)) {
                     throw new Error(`unrecognized character ${c} in ${fmt}`)
                 }
-                out[out.length] = {t: 't', v: c}
+                out[out.length] = { t: 't', v: c }
                 ++i
                 break
         }
@@ -1467,7 +1467,7 @@ function eval_fmt(fmt: string, v: any, opts: any, flen: number) {
                     )
                 )) {
                     out[i].v += out[jj].v
-                    out[jj] = {v: '', t: ';'}
+                    out[jj] = { v: '', t: ';' }
                     ++jj
                 }
                 nstr += out[i].v
@@ -1682,7 +1682,7 @@ export function format(fmt: string | number, v: any, o?: any) {
             if (fmt == 14 && o.dateNF) {
                 sfmt = o.dateNF
             } else {
-                sfmt = (o.table != null ? (o.table/*:any*/) : table_fmt)[fmt]
+                sfmt = (o.table != null ? (o.table) : table_fmt)[fmt]
             }
             break
     }

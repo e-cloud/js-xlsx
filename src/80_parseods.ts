@@ -23,13 +23,13 @@ export const parse_content_xml = function () {
         'day-of-week': ['ddd', 'dddd'],
     }
 
-    return function pcx(d /*:string*/, _opts) /*:Workbook*/ {
+    return function pcx(d: string, _opts): Workbook {
         const opts = _opts || {}
         if (DENSE != null && opts.dense == null) {
             opts.dense = DENSE
         }
         let str = xlml_normalize(d)
-        const state /*:Array<any>*/ = []
+        const state = []
         let tmp
         let tag
         /*:: = {}*/
@@ -41,9 +41,9 @@ export const parse_content_xml = function () {
         let rowtag
         /*:: = {'行号':""}*/
         const Sheets = {}
-        const SheetNames /*:Array<string>*/ = []
-        let ws = opts.dense ? [] /*:any*/ : {}
-        /*:any*/
+        const SheetNames: Array<string> = []
+        let ws = opts.dense ? [] : {}
+
         let Rn
         let q
         /*:: = ({t:"", v:null, z:null, w:"",c:[]}:any)*/
@@ -91,8 +91,8 @@ export const parse_content_xml = function () {
                         R = C = -1
                         range.s.r = range.s.c = 10000000
                         range.e.r = range.e.c = 0
-                        ws = opts.dense ? [] /*:any*/ : {}
-                        /*:any*/
+                        ws = opts.dense ? [] : {}
+
                         merges = []
                     }
                     break
@@ -156,7 +156,7 @@ export const parse_content_xml = function () {
                             t: ctag['\u6570\u636E\u7C7B\u578B'] || ctag['value-type'],
                             v: null /*:: , z:null, w:"",c:[]*/
                         }
-                        /*:any*/
+
                         if (opts.cellFormula) {
                             if (ctag.formula) {
                                 ctag.formula = unescapexml(ctag.formula)

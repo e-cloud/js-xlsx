@@ -1,16 +1,15 @@
 import * as SSF from './10_ssf'
 
-export function isval(x /*:?any*/) /*:boolean*/ {
+export function isval(x?: any): boolean {
     return x !== undefined && x !== null
 }
 
-export function keys(o /*:any*/) /*:Array<any>*/ {
+export function keys(o: any) {
     return Object.keys(o)
 }
 
-export function evert_key(obj /*:any*/, key /*:string*/) /*:EvertType*/ {
-    const o = []
-    /*:any*/
+export function evert_key(obj: any, key: string): EvertType {
+    const o = {}
     const K = keys(obj)
     for (let i = 0; i !== K.length; ++i) {
         o[obj[K[i]][key]] = K[i]
@@ -18,9 +17,8 @@ export function evert_key(obj /*:any*/, key /*:string*/) /*:EvertType*/ {
     return o
 }
 
-export function evert(obj /*:any*/) /*:EvertType*/ {
-    const o = []
-    /*:any*/
+export function evert(obj: any): EvertType {
+    const o = {}
     const K = keys(obj)
     for (let i = 0; i !== K.length; ++i) {
         o[obj[K[i]]] = K[i]
@@ -28,9 +26,8 @@ export function evert(obj /*:any*/) /*:EvertType*/ {
     return o
 }
 
-export function evert_num(obj /*:any*/) /*:EvertNumType*/ {
-    const o = []
-    /*:any*/
+export function evert_num(obj: any): EvertNumType {
+    const o = {}
     const K = keys(obj)
     for (let i = 0; i !== K.length; ++i) {
         o[obj[K[i]]] = parseInt(K[i], 10)
@@ -38,9 +35,8 @@ export function evert_num(obj /*:any*/) /*:EvertNumType*/ {
     return o
 }
 
-export function evert_arr(obj /*:any*/) /*:EvertArrType*/ {
-    const o /*:EvertArrType*/ = []
-    /*:any*/
+export function evert_arr(obj: any): EvertArrType {
+    const o = {}
     const K = keys(obj)
     for (let i = 0; i !== K.length; ++i) {
         if (o[obj[K[i]]] == null) {
@@ -51,7 +47,7 @@ export function evert_arr(obj /*:any*/) /*:EvertArrType*/ {
     return o
 }
 
-export function datenum(v /*:Date*/, date1904? /*:?boolean*/) /*:number*/ {
+export function datenum(v: Date, date1904 ?: boolean): number {
     let epoch = v.getTime()
     if (date1904) {
         epoch += 1462 * 24 * 60 * 60 * 1000
@@ -59,7 +55,7 @@ export function datenum(v /*:Date*/, date1904? /*:?boolean*/) /*:number*/ {
     return (epoch + 2209161600000) / (24 * 60 * 60 * 1000)
 }
 
-export function numdate(v /*:number*/) /*:Date*/ {
+export function numdate(v: number): Date {
     const date = SSF.parse_date_code(v)
     const val = new Date()
     if (date == null) {
@@ -118,7 +114,7 @@ export function parse_isodur(s) {
 const good_pd_date = new Date('2017-02-19T19:06:09.000Z')
 const good_pd = good_pd_date.getFullYear() == 2017
 
-export function parseDate(str /*:string|Date*/) /*:Date*/ {
+export function parseDate(str: string | Date): Date {
     if (good_pd) {
         return new Date(str)
     }
@@ -129,7 +125,7 @@ export function parseDate(str /*:string|Date*/) /*:Date*/ {
     return new Date(Date.UTC(+n[0], +n[1] - 1, +n[2], +n[3], +n[4], +n[5]))
 }
 
-export function cc2str(arr /*:Array<number>*/) /*:string*/ {
+export function cc2str(arr: Array<number>): string {
     let o = ''
     for (let i = 0; i != arr.length; ++i) {
         o += String.fromCharCode(arr[i])
@@ -145,7 +141,7 @@ export function str2cc(str) {
     return o
 }
 
-export function dup(o /*:any*/) /*:any*/ {
+export function dup(o: any): any {
     if (typeof JSON != 'undefined' && !Array.isArray(o)) {
         return JSON.parse(JSON.stringify(o))
     }
@@ -161,7 +157,7 @@ export function dup(o /*:any*/) /*:any*/ {
     return out
 }
 
-export function fill(c /*:string*/, l /*:number*/) /*:string*/ {
+export function fill(c: string, l: number): string {
     let o = ''
     while (o.length < l) {
         o += c

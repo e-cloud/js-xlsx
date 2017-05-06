@@ -10,15 +10,14 @@ export const RELS = {
     VML: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/vmlDrawing',
     VBA: 'http://schemas.microsoft.com/office/2006/relationships/vbaProject',
 }
-/*:any*/
 
 /* 9.3.3 Representing Relationships */
-export function get_rels_path(file /*:string*/) /*:string*/ {
+export function get_rels_path(file: string): string {
     const n = file.lastIndexOf('/')
     return `${file.substr(0, n + 1)}_rels/${file.substr(n + 1)}.rels`
 }
 
-export function parse_rels(data /*:?string*/, currentFilePath /*:string*/) {
+export function parse_rels(data: string, currentFilePath: string) {
     if (!data) {
         return data
     }
@@ -54,7 +53,7 @@ const RELS_ROOT = writextag('Relationships', null, {
 })
 
 /* TODO */
-export function write_rels(rels) /*:string*/ {
+export function write_rels(rels): string {
     const o = [XML_HEADER, RELS_ROOT]
     keys(rels['!id']).forEach(function (rid) {
         o[o.length] = writextag('Relationship', null, rels['!id'][rid])
@@ -66,7 +65,7 @@ export function write_rels(rels) /*:string*/ {
     return o.join('')
 }
 
-export function add_rels(rels, rId, f, type, relobj?) /*:number*/ {
+export function add_rels(rels, rId, f, type, relobj?): number {
     if (!relobj) {
         relobj = {}
     }

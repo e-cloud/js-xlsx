@@ -39,7 +39,7 @@ const XLMLDocPropsMap = {
 
 const evert_XLMLDPM = evert(XLMLDocPropsMap)
 
-export function xlml_set_prop(Props, tag /*:string*/, val) {
+export function xlml_set_prop(Props, tag: string, val) {
     tag = evert_XLMLDPM[tag] || tag
     Props[tag] = val
 }

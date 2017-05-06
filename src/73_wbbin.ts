@@ -16,7 +16,7 @@ import { stringify_formula } from './62_fxls'
 import { parse_XLSBNameParsedFormula } from './63_fbin'
 import { parse_wb_defaults } from './71_wbcommon'
 
-export function parse_BrtBundleSh(data, length /*:number*/) {
+export function parse_BrtBundleSh(data, length: number) {
     const z = {}
     z.Hidden = data.read_shift(4) //hsState ST_SheetState
     z.iTabID = data.read_shift(4)
@@ -79,7 +79,7 @@ export function parse_BrtName(data, length, opts) {
     //}
     data.l = end
     const out = { Name: name, Ptg: formula, Comment: comment }
-    /*:any*/
+
     if (itab < 0xFFFFFFF) {
         out.Sheet = itab
     }
@@ -87,7 +87,7 @@ export function parse_BrtName(data, length, opts) {
 }
 
 /* [MS-XLSB] 2.1.7.60 Workbook */
-export function parse_wb_bin(data, opts) /*:WorkbookFile*/ {
+export function parse_wb_bin(data, opts): WorkbookFile {
     const wb = { AppVersion: {}, WBProps: {}, WBView: [], Sheets: [], CalcPr: {}, xmlns: '' }
     let pass = false
     let z

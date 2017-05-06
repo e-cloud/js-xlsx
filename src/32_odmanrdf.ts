@@ -34,7 +34,7 @@ export function parse_manifest(d, opts) {
     }
 }
 
-export function write_manifest(manifest /*:Array<Array<string> >*/, opts) /*:string*/ {
+export function write_manifest(manifest: Array<Array<string>>, opts): string {
     const o = [XML_HEADER]
     o.push('<manifest:manifest xmlns:manifest="urn:oasis:names:tc:opendocument:xmlns:manifest:1.0" manifest:version="1.2">\n')
     o.push('  <manifest:file-entry manifest:full-path="/" manifest:version="1.2" manifest:media-type="application/vnd.oasis.opendocument.spreadsheet"/>\n')
@@ -46,7 +46,7 @@ export function write_manifest(manifest /*:Array<Array<string> >*/, opts) /*:str
 }
 
 /* Part 3 Section 6 Metadata Manifest File */
-export function write_rdf_type(file /*:string*/, res /*:string*/, tag? /*:?string*/) {
+export function write_rdf_type(file: string, res: string, tag?: string) {
     return [
         `  <rdf:Description rdf:about="${file}">\n`,
         `    <rdf:type rdf:resource="http://docs.oasis-open.org/ns/office/1.2/meta/${tag || 'odf'}#${res}"/>\n`,
@@ -54,7 +54,7 @@ export function write_rdf_type(file /*:string*/, res /*:string*/, tag? /*:?strin
     ].join('')
 }
 
-export function write_rdf_has(base /*:string*/, file /*:string*/) {
+export function write_rdf_has(base: string, file: string) {
     return [
         `  <rdf:Description rdf:about="${base}">\n`,
         `    <ns0:hasPart xmlns:ns0="http://docs.oasis-open.org/ns/office/1.2/meta/pkg#" rdf:resource="${file}"/>\n`,

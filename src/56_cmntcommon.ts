@@ -73,7 +73,6 @@ export function insertCommentsIntoSheet(sheetName, sheet, comments) {
             cell.c = []
         }
         const o = { a: comment.author, t: comment.t, r: comment.r }
-        /*:any*/
         if (comment.h) {
             o.h = comment.h
         }

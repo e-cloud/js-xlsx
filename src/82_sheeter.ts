@@ -3,8 +3,8 @@ import { DIF, PRN, SYLK } from './40_harb'
 import { HTML_ } from './79_html'
 import { sheet_to_csv, sheet_to_txt } from './90_utils'
 
-function write_obj_str(factory /*:WriteObjStrFactory*/) {
-    return function write_str(wb /*:Workbook*/, o /*:WriteOpts*/) /*:string*/ {
+function write_obj_str(factory: WriteObjStrFactory) {
+    return function write_str(wb: Workbook, o: WriteOpts): string {
         let idx = 0
         for (let i = 0; i < wb.SheetNames.length; ++i) {
             if (wb.SheetNames[i] == o.sheet) {

@@ -4,13 +4,13 @@ import { decode_range, encode_cell, encode_range, format_cell, sheet_to_workbook
 
 /* TODO: in browser attach to DOM; in node use an html parser */
 export const HTML_ = function () {
-    function html_to_sheet(str /*:string*/, _opts) /*:Workbook*/ {
+    function html_to_sheet(str: string, _opts): Workbook {
         const opts = _opts || {}
         if (DENSE != null && opts.dense == null) {
             opts.dense = DENSE
         }
-        const ws /*:Worksheet*/ = opts.dense ? [] /*:any*/ : {}
-        /*:any*/
+        const ws: Worksheet = opts.dense ? [] : {}
+
         let i = str.indexOf('<table')
         let j = str.indexOf('</table')
         if (i == -1 || j == -1) {
@@ -85,7 +85,7 @@ export const HTML_ = function () {
                         ws[R][C] = { t: 's', v: m }
                     }
                 } else {
-                    const coord /*:string*/ = encode_cell({ r: R, c: C })
+                    const coord: string = encode_cell({ r: R, c: C })
                     /* TODO: value parsing */
                     if (Number(m) == Number(m)) {
                         ws[coord] = { t: 'n', v: +m }
@@ -100,11 +100,11 @@ export const HTML_ = function () {
         return ws
     }
 
-    function html_to_book(str /*:string*/, opts) /*:Workbook*/ {
+    function html_to_book(str: string, opts): Workbook {
         return sheet_to_workbook(html_to_sheet(str, opts), opts)
     }
 
-    function make_html_row(ws /*:Worksheet*/, r /*:Range*/, R /*:number*/, o) /*:string*/ {
+    function make_html_row(ws: Worksheet, r: Range, R: number, o): string {
         const M = ws['!merges'] || []
         const oo = []
         for (let C = r.s.c; C <= r.e.c; ++C) {
@@ -148,8 +148,8 @@ export const HTML_ = function () {
         return `<tr>${oo.join('')}</tr>`
     }
 
-    function sheet_to_html(ws /*:Worksheet*/, opts) /*:string*/ {
-        const o /*:Array<string>*/ = []
+    function sheet_to_html(ws: Worksheet, opts): string {
+        const o: Array<string> = []
         const r = decode_range(ws['!ref'])
         o.dense = Array.isArray(ws)
         for (let R = r.s.r; R <= r.e.r; ++R) {
@@ -166,13 +166,13 @@ export const HTML_ = function () {
     }
 }()
 
-export function parse_dom_table(table /*:HTMLElement*/, _opts /*:?any*/) /*:Worksheet*/ {
+export function parse_dom_table(table: HTMLElement, _opts ?: any): Worksheet {
     const opts = _opts || {}
     if (DENSE != null) {
         opts.dense = DENSE
     }
-    const ws /*:Worksheet*/ = opts.dense ? [] /*:any*/ : {}
-    /*:any*/
+    const ws: Worksheet = opts.dense ? [] : {}
+
     const rows = table.getElementsByTagName('tr')
     const range = { s: { r: 0, c: 0 }, e: { r: rows.length - 1, c: 0 } }
     const merges = []
@@ -226,6 +226,6 @@ export function parse_dom_table(table /*:HTMLElement*/, _opts /*:?any*/) /*:Work
     return ws
 }
 
-export function table_to_book(table /*:HTMLElement*/, opts /*:?any*/) /*:Workbook*/ {
+export function table_to_book(table: HTMLElement, opts ?: any): Workbook {
     return sheet_to_workbook(parse_dom_table(table, opts), opts)
 }

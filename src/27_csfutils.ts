@@ -2,23 +2,23 @@ import { DENSE } from './03_consts'
 import * as SSF from './10_ssf'
 import { datenum } from './20_jsutils'
 
-export function decode_row(rowstr /*:string*/) /*:number*/ {
+export function decode_row(rowstr: string): number {
     return parseInt(unfix_row(rowstr), 10) - 1
 }
 
-export function encode_row(row /*:number*/) /*:string*/ {
+export function encode_row(row: number): string {
     return `${row + 1}`
 }
 
-export function fix_row(cstr /*:string*/) /*:string*/ {
+export function fix_row(cstr: string): string {
     return cstr.replace(/([A-Z]|^)(\d+)$/, '$1$$$2')
 }
 
-export function unfix_row(cstr /*:string*/) /*:string*/ {
+export function unfix_row(cstr: string): string {
     return cstr.replace(/\$(\d+)$/, '$1')
 }
 
-export function decode_col(colstr /*:string*/) /*:number*/ {
+export function decode_col(colstr: string): number {
     const c = unfix_col(colstr)
     let d = 0
     let i = 0
@@ -28,7 +28,7 @@ export function decode_col(colstr /*:string*/) /*:number*/ {
     return d - 1
 }
 
-export function encode_col(col /*:number*/) /*:string*/ {
+export function encode_col(col: number): string {
     let s = ''
     for (++col; col; col = Math.floor((col - 1) / 26)) {
         s = String.fromCharCode((col - 1) % 26 + 65) + s
@@ -36,59 +36,59 @@ export function encode_col(col /*:number*/) /*:string*/ {
     return s
 }
 
-export function fix_col(cstr /*:string*/) /*:string*/ {
+export function fix_col(cstr: string): string {
     return cstr.replace(/^([A-Z])/, '$$$1')
 }
 
-export function unfix_col(cstr /*:string*/) /*:string*/ {
+export function unfix_col(cstr: string): string {
     return cstr.replace(/^\$([A-Z])/, '$1')
 }
 
-export function split_cell(cstr /*:string*/) /*:Array<string>*/ {
+export function split_cell(cstr: string): Array<string> {
     return cstr.replace(/(\$?[A-Z]*)(\$?\d*)/, '$1,$2').split(',')
 }
 
-export function decode_cell(cstr /*:string*/) /*:CellAddress*/ {
+export function decode_cell(cstr: string): CellAddress {
     const splt = split_cell(cstr)
     return { c: decode_col(splt[0]), r: decode_row(splt[1]) }
 }
 
-export function encode_cell(cell /*:CellAddress*/) /*:string*/ {
+export function encode_cell(cell: CellAddress): string {
     return encode_col(cell.c) + encode_row(cell.r)
 }
 
-export function fix_cell(cstr /*:string*/) /*:string*/ {
+export function fix_cell(cstr: string): string {
     return fix_col(fix_row(cstr))
 }
 
-export function unfix_cell(cstr /*:string*/) /*:string*/ {
+export function unfix_cell(cstr: string): string {
     return unfix_col(unfix_row(cstr))
 }
 
-export function decode_range(range /*:string*/) /*:Range*/ {
+export function decode_range(range: string): Range {
     const x = range.split(':').map(decode_cell)
     return { s: x[0], e: x[x.length - 1] }
 }
 
 /*# if only one arg, it is assumed to be a Range.  If 2 args, both are cell addresses */
-export function encode_range(cs /*:CellAddrSpec|Range*/, ce? /*:?CellAddrSpec*/) /*:string*/ {
+export function encode_range(cs: CellAddrSpec | Range, ce?: CellAddrSpec): string {
     if (typeof ce === 'undefined' || typeof ce === 'number') {
         /*:: if(!(cs instanceof Range)) throw "unreachable"; */
         return encode_range(cs.s, cs.e)
     }
     /*:: if((cs instanceof Range)) throw "unreachable"; */
     if (typeof cs !== 'string') {
-        cs = encode_cell(cs /*:any*/)
+        cs = encode_cell(cs)
     }
     if (typeof ce !== 'string') {
-        ce = encode_cell(ce /*:any*/)
+        ce = encode_cell(ce)
     }
     /*:: if(typeof cs !== 'string') throw "unreachable"; */
     /*:: if(typeof ce !== 'string') throw "unreachable"; */
     return cs == ce ? cs : `${cs}:${ce}`
 }
 
-export function safe_decode_range(range /*:string*/) /*:Range*/ {
+export function safe_decode_range(range: string): Range {
     const o = { s: { c: 0, r: 0 }, e: { c: 0, r: 0 } }
     let idx = 0
     let i = 0
@@ -134,7 +134,7 @@ export function safe_decode_range(range /*:string*/) /*:Range*/ {
     return o
 }
 
-export function safe_format_cell(cell /*:Cell*/, v /*:any*/) {
+export function safe_format_cell(cell: Cell, v) {
     const q = cell.t == 'd' && v instanceof Date
     if (cell.z != null) {
         try {
@@ -150,7 +150,7 @@ export function safe_format_cell(cell /*:Cell*/, v /*:any*/) {
     }
 }
 
-export function format_cell(cell /*:Cell*/, v? /*:any*/, o? /*:any*/) {
+export function format_cell(cell: Cell, v?, o?) {
     if (cell == null || cell.t == null || cell.t == 'z') {
         return ''
     }
@@ -166,29 +166,29 @@ export function format_cell(cell /*:Cell*/, v? /*:any*/, o? /*:any*/) {
     return safe_format_cell(cell, v)
 }
 
-export function sheet_to_workbook(sheet /*:Worksheet*/, opts) /*:Workbook*/ {
+export function sheet_to_workbook(sheet: Worksheet, opts): Workbook {
     const n = opts && opts.sheet ? opts.sheet : 'Sheet1'
     const sheets = {}
     sheets[n] = sheet
     return { SheetNames: [n], Sheets: sheets }
 }
 
-export function aoa_to_sheet(data /*:AOA*/, opts /*:?any*/) /*:Worksheet*/ {
+export function aoa_to_sheet(data: AOA, opts ?): Worksheet {
     const o = opts || {}
     if (DENSE != null && o.dense == null) {
         o.dense = DENSE
     }
-    const ws /*:Worksheet*/ = o.dense ? [] /*:any*/ : {}
-    /*:any*/
-    const range /*:Range*/ = { s: { c: 10000000, r: 10000000 }, e: { c: 0, r: 0 } }
-    /*:any*/
+    const ws: Worksheet = o.dense ? [] : {}
+
+    const range: Range = { s: { c: 10000000, r: 10000000 }, e: { c: 0, r: 0 } }
+
     for (let R = 0; R != data.length; ++R) {
         for (let C = 0; C != data[R].length; ++C) {
             if (typeof data[R][C] === 'undefined') {
                 continue
             }
-            const cell /*:Cell*/ = { v: data[R][C] }
-            /*:any*/
+            const cell: Cell = { v: data[R][C] }
+
             if (range.s.r > R) {
                 range.s.r = R
             }
@@ -229,7 +229,7 @@ export function aoa_to_sheet(data /*:AOA*/, opts /*:?any*/) /*:Worksheet*/ {
                 }
                 ws[R][C] = cell
             } else {
-                const cell_ref = encode_cell({ c: C, r: R } /*:any*/)
+                const cell_ref = encode_cell({ c: C, r: R })
                 ws[cell_ref] = cell
             }
         }

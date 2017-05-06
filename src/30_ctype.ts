@@ -6,7 +6,7 @@ import { evert_arr, keys } from './20_jsutils'
 /* [MS-XLSB] 2.1.7 Part Enumeration */
 import { nsregex, parsexmltag, tagregex, writextag, XML_HEADER, XMLNS } from './22_xmlutils'
 
-export const ct2type /*{[string]:string}*/ = {
+export const ct2type: { [n: string]: string } = {
     /* Workbook */
     'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml': 'workbooks',
 
@@ -144,7 +144,6 @@ export const ct2type /*{[string]:string}*/ = {
 
     'sheet': 'js',
 }
-/*:any*/
 
 export const CT_LIST = function () {
     const o = {
@@ -207,15 +206,28 @@ const type2ct /*{[string]:Array<string>}*/ = evert_arr(ct2type)
 
 XMLNS.CT = 'http://schemas.openxmlformats.org/package/2006/content-types'
 
-export function parse_ct(data /*:?string*/, opts) {
+export function parse_ct(data ?: string, opts) {
     const ct = {
-        workbooks: [], sheets: [], charts: [], dialogs: [], macros: [],
-        rels: [], strs: [], comments: [],
-        coreprops: [], extprops: [], custprops: [], themes: [], styles: [],
-        calcchains: [], vba: [], drawings: [],
-        TODO: [], xmlns: '',
+        workbooks: [],
+        sheets: [],
+        charts: [],
+        dialogs: [],
+        macros: [],
+        rels: [],
+        strs: [],
+        comments: [],
+        coreprops: [],
+        extprops: [],
+        custprops: [],
+        themes: [],
+        styles: [],
+        calcchains: [],
+        vba: [],
+        drawings: [],
+        TODO: [],
+        xmlns: '',
     }
-    /*:any*/
+
     if (!data || !data.match) {
         return ct
     }
@@ -266,8 +278,8 @@ export const CTYPE_DEFAULTS = [
     return writextag('Default', null, { 'Extension': x[0], 'ContentType': x[1] })
 })
 
-export function write_ct(ct, opts) /*:string*/ {
-    let o /*:Array<string>*/ = []
+export function write_ct(ct, opts): string {
+    let o: Array<string> = []
     let v
     o[o.length] = XML_HEADER
     o[o.length] = CTYPE_XML_ROOT

@@ -1,6 +1,6 @@
 const map = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
 
-export function encode(input /*:string*/, utf8?) /*:string*/ {
+export function encode(input: string, utf8?): string {
     let o = ''
     let c1
     let c2
@@ -27,7 +27,7 @@ export function encode(input /*:string*/, utf8?) /*:string*/ {
     return o
 }
 
-export function decode(input /*:string*/, utf8?) /*:string*/ {
+export function decode(input: string, utf8?): string {
     let o = ''
     let c1
     let c2

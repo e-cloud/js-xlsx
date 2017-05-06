@@ -8,9 +8,9 @@ export function parse_BrtBeginSst(data, length) {
 }
 
 /* [MS-XLSB] 2.1.7.45 Shared Strings */
-export function parse_sst_bin(data, opts) /*:SST*/ {
-    const s /*:SST*/ = []
-    /*:any*/
+export function parse_sst_bin(data, opts): SST {
+    const s: SST = []
+
     let pass = false
     recordhopper(data, function hopper_sst(val, R_n, RT) {
         switch (RT) {

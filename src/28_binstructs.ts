@@ -2,18 +2,18 @@
 import { evert_num } from './20_jsutils'
 import { __double, __readInt32LE, new_buf } from './23_binutils'
 
-function parse_StrRun(data, length? /*:?number*/) {
+function parse_StrRun(data, length?: number) {
     return { ich: data.read_shift(2), ifnt: data.read_shift(2) }
 }
 
 /* [MS-XLSB] 2.1.7.121 */
-export function parse_RichStr(data, length /*:number*/) /*:XLString*/ {
+export function parse_RichStr(data, length: number): XLString {
     const start = data.l
     const flags = data.read_shift(1)
     const str = parse_XLWideString(data)
     const rgsStrRun = []
     const z = { t: str, h: str }
-    /*:any*/
+
     if ((flags & 1) !== 0) {
         /* fRichStr */
         /* TODO: formatted string */
@@ -32,7 +32,7 @@ export function parse_RichStr(data, length /*:number*/) /*:XLString*/ {
     return z
 }
 
-export function write_RichStr(str /*:XLString*/, o? /*:?Block*/) /*:Block*/ {
+export function write_RichStr(str: XLString, o?: Block): Block {
     /* TODO: formatted string */
     let _null = false
     if (o == null) {
@@ -45,14 +45,14 @@ export function write_RichStr(str /*:XLString*/, o? /*:?Block*/) /*:Block*/ {
 }
 
 /* [MS-XLSB] 2.5.9 */
-export function parse_XLSBCell(data) /*:any*/ {
+export function parse_XLSBCell(data) {
     const col = data.read_shift(4)
     let iStyleRef = data.read_shift(2)
     iStyleRef += data.read_shift(1) << 16
     const fPhShow = data.read_shift(1)
     return { c: col, iStyleRef }
 }
-export function write_XLSBCell(cell /*:any*/, o /*:?Block*/) {
+export function write_XLSBCell(cell, o ?: Block) {
     if (o == null) {
         o = new_buf(8)
     }
@@ -68,11 +68,11 @@ export const parse_XLSBCodeName = parse_XLWideString
 export const write_XLSBCodeName = write_XLWideString
 
 /* [MS-XLSB] 2.5.166 */
-export function parse_XLNullableWideString(data) /*:string*/ {
+export function parse_XLNullableWideString(data): string {
     const cchCharacters = data.read_shift(4)
     return cchCharacters === 0 || cchCharacters === 0xFFFFFFFF ? '' : data.read_shift(cchCharacters, 'dbcs')
 }
-export function write_XLNullableWideString(data /*:string*/, o) {
+export function write_XLNullableWideString(data: string, o) {
     let _null = false
     if (o == null) {
         _null = true
@@ -86,12 +86,12 @@ export function write_XLNullableWideString(data /*:string*/, o) {
 }
 
 /* [MS-XLSB] 2.5.168 */
-export function parse_XLWideString(data) /*:string*/ {
+export function parse_XLWideString(data): string {
     const cchCharacters = data.read_shift(4)
     return cchCharacters === 0 ? '' : data.read_shift(cchCharacters, 'dbcs')
 }
 
-export function write_XLWideString(data /*:string*/, o?) {
+export function write_XLWideString(data: string, o?) {
     let _null = false
     if (o == null) {
         _null = true
@@ -114,7 +114,7 @@ export const write_RelID = write_XLNullableWideString
 
 /* [MS-XLSB] 2.5.122 */
 /* [MS-XLS] 2.5.217 */
-export function parse_RkNumber(data) /*:number*/ {
+export function parse_RkNumber(data): number {
     const b = data.slice(data.l, data.l + 4)
     const fX100 = b[0] & 1
     const fInt = b[0] & 2
@@ -123,7 +123,7 @@ export function parse_RkNumber(data) /*:number*/ {
     const RK = fInt === 0 ? __double([0, 0, 0, 0, b[0], b[1], b[2], b[3]], 0) : __readInt32LE(b, 0) >> 2
     return fX100 ? RK / 100 : RK
 }
-export function write_RkNumber(data /*:number*/, o) {
+export function write_RkNumber(data: number, o) {
     if (o == null) {
         o = new_buf(4)
     }
@@ -144,9 +144,9 @@ export function write_RkNumber(data /*:number*/, o) {
 }
 
 /* [MS-XLSB] 2.5.117 RfX */
-export function parse_RfX(data) /*:Range*/ {
-    const cell /*:Range*/ = { s: {}, e: {} }
-    /*:any*/
+export function parse_RfX(data): Range {
+    const cell: Range = { s: {}, e: {} }
+
     cell.s.r = data.read_shift(4)
     cell.e.r = data.read_shift(4)
     cell.s.c = data.read_shift(4)
@@ -154,7 +154,7 @@ export function parse_RfX(data) /*:Range*/ {
     return cell
 }
 
-function write_RfX(r /*:Range*/, o) {
+function write_RfX(r: Range, o) {
     if (!o) {
         o = new_buf(16)
     }
@@ -172,7 +172,7 @@ export const write_UncheckedRfX = write_RfX
 /* [MS-XLSB] 2.5.171 */
 /* [MS-XLS] 2.5.342 */
 /* TODO: error checking, NaN and Infinity values are not valid Xnum */
-export function parse_Xnum(data, length? /*:?number*/) {
+export function parse_Xnum(data, length?: number) {
     return data.read_shift(8, 'f')
 }
 export function write_Xnum(data, o) {
@@ -191,10 +191,11 @@ export const BErr = {
     /*::[*/0x2B /*::]*/: '#GETTING_DATA',
     /*::[*/0xFF /*::]*/: '#WTF?',
 }
+
 export const RBErr = evert_num(BErr)
 
 /* [MS-XLSB] 2.4.321 BrtColor */
-export function parse_BrtColor(data, length /*:number*/) {
+export function parse_BrtColor(data, length: number) {
     const out = {}
     const d = data.read_shift(1)
     out.fValidRGB = d & 1
@@ -208,7 +209,7 @@ export function parse_BrtColor(data, length /*:number*/) {
 }
 
 /* [MS-XLSB] 2.5.52 */
-export function parse_FontFlags(data, length /*:number*/) {
+export function parse_FontFlags(data, length: number) {
     const d = data.read_shift(1)
     data.l++
     const out = {

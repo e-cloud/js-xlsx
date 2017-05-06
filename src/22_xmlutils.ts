@@ -6,9 +6,8 @@ export const tagregex = /<[^>]*>/g
 export const nsregex = /<\w*:/
 const nsregex2 = /<(\/?)\w+:/
 
-export function parsexmltag(tag /*:string*/, skip_root? /*:?boolean*/) /*:any*/ {
+export function parsexmltag(tag: string, skip_root ?: boolean) {
     const z = {}
-    /*:any*/
     let eq = 0
     let c = 0
     for (; eq !== tag.length; ++eq) {
@@ -61,7 +60,7 @@ export function parsexmltag(tag /*:string*/, skip_root? /*:?boolean*/) /*:any*/ 
     }
     return z
 }
-export function strip_ns(x /*:string*/) /*:string*/ {
+export function strip_ns(x: string): string {
     return x.replace(nsregex2, '<$1')
 }
 
@@ -76,12 +75,12 @@ const rencoding = evert(encodings)
 const rencstr = '&<>\'"'.split('')
 
 // TODO: CP remap (need to read file version to determine OS)
-export const unescapexml /*:StringConv*/ = function () {
+export const unescapexml: StringConv = function () {
     /* 22.4.2.4 bstr (Basic String) */
     const encregex = /&(?:quot|apos|gt|lt|amp|#x?([\da-fA-F]+));/g
 
     const coderegex = /_x([\da-fA-F]{4})_/g
-    return function unescapexml(text /*:string*/) /*:string*/ {
+    return function unescapexml(text: string): string {
         const s = `${text}`
         return s.replace(encregex, function ($$, $1) {
             return encodings[$$] || String.fromCharCode(parseInt($1, $$.includes('x') ? 16 : 10)) || $$
@@ -93,7 +92,7 @@ export const unescapexml /*:StringConv*/ = function () {
 
 const decregex = /[&<>'"]/g
 const charegex = /[\u0000-\u0008\u000b-\u001f]/g
-export function escapexml(text /*:string*/, xml? /*:?boolean*/) /*:string*/ {
+export function escapexml(text: string, xml?: boolean): string {
     const s = `${text}`
     return s.replace(decregex, function (y) {
         return rencoding[y]
@@ -101,7 +100,7 @@ export function escapexml(text /*:string*/, xml? /*:?boolean*/) /*:string*/ {
         return `_x${('000' + s.charCodeAt(0).toString(16)).slice(-4)}_`
     })
 }
-export function escapexmltag(text /*:string*/) /*:string*/ {
+export function escapexmltag(text: string): string {
     return escapexml(text).replace(/ /g, '_x0020_')
 }
 
@@ -116,24 +115,24 @@ export function escapehtml(text) {
 }
 
 /* TODO: handle codepages */
-export const xlml_fixstr /*:StringConv*/ = function () {
+export const xlml_fixstr: StringConv = function () {
     const entregex = /&#(\d+);/g
 
-    function entrepl($$ /*:string*/, $1 /*:string*/) /*:string*/ {
+    function entrepl($$: string, $1: string): string {
         return String.fromCharCode(parseInt($1, 10))
     }
 
-    return function xlml_fixstr(str /*:string*/) /*:string*/ {
+    return function xlml_fixstr(str: string): string {
         return str.replace(entregex, entrepl)
     }
 }()
-export const xlml_unfixstr /*:StringConv*/ = function () {
-    return function xlml_unfixstr(str /*:string*/) /*:string*/ {
+export const xlml_unfixstr: StringConv = function () {
+    return function xlml_unfixstr(str: string): string {
         return str.replace(/(\r\n|[\r\n])/g, '&#10;')
     }
 }()
 
-export function parsexmlbool(value /*:any*/, tag? /*:?string*/) /*:boolean*/ {
+export function parsexmlbool(value: any, tag?: string): boolean {
     switch (value) {
         case '1':
         case 'true':
@@ -145,7 +144,7 @@ export function parsexmlbool(value /*:any*/, tag? /*:?string*/) /*:boolean*/ {
     }
 }
 
-export let utf8read /*:StringConv*/ = function utf8reada(orig) {
+export let utf8read: StringConv = function utf8reada(orig) {
     let out = ''
     let i = 0
     let c = 0
@@ -229,9 +228,8 @@ if (has_buf) {
 
 // matches <foo>...</foo> extracts content
 export const matchtag = function () {
-    const mtcache /*:{[k:string]:RegExp}*/ = {}
-    /*:any*/
-    return function matchtag(f, g? /*:?string*/) /*:RegExp*/ {
+    const mtcache: { [k: string]: RegExp } = {}
+    return function matchtag(f, g?: string): RegExp {
         const t = `${f}|${g || ''}`
         if (mtcache[t]) {
             return mtcache[t]
@@ -249,6 +247,7 @@ const vtregex = function () {
         return vt_cache[bt] = new RegExp(`<(?:vt:)?${bt}>(.*?)</(?:vt:)?${bt}>`, 'g')
     }
 }()
+
 const vtvregex = /<\/?(?:vt:)?variant>/g
 const vtmregex = /<(?:vt:)([^>]*)>(.*)</
 
@@ -271,7 +270,7 @@ export function writetag(f, g) {
     return `<${f}${g.match(wtregex) ? ' xml:space="preserve"' : ''}>${g}</${f}>`
 }
 
-export function wxt_helper(h) /*:string*/ {
+export function wxt_helper(h): string {
     return keys(h).map(k => ` ${k}="${h[k]}"`).join('')
 }
 
@@ -281,7 +280,7 @@ export function writextag(f, g, h?) {
             : '') + `>${g}</${f}` : '/'}>`
 }
 
-export function write_w3cdtf(d /*:Date*/, t? /*:?boolean*/) /*:string*/ {
+export function write_w3cdtf(d: Date, t?: boolean): string {
     try {
         return d.toISOString().replace(/\.\d*/, '')
     } catch (e) {
@@ -336,4 +335,3 @@ export const XLMLNS = {
     'v': 'urn:schemas-microsoft-com:vml',
     'html': 'http://www.w3.org/TR/REC-html40',
 }
-/*:any*/

@@ -3,7 +3,7 @@ import { decode_range, encode_col, safe_decode_range } from './27_csfutils'
 import { HTML_ } from './79_html'
 import { make_csv_row } from './90_utils'
 
-const write_csv_stream = function (sheet /*:Worksheet*/, opts /*:?Sheet2CSVOpts*/) {
+const write_csv_stream = function (sheet: Worksheet, opts ?: Sheet2CSVOpts) {
     const stream = new Readable()
     const out = ''
     const o = opts == null ? {} : opts
@@ -48,12 +48,12 @@ const write_csv_stream = function (sheet /*:Worksheet*/, opts /*:?Sheet2CSVOpts*
 const HTML_BEGIN = '<html><body><table>'
 const HTML_END = '</table></body></html>'
 
-const write_html_stream = function (sheet /*:Worksheet*/, opts) {
+const write_html_stream = function (sheet: Worksheet, opts) {
     const stream = new Readable()
-    const o /*:Array<string>*/ = []
+    const o: Array<string> = []
     const r = decode_range(sheet['!ref'])
-    /*:Cell*/
-    let cell
+
+    let cell: Cell
 
     o.dense = Array.isArray(sheet)
     stream.push(HTML_BEGIN)

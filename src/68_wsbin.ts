@@ -40,7 +40,7 @@ import { parse_XLSBArrayParsedFormula, parse_XLSBCellParsedFormula, parse_XLSBSh
 import { col_obj_w, default_margins, get_sst_id, safe_format, strs } from './66_wscommon'
 
 export function parse_BrtRowHdr(data, length) {
-    const z = ({}/*:any*/)
+    const z = {}
     const tgt = data.l + length
     z.r = data.read_shift(4)
     data.l += 4 // TODO: ixfe
@@ -57,7 +57,7 @@ export function parse_BrtRowHdr(data, length) {
     return z
 }
 
-export function write_BrtRowHdr(R /*:number*/, range, ws) {
+export function write_BrtRowHdr(R: number, range, ws) {
     const o = new_buf(17 + 8 * 16)
     const row = (ws['!rows'] || [])[R] || {}
     o.write_shift(4, R)
@@ -398,7 +398,7 @@ export function parse_BrtShrFmla(data, length, opts) {
 
 /* [MS-XLSB] 2.4.323 BrtColInfo */
 /* TODO: once XLS ColInfo is set, combine the functions */
-export function write_BrtColInfo(C /*:number*/, col, o?) {
+export function write_BrtColInfo(C: number, col, o?) {
     if (o == null) {
         o = new_buf(18)
     }
@@ -498,7 +498,7 @@ export function write_BrtSheetProtection(sp, o?) {
 }
 
 /* [MS-XLSB] 2.1.7.61 Worksheet */
-export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet*/ {
+export function parse_ws_bin(data, _opts, rels, wb, themes, styles): Worksheet {
     if (!data) {
         return data
     }
@@ -535,7 +535,7 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
     const array_formulae = []
     const shared_formulae = {}
     const supbooks = [[]]
-    /*:any*/
+
     supbooks.sharedf = shared_formulae
     supbooks.arrayf = array_formulae
     supbooks.SheetNames = wb.SheetNames || wb.Sheets.map(function (x) {
@@ -589,7 +589,7 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
             case 0x000B:
                 /* 'BrtFmlaError' */
                 p = { t: val[2] }
-                /*:any*/
+
                 switch (val[2]) {
                     case 'n':
                         p.v = val[1]
@@ -667,7 +667,7 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
                     break
                 }
                 p = { t: 'z', v: undefined }
-                /*:any*/
+
                 C = val[0].c
                 if (opts.dense) {
                     if (!s[R]) {
@@ -894,7 +894,7 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles) /*:Worksheet
 }
 
 /* TODO: something useful -- this is a stub */
-function write_ws_bin_cell(ba /*:BufArray*/, cell /*:Cell*/, R /*:number*/, C /*:number*/, opts, ws /*:Worksheet*/) {
+function write_ws_bin_cell(ba: BufArray, cell: Cell, R: number, C: number, opts, ws: Worksheet) {
     if (cell.v === undefined) {
         return ''
     }
@@ -908,7 +908,7 @@ function write_ws_bin_cell(ba /*:BufArray*/, cell /*:Cell*/, R /*:number*/, C /*
             // no BrtCellDate :(
             cell.z = cell.z || SSF._table[14]
             olddate = cell.v
-            cell.v = datenum(cell.v /*:any*/)
+            cell.v = datenum(cell.v)
             cell.t = 'n'
             break
         /* falls through */
@@ -920,8 +920,8 @@ function write_ws_bin_cell(ba /*:BufArray*/, cell /*:Cell*/, R /*:number*/, C /*
             vv = cell.v
             break
     }
-    const o /*:any*/ = { r: R, c: C }
-    /*:any*/
+    const o = { r: R, c: C }
+
     /* TODO: cell style */
     //o.s = get_cell_style(opts.cellXfs, cell, opts);
     if (cell.l) {
@@ -934,7 +934,7 @@ function write_ws_bin_cell(ba /*:BufArray*/, cell /*:Cell*/, R /*:number*/, C /*
         case 's':
         case 'str':
             if (opts.bookSST) {
-                vv = get_sst_id(opts.Strings, cell.v /*:any*/)
+                vv = get_sst_id(opts.Strings, cell.v)
                 o.t = 's'
                 o.v = vv
                 write_record(ba, 'BrtCellIsst', write_BrtCellIsst(cell, o))
@@ -967,7 +967,7 @@ function write_ws_bin_cell(ba /*:BufArray*/, cell /*:Cell*/, R /*:number*/, C /*
     write_record(ba, 'BrtCellBlank', write_BrtCellBlank(cell, o))
 }
 
-function write_CELLTABLE(ba, ws /*:Worksheet*/, idx /*:number*/, opts, wb /*:Workbook*/) {
+function write_CELLTABLE(ba, ws: Worksheet, idx: number, opts, wb: Workbook) {
     const range = safe_decode_range(ws['!ref'] || 'A1')
     let ref
     let rr = ''
@@ -996,7 +996,7 @@ function write_CELLTABLE(ba, ws /*:Worksheet*/, idx /*:number*/, opts, wb /*:Wor
     write_record(ba, 'BrtEndSheetData')
 }
 
-function write_MERGECELLS(ba, ws /*:Worksheet*/) {
+function write_MERGECELLS(ba, ws: Worksheet) {
     if (!ws || !ws['!merges']) {
         return
     }
@@ -1007,7 +1007,7 @@ function write_MERGECELLS(ba, ws /*:Worksheet*/) {
     write_record(ba, 'BrtEndMergeCells')
 }
 
-function write_COLINFOS(ba, ws /*:Worksheet*/, idx /*:number*/, opts, wb /*:Workbook*/) {
+function write_COLINFOS(ba, ws: Worksheet, idx: number, opts, wb: Workbook) {
     if (!ws || !ws['!cols']) {
         return
     }
@@ -1020,7 +1020,7 @@ function write_COLINFOS(ba, ws /*:Worksheet*/, idx /*:number*/, opts, wb /*:Work
     write_record(ba, 'BrtEndColInfos')
 }
 
-function write_HLINKS(ba, ws /*:Worksheet*/, rels) {
+function write_HLINKS(ba, ws: Worksheet, rels) {
     /* *BrtHLink */
     ws['!links'].forEach(function (l) {
         if (!l[1].Target) {
@@ -1031,7 +1031,7 @@ function write_HLINKS(ba, ws /*:Worksheet*/, rels) {
     })
     delete ws['!links']
 }
-function write_LEGACYDRAWING(ba, ws /*:Worksheet*/, idx /*:number*/, rels) {
+function write_LEGACYDRAWING(ba, ws: Worksheet, idx: number, rels) {
     /* [BrtLegacyDrawing] */
     if (ws['!comments'].length > 0) {
         const rId = add_rels(rels, -1, `../drawings/vmlDrawing${idx + 1}.vml`, RELS.VML)
@@ -1074,7 +1074,7 @@ function write_SHEETPROTECT(ba, ws) {
     write_record(ba, 'BrtSheetProtection', write_BrtSheetProtection(ws['!protect']))
 }
 
-export function write_ws_bin(idx /*:number*/, opts, wb /*:Workbook*/, rels) {
+export function write_ws_bin(idx: number, opts, wb: Workbook, rels) {
     const ba = buf_array()
     const s = wb.SheetNames[idx]
     const ws = wb.Sheets[s] || {}

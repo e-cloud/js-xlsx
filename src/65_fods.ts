@@ -1,7 +1,7 @@
 import { crefregex } from './61_fcommon'
 
 /* Part 3 TODO: actually parse formulae */
-export function ods_to_csf_formula(f /*:string*/) /*:string*/ {
+export function ods_to_csf_formula(f: string): string {
     if (f.substr(0, 3) == 'of:') {
         f = f.substr(3)
     }
@@ -22,13 +22,13 @@ export function ods_to_csf_formula(f /*:string*/) /*:string*/ {
     return f.replace(/[;~]/g, ',').replace(/\|/g, ';')
 }
 
-export function csf_to_ods_formula(f /*:string*/) /*:string*/ {
+export function csf_to_ods_formula(f: string): string {
     const o = `of:=${f.replace(crefregex, '$1[.$2$3$4$5]').replace(/\]:\[/g, ':')}`
     /* TODO: something other than this */
     return o.replace(/;/g, '|').replace(/,/g, ';')
 }
 
-export function ods_to_csf_range_3D(r /*:string*/) {
+export function ods_to_csf_range_3D(r: string) {
     const a = r.split(':')
     const s = a[0].split('.')[0]
     return [s, `${a[0].split('.')[1]}:${a[1].split('.')[1]}`]

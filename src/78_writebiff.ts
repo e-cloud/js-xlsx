@@ -5,7 +5,7 @@ import { is_buf, new_buf } from './23_binutils'
 import { buf_array } from './24_hoppers'
 import { encode_col, encode_row, safe_decode_range } from './27_csfutils'
 
-export function write_biff_rec(ba /*:BufArray*/, t /*:number*/, payload, length? /*:?number*/) {
+export function write_biff_rec(ba: BufArray, t: number, payload, length?: number) {
     const len = length || (payload || []).length
     const o = ba.next(4 + len)
     o.write_shift(2, t)
@@ -15,7 +15,7 @@ export function write_biff_rec(ba /*:BufArray*/, t /*:number*/, payload, length?
     }
 }
 
-export function write_BOF(wb /*:Workbook*/, o) {
+export function write_BOF(wb: Workbook, o) {
     if (o.bookType != 'biff2') {
         throw 'unsupported BIFF version'
     }
@@ -25,7 +25,7 @@ export function write_BOF(wb /*:Workbook*/, o) {
     return out
 }
 
-export function write_BIFF2Cell(out, r /*:number*/, c /*:number*/) {
+export function write_BIFF2Cell(out, r: number, c: number) {
     if (!out) {
         out = new_buf(7)
     }
@@ -37,7 +37,7 @@ export function write_BIFF2Cell(out, r /*:number*/, c /*:number*/) {
     return out
 }
 
-export function write_BIFF2INT(r /*:number*/, c /*:number*/, val) {
+export function write_BIFF2INT(r: number, c: number, val) {
     const out = new_buf(9)
     write_BIFF2Cell(out, r, c)
     out.write_shift(2, val)
@@ -73,7 +73,7 @@ export function write_BIFF2LABEL(r, c, val) {
     return out.l < out.length ? out.slice(0, out.l) : out
 }
 
-export function write_ws_biff_cell(ba /*:BufArray*/, cell /*:Cell*/, R /*:number*/, C /*:number*/, opts) {
+export function write_ws_biff_cell(ba: BufArray, cell: Cell, R: number, C: number, opts) {
     if (cell.v != null) {
         switch (cell.t) {
             case 'd':
@@ -99,7 +99,7 @@ export function write_ws_biff_cell(ba /*:BufArray*/, cell /*:Cell*/, R /*:number
     write_biff_rec(ba, 0x0001, write_BIFF2Cell(null, R, C))
 }
 
-export function write_biff_ws(ba /*:BufArray*/, ws /*:Worksheet*/, idx /*:number*/, opts, wb /*:Workbook*/) {
+export function write_biff_ws(ba: BufArray, ws: Worksheet, idx: number, opts, wb: Workbook) {
     const dense = Array.isArray(ws)
     const range = safe_decode_range(ws['!ref'] || 'A1')
     let ref
@@ -123,7 +123,7 @@ export function write_biff_ws(ba /*:BufArray*/, ws /*:Worksheet*/, idx /*:number
 }
 
 /* Based on test files */
-export function write_biff_buf(wb /*:Workbook*/, opts /*:WriteOpts*/) {
+export function write_biff_buf(wb: Workbook, opts: WriteOpts) {
     const o = opts || {}
     if (DENSE != null && o.dense == null) {
         o.dense = DENSE

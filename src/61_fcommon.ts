@@ -3,8 +3,7 @@ import { decode_cell, decode_col, decode_range, decode_row, encode_col, encode_r
 
 export const rc_to_a1 = function () {
     const rcregex = /(^|[^A-Za-z])R(\[?)(-?\d+|)\]?C(\[?)(-?\d+|)\]?/g
-    let rcbase /*:Cell*/ = { r: 0, c: 0 }
-    /*:any*/
+    let rcbase: Cell = { r: 0, c: 0 }
 
     function rcfunc($$, $1, $2, $3, $4, $5) {
         let R = $3.length > 0 ? parseInt($3, 10) | 0 : 0
@@ -33,7 +32,7 @@ export const rc_to_a1 = function () {
         return $1 + (cRel ? '' : '$') + encode_col(C) + (rRel ? '' : '$') + encode_row(R)
     }
 
-    return function rc_to_a1(fstr /*:string*/, base /*:Cell*/) /*:string*/ {
+    return function rc_to_a1(fstr: string, base: Cell): string {
         rcbase = base
         return fstr.replace(rcregex, rcfunc)
     }
@@ -52,7 +51,7 @@ export const a1_to_rc = function () {
 }()
 
 /* no defined name can collide with a valid cell address A1:XFD1048576 ... except LOG10! */
-export function shift_formula_str(f /*:string*/, delta /*:Cell*/) /*:string*/ {
+export function shift_formula_str(f: string, delta: Cell): string {
     return f.replace(crefregex, function ($0, $1, $2, $3, $4, $5, off, str) {
         return $1 + ($2 == '$' ? $2 + $3 : encode_col(decode_col($3) + delta.c)) + ($4 == '$'
                 ? $4 + $5
@@ -60,7 +59,7 @@ export function shift_formula_str(f /*:string*/, delta /*:Cell*/) /*:string*/ {
     })
 }
 
-export function shift_formula_xlsx(f /*:string*/, range /*:string*/, cell /*:string*/) /*:string*/ {
+export function shift_formula_xlsx(f: string, range: string, cell: string): string {
     const r = decode_range(range)
     const s = r.s
     const c = decode_cell(cell)

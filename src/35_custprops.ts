@@ -7,7 +7,7 @@ XMLNS.CUST_PROPS = 'http://schemas.openxmlformats.org/officeDocument/2006/custom
 RELS.CUST_PROPS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/custom-properties'
 
 const custregex = /<[^>]+>[^<]*/g
-export function parse_cust_props(data /*:string*/, opts) {
+export function parse_cust_props(data: string, opts) {
     const p = {}
     let name = ''
     const m = data.match(custregex)
@@ -82,7 +82,7 @@ const CUST_PROPS_XML_ROOT = writextag('Properties', null, {
     'xmlns:vt': XMLNS.vt,
 })
 
-export function write_cust_props(cp, opts) /*:string*/ {
+export function write_cust_props(cp, opts): string {
     const o = [XML_HEADER, CUST_PROPS_XML_ROOT]
     if (!cp) {
         return o.join('')

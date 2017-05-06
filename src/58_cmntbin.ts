@@ -27,7 +27,7 @@ export function write_BrtBeginComment(data, o?) {
         o = new_buf(36)
     }
     o.write_shift(4, data[1].iauthor)
-    write_UncheckedRfX(data[0] /*:any*/, o)
+    write_UncheckedRfX(data[0], o)
     o.write_shift(4, 0)
     o.write_shift(4, 0)
     o.write_shift(4, 0)

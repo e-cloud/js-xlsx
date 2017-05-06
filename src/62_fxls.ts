@@ -355,7 +355,7 @@ function parse_PtgStr(blob, length, opts) {
 
 /* [MS-XLS] 2.5.192.112 + 2.5.192.11{3,4,5,6,7} */
 /* [MS-XLSB] 2.5.97.93 + 2.5.97.9{4,5,6,7} */
-function parse_SerAr(blob, biff /*:number*/) {
+function parse_SerAr(blob, biff: number) {
     const val = [blob.read_shift(1)]
     if (biff == 12) {
         switch (val[0]) {
@@ -434,7 +434,7 @@ function parse_PtgExtraArray(blob, length, opts) {
         }
     }
     // $FlowIgnore
-    const o /*:Array<Array<any> >*/ = []
+    const o: Array<Array<any>> = []
     for (let i = 0; i != rows && (o[i] = []); ++i) {
         for (let j = 0; j != cols; ++j) {
             o[i][j] = parse_SerAr(blob, opts.biff)
@@ -644,6 +644,7 @@ const PtgDupes = {
     /*::[*/0x5C /*::]*/: 0x3C, /*::[*/0x7C /*::]*/: 0x3C,
     /*::[*/0x5D /*::]*/: 0x3D, /*::[*/0x7D /*::]*/: 0x3D,
 };
+
 (function () {
     for (const y in PtgDupes) {
         PtgTypes[y] = PtgTypes[PtgDupes[y]]
@@ -876,10 +877,10 @@ const PtgBinOp = {
     PtgPower: '^',
     PtgSub: '-',
 }
-export function stringify_formula(formula /*Array<any>*/, range, cell /*:any*/, supbooks, opts) {
+export function stringify_formula(formula: Array<any>, range, cell, supbooks, opts) {
     //console.log(formula);
     const _range = /*range != null ? range :*/{ s: { c: 0, r: 0 }, e: { c: 0, r: 0 } }
-    const stack /*:Array<string>*/ = []
+    const stack: Array<string> = []
     let e1
     let e2
     let type
@@ -1009,9 +1010,9 @@ export function stringify_formula(formula /*Array<any>*/, range, cell /*:any*/, 
             case 'PtgFuncVar':
                 //console.log(f[1]);
                 /* f[1] = [argc, func, type] */
-                let argc /*:number*/ = f[1][0]
+                let argc: number = f[1][0]
 
-                let func /*:string*/ = f[1][1]
+                let func: string = f[1][1]
                 if (!argc) {
                     argc = 0
                 }
@@ -1048,13 +1049,13 @@ export function stringify_formula(formula /*Array<any>*/, range, cell /*:any*/, 
             case 'PtgAreaN':
                 type = f[1][0]
                 r = shift_range_xls(f[1][1], _range, opts)
-                stack.push(encode_range_xls(r /*:any*/, opts))
+                stack.push(encode_range_xls(r, opts))
                 break
             /* 2.5.198.27 TODO: fixed points */
             case 'PtgArea':
                 type = f[1][0]
                 r = shift_range_xls(f[1][1], _range, opts)
-                stack.push(encode_range_xls(r /*:any*/, opts))
+                stack.push(encode_range_xls(r, opts))
                 break
             /* 2.5.198.28 */
             case 'PtgArea3d':
@@ -1064,7 +1065,7 @@ export function stringify_formula(formula /*Array<any>*/, range, cell /*:any*/, 
                 /*::)*/
                 r = f[1][2]
                 sname = supbooks && supbooks[1] ? supbooks[1][ixti + 1] : '**MISSING**'
-                stack.push(`${sname}!${encode_range(r /*:any*/)}`)
+                stack.push(`${sname}!${encode_range(r)}`)
                 break
             /* 2.5.198.41 */
             case 'PtgAttrSum':
@@ -1090,8 +1091,7 @@ export function stringify_formula(formula /*Array<any>*/, range, cell /*:any*/, 
             /* 2.5.97.61 TODO: do something different for revisions */
             case 'PtgNameX':
                 /* f[1] = type, ixti, nameindex */
-                let bookidx /*:number*/ = f[1][1]
-                /*:any*/
+                let bookidx: number = f[1][1]
                 nameidx = f[1][2]
                 let externbook
                 /* TODO: Properly handle missing values */
@@ -1179,7 +1179,7 @@ export function stringify_formula(formula /*Array<any>*/, range, cell /*:any*/, 
             case 'PtgExp':
                 c = { c: f[1][1], r: f[1][0] }
                 const q = { c: cell.c, r: cell.r }
-                /*:any*/
+
                 if (supbooks.sharedf[encode_cell(c)]) {
                     const parsedf = supbooks.sharedf[encode_cell(c)]
                     stack.push(stringify_formula(parsedf, _range, q, supbooks, opts))

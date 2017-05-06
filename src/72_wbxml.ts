@@ -14,7 +14,7 @@ import {
 import { parse_wb_defaults } from './71_wbcommon'
 
 const wbnsregex = /<\w+:workbook/
-export function parse_wb_xml(data, opts) /*:WorkbookFile*/ {
+export function parse_wb_xml(data, opts): WorkbookFile {
     if (!data) {
         throw new Error('Could not find file')
     }
@@ -270,7 +270,7 @@ const WB_XML_ROOT = writextag('workbook', null, {
     'xmlns:r': XMLNS.r,
 })
 
-function safe1904(wb /*:Workbook*/) /*:string*/ {
+function safe1904(wb: Workbook): string {
     /* TODO: store date1904 somewhere else */
     if (!wb.Workbook) {
         return 'false'
@@ -282,7 +282,7 @@ function safe1904(wb /*:Workbook*/) /*:string*/ {
     return parsexmlbool(wb.Workbook.WBProps.date1904) ? 'true' : 'false'
 }
 
-export function write_wb_xml(wb /*:Workbook*/, opts /*:?WriteOpts*/) /*:string*/ {
+export function write_wb_xml(wb: Workbook, opts ?: WriteOpts): string {
     const o = [XML_HEADER]
     o[o.length] = WB_XML_ROOT
 
@@ -300,7 +300,7 @@ export function write_wb_xml(wb /*:Workbook*/, opts /*:?WriteOpts*/) /*:string*/
     const sheets = wb.Workbook && wb.Workbook.Sheets || []
     for (let i = 0; i != wb.SheetNames.length; ++i) {
         const sht = { name: escapexml(wb.SheetNames[i].substr(0, 31)) }
-        /*:any*/
+
         sht.sheetId = `${i + 1}`
         sht['r:id'] = `rId${i + 1}`
         if (sheets[i]) {

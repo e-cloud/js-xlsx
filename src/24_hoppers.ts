@@ -2,7 +2,7 @@ import { __toBuffer, is_buf, new_buf, prep_blob } from './23_binutils'
 import { evert_RE, XLSBRecordEnum } from './77_parsetab'
 
 /* [MS-XLSB] 2.1.4 Record */
-export function recordhopper(data, cb /*:RecordHopperCB*/, opts? /*:?any*/) {
+export function recordhopper(data, cb: RecordHopperCB, opts?: any) {
     if (!data) {
         return
     }
@@ -35,12 +35,11 @@ export function recordhopper(data, cb /*:RecordHopperCB*/, opts? /*:?any*/) {
 }
 
 /* control buffer usage for fixed-length buffers */
-export function buf_array() /*:BufArray*/ {
+export function buf_array(): BufArray {
     const bufs = []
     const blksz = 2048
     const newblk = function ba_newblk(sz) {
-        const o /*:Block*/ = new_buf(sz)
-        /*:any*/
+        const o: Block = new_buf(sz)
         prep_blob(o, 0)
         return o
     }
@@ -80,11 +79,10 @@ export function buf_array() /*:BufArray*/ {
     }
 
     return { next, push, end, _bufs: bufs }
-    /*:any*/
 }
 
-export function write_record(ba /*:BufArray*/, type /*:string*/, payload, length? /*:?number*/) {
-    const t /*:number*/ = Number(evert_RE[type])
+export function write_record(ba: BufArray, type: string, payload, length?: number) {
+    const t: number = Number(evert_RE[type])
     let l
     if (isNaN(t)) {
         return

@@ -6,7 +6,7 @@ import { parse_manifest, write_manifest, write_rdf } from './32_odmanrdf'
 import { parse_content_xml } from './80_parseods'
 import { write_content_xml } from './81_writeods'
 
-export function parse_ods(zip /*:ZIPFile*/, opts /*:?ParseOpts*/ = {}) {
+export function parse_ods(zip: ZIPFile, opts ?: ParseOpts = {}) {
     const ods = !!safegetzipfile(zip, 'objectdata')
     if (ods) {
         // todo: remove var
@@ -19,11 +19,11 @@ export function parse_ods(zip /*:ZIPFile*/, opts /*:?ParseOpts*/ = {}) {
     return parse_content_xml(ods ? content : utf8read(content), opts)
 }
 
-export function parse_fods(data /*:string*/, opts /*:?ParseOpts*/) {
+export function parse_fods(data: string, opts ?: ParseOpts) {
     return parse_content_xml(data, opts)
 }
 
-export function write_ods(wb /*:any*/, opts /*:any*/) {
+export function write_ods(wb, opts) {
     if (opts.bookType == 'fods') {
         return write_content_xml(wb, opts)
     }
@@ -32,7 +32,7 @@ export function write_ods(wb /*:any*/, opts /*:any*/) {
     const zip = new JSZip()
     let f = ''
 
-    const manifest /*:Array<Array<string> >*/ = []
+    const manifest: Array<Array<string>> = []
     const rdf = []
 
     /* 3:3.3 and 2:2.2.4 */

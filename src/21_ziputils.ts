@@ -2,7 +2,7 @@ import { char_codes, debom } from './02_codepage'
 import { has_buf } from './05_buf'
 import { cc2str, keys, str2cc } from './20_jsutils'
 
-export function getdatastr(data) /*:?string*/ {
+export function getdatastr(data): string {
     if (!data) {
         return null
     }
@@ -47,7 +47,7 @@ export function getdata(data) {
 
 /* Part 2 Section 10.1.2 "Mapping Content Types" Names are case-insensitive */
 /* OASIS does not comment on filename case sensitivity */
-export function safegetzipfile(zip, file /*:string*/) {
+export function safegetzipfile(zip, file: string) {
     const k = keys(zip.files)
     const f = file.toLowerCase()
     const g = f.replace(/\//g, '\\')
@@ -60,7 +60,7 @@ export function safegetzipfile(zip, file /*:string*/) {
     return null
 }
 
-export function getzipfile(zip, file /*:string*/) {
+export function getzipfile(zip, file: string) {
     const o = safegetzipfile(zip, file)
     if (o == null) {
         throw new Error(`Cannot find file ${file} in zip`)
@@ -68,7 +68,7 @@ export function getzipfile(zip, file /*:string*/) {
     return o
 }
 
-export function getzipdata(zip, file /*:string*/, safe? /*:?boolean*/) {
+export function getzipdata(zip, file: string, safe?: boolean) {
     if (!safe) {
         return getdata(getzipfile(zip, file))
     }
@@ -82,7 +82,7 @@ export function getzipdata(zip, file /*:string*/, safe? /*:?boolean*/) {
     }
 }
 
-export function getzipstr(zip, file /*:string*/, safe? /*:?boolean*/) /*:?string*/ {
+export function getzipstr(zip, file: string, safe?: boolean): string {
     if (!safe) {
         return getdatastr(getzipfile(zip, file))
     }
@@ -96,7 +96,7 @@ export function getzipstr(zip, file /*:string*/, safe? /*:?boolean*/) /*:?string
     }
 }
 
-export function resolve_path(path /*:string*/, base /*:string*/) /*:string*/ {
+export function resolve_path(path: string, base: string): string {
     const result = base.split('/')
     if (base.slice(-1) != '/') {
         result.pop()

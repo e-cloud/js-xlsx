@@ -4,16 +4,16 @@ import { buf_array, recordhopper, write_record } from './24_hoppers'
 import { parse_BrtColor, parse_FontFlags, parse_XLWideString } from './28_binstructs'
 
 /* [MS-XLSB] 2.4.651 BrtFmt */
-export function parse_BrtFmt(data, length /*:number*/) {
+export function parse_BrtFmt(data, length: number) {
     const ifmt = data.read_shift(2)
     const stFmtCode = parse_XLWideString(data, length - 2)
     return [ifmt, stFmtCode]
 }
 
 /* [MS-XLSB] 2.4.653 BrtFont TODO */
-export function parse_BrtFont(data, length /*:number*/) {
+export function parse_BrtFont(data, length: number) {
     const out = { flags: {} }
-    /*:any*/
+
     out.dyHeight = data.read_shift(2)
     out.grbit = parse_FontFlags(data, 2)
     out.bls = data.read_shift(2)
@@ -39,7 +39,7 @@ export function parse_BrtFont(data, length /*:number*/) {
 }
 
 /* [MS-XLSB] 2.4.816 BrtXF */
-export function parse_BrtXF(data, length /*:number*/) {
+export function parse_BrtXF(data, length: number) {
     const ixfeParent = data.read_shift(2)
     const ifmt = data.read_shift(2)
     parsenoop(data, length - 4)
@@ -50,7 +50,7 @@ export function parse_BrtXF(data, length /*:number*/) {
 export function parse_sty_bin(data, themes, opts) {
     const styles = {}
     styles.NumberFmt = []
-    /*:any*/
+
     for (const y in SSF._table) {
         styles.NumberFmt[y] = SSF._table[y]
     }

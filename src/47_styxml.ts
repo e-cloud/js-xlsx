@@ -367,8 +367,8 @@ function parse_fonts(t, styles, themes, opts) {
 /* 18.8.31 numFmts CT_NumFmts */
 function parse_numFmts(t, styles, opts) {
     styles.NumberFmt = []
-    const k /*Array<number>*/ = keys(SSF._table)
-    /*:any*/
+    const k: Array<number> = keys(SSF._table)
+
     for (let i = 0; i < k.length; ++i) {
         styles.NumberFmt[k[i]] = SSF._table[k[i]]
     }
@@ -403,7 +403,7 @@ function parse_numFmts(t, styles, opts) {
     }
 }
 
-function write_numFmts(NF /*:{[n:number]:string}*/, opts?) {
+function write_numFmts(NF: { [n: number]: string }, opts?) {
     const o = ['<numFmts>'];
     [[5, 8], [23, 26], [41, 44], [/*63*/50, /*66],[164,*/392]].forEach(function (r) {
         for (let i = r[0]; i <= r[1]; ++i) {
@@ -495,7 +495,7 @@ function parse_cellXfs(t, styles, opts) {
     })
 }
 
-function write_cellXfs(cellXfs) /*:string*/ {
+function write_cellXfs(cellXfs): string {
     const o = []
     o[o.length] = writextag('cellXfs', null)
     cellXfs.forEach(function (c) {
@@ -568,7 +568,7 @@ const STYLES_XML_ROOT = writextag('styleSheet', null, {
 
 RELS.STY = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles'
 
-export function write_sty_xml(wb /*:Workbook*/, opts) /*:string*/ {
+export function write_sty_xml(wb: Workbook, opts): string {
     const o = [XML_HEADER, STYLES_XML_ROOT]
     let w
     if (wb.SSF && (w = write_numFmts(wb.SSF)) != null) {

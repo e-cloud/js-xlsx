@@ -7,7 +7,7 @@ import { char2width, px2char, rgb_tint, setMDW } from './45_styutils'
 export const strs = {} // shared strings
 export let _ssfopts = {} // spreadsheet formatting options
 
-export function resetSSFOpts (val) {
+export function resetSSFOpts(val) {
     _ssfopts = val
 }
 
@@ -16,7 +16,7 @@ RELS.WS = [
     'http://purl.oclc.org/ooxml/officeDocument/relationships/worksheet',
 ]
 
-export function get_sst_id(sst /*:SST*/, str /*:string*/) /*:number*/ {
+export function get_sst_id(sst: SST, str: string): number {
     const len = sst.length
     for (let i = 0; i < len; ++i) {
         if (sst[i].t === str) {
@@ -30,9 +30,8 @@ export function get_sst_id(sst /*:SST*/, str /*:string*/) /*:number*/ {
     return len
 }
 
-export function col_obj_w(C /*:number*/, col) {
+export function col_obj_w(C: number, col) {
     const p = { min: C + 1, max: C + 1 }
-    /*:any*/
     /* wch (chars), wpx (pixels) */
     let wch = -1
     if (col.MDW) {

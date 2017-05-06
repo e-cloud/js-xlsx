@@ -36,7 +36,6 @@ export const CS2CP = {
     /*::[*/255 /*::]*/: 1252, /* OEM */
     /*::[*/69 /*::]*/: 6969 /* MISC */
 }
-/*:any*/
 
 /* Parse a list of <r> tags */
 const parse_rs = function parse_rs_factory() {
@@ -310,9 +309,9 @@ export function parse_si(x, opts?) {
 const sstr0 = /<(?:\w+:)?sst([^>]*)>([\s\S]*)<\/(?:\w+:)?sst>/
 const sstr1 = /<(?:\w+:)?(?:si|sstItem)>/g
 const sstr2 = /<\/(?:\w+:)?(?:si|sstItem)>/
-export function parse_sst_xml(data /*:string*/, opts) /*:SST*/ {
-    const s /*:SST*/ = []
-    /*:any*/
+export function parse_sst_xml(data: string, opts): SST {
+    const s: SST = []
+
     let ss = ''
     if (!data) {
         return s
@@ -337,7 +336,7 @@ export function parse_sst_xml(data /*:string*/, opts) /*:SST*/ {
 RELS.SST = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings'
 const straywsregex = /^\s|\s$|[\t\n\r]/
 
-export function write_sst_xml(sst /*:SST*/, opts) /*:string*/ {
+export function write_sst_xml(sst: SST, opts): string {
     if (!opts.bookSST) {
         return ''
     }
@@ -351,7 +350,7 @@ export function write_sst_xml(sst /*:SST*/, opts) /*:string*/ {
         if (sst[i] == null) {
             continue
         }
-        const s /*:XLString*/ = sst[i]
+        const s: XLString = sst[i]
         let sitag = '<si>'
         if (s.r) {
             sitag += s.r

@@ -12,7 +12,7 @@ import {
     parse_DataSpaceMap,
     parse_DataSpaceVersionInfo,
     parse_EncryptionInfo,
-    parse_Primary,
+    parse_Primary
 } from './44_offcrypto'
 import { parse_drawing } from './54_drawing'
 import { parse_comments } from './56_cmntcommon'
@@ -27,7 +27,7 @@ import {
     parse_sty,
     parse_theme,
     parse_wb,
-    parse_ws,
+    parse_ws
 } from './74_xmlbin'
 import { parse_ods } from './83_ods'
 import { fix_read_opts } from './84_defaults'
@@ -70,15 +70,12 @@ function safe_parse_wbrels(wbrels, sheets) {
 
 function safe_parse_sheet(
     zip,
-    path
-    /*:string*/,
-    relsPath
-    /*:string*/,
+    path: string,
+    relsPath: string,
     sheet,
     sheetRels,
     sheets,
-    stype
-    /*:string*/,
+    stype: string,
     opts,
     wb,
     themes,
@@ -118,11 +115,11 @@ function safe_parse_sheet(
     }
 }
 
-const nodirs = function nodirs(x /*:string*/) /*:boolean*/ {
+const nodirs = function nodirs(x: string): boolean {
     return x.slice(-1) != '/'
 }
 
-export function parse_zip(zip /*:ZIP*/, opts /*:?ParseOpts*/) /*:Workbook*/ {
+export function parse_zip(zip: ZIP, opts ?: ParseOpts): Workbook {
     SSF.make_ssf()
     opts = opts || {}
     fix_read_opts(opts)
@@ -138,7 +135,7 @@ export function parse_zip(zip /*:ZIP*/, opts /*:?ParseOpts*/) /*:Workbook*/ {
     }
 
     const entries = keys(zip.files).filter(nodirs).sort()
-    const dir = parse_ct(getzipstr(zip, '[Content_Types].xml') /*:?any*/, opts)
+    const dir = parse_ct(getzipstr(zip, '[Content_Types].xml'), opts)
     let xlsb = false
     let sheets
     let binname
@@ -164,9 +161,9 @@ export function parse_zip(zip /*:ZIP*/, opts /*:?ParseOpts*/) /*:Workbook*/ {
     }
 
     let themes = {}
-    /*:any*/
+
     let styles = {}
-    /*:any*/
+
     if (!opts.bookSheets && !opts.bookProps) {
         strs = []
         if (dir.sst) {
@@ -211,7 +208,7 @@ export function parse_zip(zip /*:ZIP*/, opts /*:?ParseOpts*/) /*:Workbook*/ {
     }
 
     let out = {}
-    /*:any*/
+
     if (opts.bookSheets || opts.bookProps) {
         if (wb.Sheets) {
             sheets = wb.Sheets.map(function pluck(x) {
@@ -240,7 +237,7 @@ export function parse_zip(zip /*:ZIP*/, opts /*:?ParseOpts*/) /*:Workbook*/ {
 
     let i = 0
     const sheetRels = {}
-    /*:any*/
+
     let path
     let relsPath
 
@@ -289,7 +286,7 @@ export function parse_zip(zip /*:ZIP*/, opts /*:?ParseOpts*/) /*:Workbook*/ {
         Themes: themes,
         SSF: SSF.get_table(),
     }
-    /*:any*/
+
     if (opts.bookFiles) {
         out.keys = entries
         out.files = zip.files
@@ -305,7 +302,7 @@ export function parse_zip(zip /*:ZIP*/, opts /*:?ParseOpts*/) /*:Workbook*/ {
 }
 
 /* references to [MS-OFFCRYPTO] */
-export function parse_xlsxcfb(cfb, opts /*:?ParseOpts*/) /*:Workbook*/ {
+export function parse_xlsxcfb(cfb, opts ?: ParseOpts): Workbook {
     let f = 'Version'
     let data = cfb.find(f)
     if (!data) {

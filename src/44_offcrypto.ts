@@ -2,7 +2,7 @@ import cptable from 'codepage/dist/cpexcel.full.js'
 import { new_raw_buf } from './05_buf'
 import { parseuint16 } from './38_xlstypes'
 
-function _JS2ANSI(str /*:string*/) /*:Array<number>*/ {
+function _JS2ANSI(str: string): Array<number> {
     if (typeof cptable !== 'undefined') {
         return cptable.utils.encode(1252, str)
     }
@@ -15,7 +15,7 @@ function _JS2ANSI(str /*:string*/) /*:Array<number>*/ {
 }
 
 /* [MS-OFFCRYPTO] 2.1.4 Version */
-function parse_CRYPTOVersion(blob, length? /*:number*/) {
+function parse_CRYPTOVersion(blob, length?: number) {
     const o = {}
     o.Major = blob.read_shift(2)
     o.Minor = blob.read_shift(2)
@@ -102,7 +102,7 @@ export function parse_Primary(blob, length?) {
 }
 
 /* [MS-OFFCRYPTO] 2.3.2 Encryption Header */
-export function parse_EncryptionHeader(blob, length /*:number*/) {
+export function parse_EncryptionHeader(blob, length: number) {
     const tgt = blob.l + length
     const o = {}
     o.Flags = blob.read_shift(4) & 0x3F
@@ -137,7 +137,7 @@ export function parse_EncryptionHeader(blob, length /*:number*/) {
 }
 
 /* [MS-OFFCRYPTO] 2.3.3 Encryption Verifier */
-export function parse_EncryptionVerifier(blob, length /*:number*/) {
+export function parse_EncryptionVerifier(blob, length: number) {
     const o = {}
     blob.l += 4 // SaltSize must be 0x10
     o.Salt = blob.slice(blob.l, blob.l + 16)
@@ -188,7 +188,7 @@ function parse_EncInfoAgl(blob, vers) {
 }
 
 /* [MS-OFFCRYPTO] 2.3.5.1 RC4 CryptoAPI Encryption Header */
-function parse_RC4CryptoHeader(blob, length /*:number*/) {
+function parse_RC4CryptoHeader(blob, length: number) {
     const o = {}
     const vers = o.EncryptionVersionInfo = parse_CRYPTOVersion(blob, 4)
     length -= 4
@@ -209,7 +209,7 @@ function parse_RC4CryptoHeader(blob, length /*:number*/) {
 }
 
 /* [MS-OFFCRYPTO] 2.3.6.1 RC4 Encryption Header */
-function parse_RC4Header(blob, length /*:number*/) {
+function parse_RC4Header(blob, length: number) {
     const o = {}
     const vers = o.EncryptionVersionInfo = parse_CRYPTOVersion(blob, 4)
     length -= 4
@@ -223,10 +223,10 @@ function parse_RC4Header(blob, length /*:number*/) {
 }
 
 /* [MS-OFFCRYPTO] 2.3.7.1 Binary Document Password Verifier Derivation */
-export function crypto_CreatePasswordVerifier_Method1(Password /*:string*/) {
+export function crypto_CreatePasswordVerifier_Method1(password: string) {
     let Verifier = 0x0000
     let PasswordArray
-    const PasswordDecoded = _JS2ANSI(Password)
+    const PasswordDecoded = _JS2ANSI(password)
     const len = PasswordDecoded.length + 1
     let i
     let PasswordByte
@@ -396,7 +396,7 @@ const crypto_CreateXorArray_Method1 = function () {
         }
         return XorKey
     }
-    return function (password /*:string*/) {
+    return function (password: string) {
         const Password = _JS2ANSI(password)
         const XorKey = CreateXorKey_Method1(Password)
         let Index = Password.length
@@ -440,7 +440,7 @@ const crypto_CreateXorArray_Method1 = function () {
 }()
 
 /* [MS-OFFCRYPTO] 2.3.7.3 Binary Document XOR Data Transformation Method 1 */
-const crypto_DecryptData_Method1 = function (password /*:string*/, Data, XorArrayIndex, XorArray, O?) {
+const crypto_DecryptData_Method1 = function (password: string, Data, XorArrayIndex, XorArray, O?) {
     /* If XorArray is set, use it; if O is not set, make changes in-place */
     if (!O) {
         O = Data
@@ -460,7 +460,7 @@ const crypto_DecryptData_Method1 = function (password /*:string*/, Data, XorArra
     return [O, XorArrayIndex, XorArray]
 }
 
-const crypto_MakeXorDecryptor = function (password /*:string*/) {
+const crypto_MakeXorDecryptor = function (password: string) {
     let XorArrayIndex = 0
     const XorArray = crypto_CreateXorArray_Method1(password)
     return function (Data) {
@@ -473,7 +473,7 @@ const crypto_MakeXorDecryptor = function (password /*:string*/) {
 /* 2.5.343 */
 export function parse_XORObfuscation(blob, length, opts, out) {
     const o = { key: parseuint16(blob), verificationBytes: parseuint16(blob) }
-    /*:any*/
+
     if (opts.password) {
         o.verifier = crypto_CreatePasswordVerifier_Method1(opts.password)
     }
@@ -485,7 +485,7 @@ export function parse_XORObfuscation(blob, length, opts, out) {
 }
 
 /* 2.4.117 */
-export function parse_FilePassHeader(blob, length /*:number*/, oo) {
+export function parse_FilePassHeader(blob, length: number, oo) {
     const o = oo || {}
     o.Info = blob.read_shift(2)
     blob.l -= 2
@@ -497,7 +497,7 @@ export function parse_FilePassHeader(blob, length /*:number*/, oo) {
     return o
 }
 
-export function parse_FilePass(blob, length /*:number*/, opts) {
+export function parse_FilePass(blob, length: number, opts) {
     const o = { Type: blob.read_shift(2) }
     /* wEncryptionType */
     if (o.Type) {

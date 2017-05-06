@@ -112,7 +112,7 @@ function parse_themeElements(data, themes, opts) {
 const themeltregex = /<a:themeElements([^>]*)>[^\u2603]*<\/a:themeElements>/
 
 /* 14.2.7 Theme Part */
-export function parse_theme_xml(data /*:string*/, opts) {
+export function parse_theme_xml(data: string, opts) {
     /* 20.1.6.9 theme CT_OfficeStyleSheet */
     if (!data || data.length === 0) {
         return parse_theme_xml(write_theme())
@@ -130,7 +130,7 @@ export function parse_theme_xml(data /*:string*/, opts) {
     return themes
 }
 
-export function write_theme(Themes, opts) /*:string*/ {
+export function write_theme(Themes, opts): string {
     if (opts && opts.themeXLSX) {
         return opts.themeXLSX
     }

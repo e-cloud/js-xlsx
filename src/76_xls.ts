@@ -56,7 +56,7 @@ function parse_compobj(obj) {
 }
 
 /* 2.4.58 Continue logic */
-function slurp(R, blob, length /*:number*/, opts) {
+function slurp(R, blob, length: number, opts) {
     let l = length
     const bufs = []
     const d = blob.slice(blob.l, blob.l + l)
@@ -87,7 +87,7 @@ function slurp(R, blob, length /*:number*/, opts) {
         next = XLSRecordEnum[__readUInt16LE(blob, blob.l)]
     }
     const b = bconcat(bufs)
-    /*:any*/
+
     prep_blob(b, 0)
     let ll = 0
     b.lens = []
@@ -98,7 +98,7 @@ function slurp(R, blob, length /*:number*/, opts) {
     return R.f(b, b.length, opts)
 }
 
-function safe_format_xf(p /*:any*/, opts /*:ParseOpts*/, date1904 /*:?boolean*/) {
+function safe_format_xf(p, opts: ParseOpts, date1904 ?: boolean) {
     if (p.t === 'z') {
         return
     }
@@ -148,15 +148,15 @@ function safe_format_xf(p /*:any*/, opts /*:ParseOpts*/, date1904 /*:?boolean*/)
     }
 }
 
-function make_cell(val, ixfe, t) /*:any*/ {
+function make_cell(val, ixfe, t) {
     return { v: val, ixfe, t }
-    /*:any*/
+
 }
 
 // 2.3.2
-function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
+function parse_workbook(blob, options?: ParseOpts): Workbook {
     const wb = { opts: {} }
-    /*:any*/
+
     const Sheets = {}
     if (DENSE != null && options.dense == null) {
         options.dense = DENSE
@@ -164,8 +164,8 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
     let out = options.dense ? [] : {}
     const Directory = {}
     const found_sheet = false
-    let range /*:Range*/ = {}
-    /*:any*/
+    let range: Range = {}
+
     let last_formula = null
     let sst = []
     let cur_sheet = ''
@@ -197,13 +197,13 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
         }
         return XLSIcv[icv]
     }
-    const process_cell_style = function pcs(cell, line /*:any*/, options) {
+    const process_cell_style = function pcs(cell, line, options) {
         const xfd = line.XF.data
         if (!xfd || !xfd.patternType || !options || !options.cellStyles) {
             return
         }
         line.s = {}
-        /*:any*/
+
         line.s.patternType = xfd.patternType
         let t
         if (t = rgb2Hex(get_rgb(xfd.icvFore))) {
@@ -213,7 +213,7 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
             line.s.bgColor = { rgb: t }
         }
     }
-    const addcell = function addcell(cell /*:any*/, line /*:any*/, options /*:any*/) {
+    const addcell = function addcell(cell, line, options) {
         if (file_depth > 1) {
             return
         }
@@ -295,7 +295,7 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
         cellStyles: !!options && !!options.cellStyles,
         WTF: !!options && !!options.wtf,
     }
-    /*:any*/
+
     if (options.password) {
         opts.password = options.password
     }
@@ -307,7 +307,7 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
     let defheight = 0
     let seencol = false
     let supbooks = []
-    /*:any*/ // 1-indexed, will hold extern names
+    // 1-indexed, will hold extern names
     supbooks.SheetNames = opts.snames
     supbooks.sharedf = opts.sharedf
     supbooks.arrayf = opts.arrayf
@@ -653,7 +653,7 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
                         break
                     }
                     temp_val = { v: val.val, ixfe: val.cell.ixfe, t: val.tt }
-                    /*:any*/
+
                     temp_val.XF = XFs[temp_val.ixfe]
                     if (options.cellFormula) {
                         const _f = val.formula
@@ -680,7 +680,7 @@ function parse_workbook(blob, options? /*:ParseOpts*/) /*:Workbook*/ {
                         /* technically always true */
                         last_formula.val = val
                         temp_val = { v: val, ixfe: last_formula.cell.ixfe, t: 's' }
-                        /*:any*/
+
                         temp_val.XF = XFs[temp_val.ixfe]
                         if (options.cellFormula) {
                             temp_val.f = `${stringify_formula(last_formula.formula, range, last_formula.cell, supbooks, opts)}`
@@ -1419,7 +1419,7 @@ function parse_props(cfb) {
     }
 }
 
-export function parse_xlscfb(cfb /*:any*/, options /*:?ParseOpts*/) /*:Workbook*/ {
+export function parse_xlscfb(cfb, options ?: ParseOpts): Workbook {
     if (!options) {
         options = {}
     }
@@ -1428,7 +1428,7 @@ export function parse_xlscfb(cfb /*:any*/, options /*:?ParseOpts*/) /*:Workbook*
     let CompObj
     let Summary
     let Workbook
-    /*:?any*/
+
     if (cfb.FullPaths) {
         CompObj = cfb.find('!CompObj')
         Summary = cfb.find('!SummaryInformation')
@@ -1436,7 +1436,7 @@ export function parse_xlscfb(cfb /*:any*/, options /*:?ParseOpts*/) /*:Workbook*
     } else {
         prep_blob(cfb, 0)
         Workbook = { content: cfb }
-        /*:any*/
+
     }
 
     if (!Workbook) {
@@ -1444,15 +1444,14 @@ export function parse_xlscfb(cfb /*:any*/, options /*:?ParseOpts*/) /*:Workbook*
     }
     let CompObjP
     let SummaryP
-    let WorkbookP
-    /*:Workbook*/
+    let WorkbookP: Workbook
 
     if (CompObj) {
         CompObjP = parse_compobj(CompObj)
     }
     if (options.bookProps && !options.bookSheets) {
         WorkbookP = {}
-        /*:any*/
+
     } else {
         if (Workbook) {
             WorkbookP = parse_workbook(Workbook.content, options, !!Workbook.find)

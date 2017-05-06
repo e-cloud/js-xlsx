@@ -4,7 +4,7 @@ RELS.IMG = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/
 RELS.DRAW = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing'
 
 /* 20.5 DrawingML - SpreadsheetML Drawing */
-export function parse_drawing(data, rels /*:any*/) {
+export function parse_drawing(data, rels) {
     if (!data) {
         return '??'
     }

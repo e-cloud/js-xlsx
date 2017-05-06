@@ -3,7 +3,7 @@ import { RELS } from './31_rels'
 
 /* 15.2.12.3 Extended File Properties Part */
 /* [MS-OSHARED] 2.3.3.2.[1-2].1 (PIDSI/PIDDSI) */
-export const EXT_PROPS /*:Array<Array<string> >*/ = [
+export const EXT_PROPS: Array<Array<string>> = [
     [
         'Application',
         'Application',
@@ -137,7 +137,7 @@ const EXT_PROPS_XML_ROOT = writextag('Properties', null, {
     'xmlns:vt': XMLNS.vt,
 })
 
-export function write_ext_props(cp, opts) /*:string*/ {
+export function write_ext_props(cp, opts): string {
     const o = []
     const p = {}
     const W = writextag

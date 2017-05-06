@@ -3,7 +3,7 @@ import { _getchar, current_codepage } from './02_codepage'
 import * as buf from './05_buf'
 import { has_buf, new_raw_buf } from './05_buf'
 
-export function read_double_le(b, idx /*:number*/) /*:number*/ {
+export function read_double_le(b, idx: number): number {
     const s = 1 - 2 * (b[idx + 7] >>> 7)
     let e = ((b[idx + 7] & 0x7f) << 4) + (b[idx + 6] >>> 4 & 0x0f)
     let m = b[idx + 6] & 0x0f
@@ -22,7 +22,7 @@ export function read_double_le(b, idx /*:number*/) /*:number*/ {
     return s * Math.pow(2, e - 52) * m
 }
 
-export function write_double_le(b, v /*:number*/, idx /*:number*/) {
+export function write_double_le(b, v: number, idx: number) {
     const bs = (v < 0 || 1 / v == -Infinity ? 1 : 0) << 7
     let e = 0
     let m = 0
@@ -225,7 +225,7 @@ const __unhexlify = typeof Buffer !== 'undefined' ? function (s) {
     return Buffer.isBuffer(s) ? new Buffer(s, 'hex') : ___unhexlify(s)
 } : ___unhexlify
 
-export function ReadShift(size /*:number*/, t /*:?string*/) {
+export function ReadShift(size: number, t ?: string) {
     let o = ''
     let oI
     let oR
@@ -401,7 +401,7 @@ const __writeInt32LE = function (b, val, idx) {
     b[idx + 3] = val >> 24 & 0xFF
 }
 
-export function WriteShift(t /*:number*/, val /*:string|number*/, f /*:?string*/) {
+export function WriteShift(t: number, val: string | number, f?: string) {
     let size = 0
     let i = 0
     if (f === 'dbcs') {
@@ -467,29 +467,29 @@ export function CheckField(hexstr, fld) {
     this.l += hexstr.length >> 1
 }
 
-export function prep_blob(blob, pos /*:number*/) {
+export function prep_blob(blob, pos: number) {
     blob.l = pos
     blob.read_shift = ReadShift
     blob.chk = CheckField
     blob.write_shift = WriteShift
 }
 
-export function parsenoop(blob, length /*:number*/) {
+export function parsenoop(blob, length: number) {
     blob.l += length
 }
 
-export function parsenooplog(blob, length /*:number*/) {
+export function parsenooplog(blob, length: number) {
     if (typeof console != 'undefined') {
         console.log(blob.slice(blob.l, blob.l + length))
     }
     blob.l += length
 }
 
-export function writenoop(blob, length /*:number*/) {
+export function writenoop(blob, length: number) {
     blob.l += length
 }
 
-export function new_buf(sz /*:number*/) /*:Block*/ {
+export function new_buf(sz: number): Block {
     const o = new_raw_buf(sz)
     prep_blob(o, 0)
     return o

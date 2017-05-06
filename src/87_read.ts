@@ -11,7 +11,7 @@ import { parse_xlml } from './75_xlml'
 import { parse_xlscfb } from './76_xls'
 import { parse_xlsxcfb, parse_zip } from './85_parsezip'
 
-function firstbyte(f /*:RawData*/, o /*:?TypeOpts*/) /*:Array<number>*/ {
+function firstbyte(f: RawData, o ?: TypeOpts): Array<number> {
     let x = ''
     switch ((o || {}).type || 'base64') {
         case 'buffer':
@@ -30,14 +30,14 @@ function firstbyte(f /*:RawData*/, o /*:?TypeOpts*/) /*:Array<number>*/ {
     return [x.charCodeAt(0), x.charCodeAt(1), x.charCodeAt(2), x.charCodeAt(3)]
 }
 
-export function read_cfb(cfb, opts /*:?ParseOpts*/) /*:Workbook*/ {
+export function read_cfb(cfb, opts ?: ParseOpts): Workbook {
     if (cfb.find('EncryptedPackage')) {
         return parse_xlsxcfb(cfb, opts)
     }
     return parse_xlscfb(cfb, opts)
 }
 
-export function read_zip(data /*:RawData*/, opts /*:?ParseOpts*/) /*:Workbook*/ {
+export function read_zip(data: RawData, opts ?: ParseOpts): Workbook {
     /*:: if(!jszip) throw new Error("JSZip is not available"); */
     let zip
 
@@ -63,7 +63,7 @@ export function read_zip(data /*:RawData*/, opts /*:?ParseOpts*/) /*:Workbook*/ 
     return parse_zip(zip, o)
 }
 
-function read_utf16(data /*:RawData*/, o /*:ParseOpts*/) /*:Workbook*/ {
+function read_utf16(data: RawData, o: ParseOpts): Workbook {
     let d = data
     if (o.type == 'base64') {
         d = Base64.decode(d)
@@ -76,7 +76,7 @@ function read_utf16(data /*:RawData*/, o /*:ParseOpts*/) /*:Workbook*/ {
     return PRN.to_workbook(d, o)
 }
 
-export function readSync(data /*:RawData*/, opts /*:?ParseOpts*/) /*:Workbook*/ {
+export function readSync(data: RawData, opts ?: ParseOpts): Workbook {
     let zip
     let d = data
     let n = [0]
@@ -140,7 +140,7 @@ export function readSync(data /*:RawData*/, opts /*:?ParseOpts*/) /*:Workbook*/ 
     return PRN.to_workbook(d, o)
 }
 
-export function readFileSync(filename /*:string*/, opts /*:?ParseOpts*/) /*:Workbook*/ {
+export function readFileSync(filename: string, opts ?: ParseOpts): Workbook {
     const o = opts || {}
     o.type = 'file'
     return readSync(filename, o)

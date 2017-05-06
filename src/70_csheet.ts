@@ -10,7 +10,7 @@ const CS_XML_ROOT = writextag('chartsheet', null, {
 })
 
 /* 18.3 Worksheets also covers Chartsheets */
-export function parse_cs_xml(data /*:?string*/, opts, rels, wb, themes, styles) /*:Worksheet*/ {
+export function parse_cs_xml(data: string, opts, rels, wb, themes, styles): Worksheet {
     if (!data) {
         return data
     }
@@ -32,7 +32,7 @@ export function parse_cs_xml(data /*:?string*/, opts, rels, wb, themes, styles) 
     return s
 }
 
-export function write_cs_xml(idx /*:number*/, opts, wb /*:Workbook*/, rels) /*:string*/ {
+export function write_cs_xml(idx: number, opts, wb: Workbook, rels): string {
     const o = [XML_HEADER, CS_XML_ROOT]
     o[o.length] = writextag('drawing', null, { 'r:id': 'rId1' })
     add_rels(rels, -1, `../drawings/drawing${idx + 1}.xml`, RELS.DRAW)
@@ -44,7 +44,7 @@ export function write_cs_xml(idx /*:number*/, opts, wb /*:Workbook*/, rels) /*:s
 }
 
 /* [MS-XLSB] 2.1.7.7 Chart Sheet */
-export function parse_cs_bin(data, opts, rels, wb, themes, styles) /*:Worksheet*/ {
+export function parse_cs_bin(data, opts, rels, wb, themes, styles): Worksheet {
     if (!data) {
         return data
     }
@@ -108,7 +108,7 @@ export function parse_cs_bin(data, opts, rels, wb, themes, styles) /*:Worksheet*
     return s
 }
 
-export function write_cs_bin(idx /*:number*/, opts, wb /*:Workbook*/, rels) {
+export function write_cs_bin(idx: number, opts, wb: Workbook, rels) {
     const ba = buf_array()
     write_record(ba, 'BrtBeginSheet')
     /* [BrtCsProp] */

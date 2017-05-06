@@ -43,7 +43,7 @@ const afregex = /<(?:\w:)?autoFilter[^>]*([\/]|>([^\u2603]*)<\/(?:\w:)?autoFilte
 const marginregex = /<(?:\w:)?pageMargins[^>]*\/>/g
 
 /* 18.3 Worksheets */
-export function parse_ws_xml(data /*:?string*/, opts, rels, wb, themes, styles) /*:Worksheet*/ {
+export function parse_ws_xml(data ?: string, opts, rels, wb, themes, styles): Worksheet {
     if (!data) {
         return data
     }
@@ -52,10 +52,9 @@ export function parse_ws_xml(data /*:?string*/, opts, rels, wb, themes, styles) 
     }
 
     /* 18.3.1.99 worksheet CT_Worksheet */
-    const s = opts.dense ? [] /*:any*/ : {}
-    /*:any*/
-    const refguess /*:Range*/ = { s: { r: 2000000, c: 2000000 }, e: { r: 0, c: 0 } }
-    /*:any*/
+    const s = opts.dense ? [] : {}
+
+    const refguess: Range = { s: { r: 2000000, c: 2000000 }, e: { r: 0, c: 0 } }
 
     let data1 = ''
     let data2 = ''
@@ -163,10 +162,10 @@ function write_ws_xml_merges(merges) {
 }
 
 /* 18.3.1.85 sheetPr CT_SheetProtection */
-function write_ws_xml_protection(sp) /*:string*/ {
+function write_ws_xml_protection(sp): string {
     // algorithmName, hashValue, saltValue, spinCountpassword
     const o = { sheet: 1 }
-    /*:any*/
+
     const deffalse = ['objects', 'scenarios', 'selectLockedCells', 'selectUnlockedCells']
     const deftrue = [
         'formatColumns',
@@ -198,7 +197,7 @@ function write_ws_xml_protection(sp) /*:string*/ {
     return writextag('sheetProtection', null, o)
 }
 
-function parse_ws_xml_hlinks(s, data /*:Array<string>*/, rels) {
+function parse_ws_xml_hlinks(s, data: Array<string>, rels) {
     const dense = Array.isArray(s)
     for (let i = 0; i != data.length; ++i) {
         const val = parsexmltag(data[i], true)
@@ -281,7 +280,7 @@ function parse_ws_xml_cols(columns, cols) {
     }
 }
 
-function write_ws_xml_cols(ws, cols) /*:string*/ {
+function write_ws_xml_cols(ws, cols): string {
     const o = ['<cols>']
     let col
     let width
@@ -299,13 +298,13 @@ function parse_ws_xml_autofilter(data) {
     const o = { ref: (data.match(/ref="([^"]*)"/) || [])[1] }
     return o
 }
-function write_ws_xml_autofilter(data) /*:string*/ {
+function write_ws_xml_autofilter(data): string {
     return writextag('autoFilter', null, { ref: data.ref })
 }
 
 /* 18.3.1.88 sheetViews CT_SheetViews */
 /* 18.3.1.87 sheetView CT_SheetView */
-function write_ws_xml_sheetviews(ws, opts, idx, wb)/*:string*/ {
+function write_ws_xml_sheetviews(ws, opts, idx, wb): string {
     return writextag('sheetViews', writextag('sheetView', null, { workbookViewId: '0' }), {})
 }
 
@@ -343,7 +342,7 @@ function write_ws_xml_cell(cell, ref, ws, opts, idx, wb) {
     }
     let v = writetag('v', escapexml(vv))
     const o = { r: ref }
-    /*:any*/
+
     /* TODO: cell style */
     const os = get_cell_style(opts.cellXfs, cell, opts)
     if (os !== 0) {
@@ -410,7 +409,7 @@ const parse_ws_xml_data = function parse_ws_xml_data_factory() {
         let cc = 0
         let d = ''
         let p
-        /*:any*/
+
         let tag
         let tagr = 0
         let tagc = 0
@@ -508,7 +507,6 @@ const parse_ws_xml_data = function parse_ws_xml_data_factory() {
                 }
                 d = x.substr(i)
                 p = { t: '' }
-                /*:any*/
 
                 if ((cref = d.match(match_v)) != null && /*::cref != null && */cref[1] !== '') {
                     p.v = unescapexml(cref[1])
@@ -650,7 +648,7 @@ const parse_ws_xml_data = function parse_ws_xml_data_factory() {
     }
 }()
 
-function write_ws_xml_data(ws /*:Worksheet*/, opts, idx /*:number*/, wb /*:Workbook*/, rels) /*:string*/ {
+function write_ws_xml_data(ws: Worksheet, opts, idx: number, wb: Workbook, rels): string {
     const o = []
     let r = []
     const range = safe_decode_range(ws['!ref'])
@@ -680,7 +678,7 @@ function write_ws_xml_data(ws /*:Worksheet*/, opts, idx /*:number*/, wb /*:Workb
         }
         if (r.length > 0) {
             const params = { r: rr }
-            /*:any*/
+
             if (rows && rows[R]) {
                 const row = rows[R]
                 if (row.hidden) {
@@ -708,7 +706,7 @@ const WS_XML_ROOT = writextag('worksheet', null, {
     'xmlns:r': XMLNS.r,
 })
 
-export function write_ws_xml(idx /*:number*/, opts, wb /*:Workbook*/, rels) /*:string*/ {
+export function write_ws_xml(idx: number, opts, wb: Workbook, rels): string {
     const o = [XML_HEADER, WS_XML_ROOT]
     const s = wb.SheetNames[idx]
     let sidx = 0
@@ -795,7 +793,7 @@ export function write_ws_xml(idx /*:number*/, opts, wb /*:Workbook*/, rels) /*:s
             }
             rId = add_rels(rels, -1, escapexml(l[1].Target).replace(/#.*$/, ''), RELS.HLINK)
             rel = { 'ref': l[0], 'r:id': `rId${rId}` }
-            /*:any*/
+
             if ((relc = l[1].Target.indexOf('#')) > -1) {
                 rel.location = escapexml(l[1].Target.substr(relc + 1))
             }

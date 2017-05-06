@@ -173,7 +173,7 @@ export function find_mdw_wpx(wpx) {
     MDW = _MDW
 }
 
-export function process_col(coll /*:ColInfo*/) {
+export function process_col(coll: ColInfo) {
     if (coll.width) {
         coll.wpx = width2px(coll.width)
         coll.wch = px2char(coll.wpx)

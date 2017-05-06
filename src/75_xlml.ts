@@ -33,10 +33,11 @@ const attregex2 = /([\w:]+)=((?:")(?:[^"]*)(?:")|(?:')(?:[^']*)(?:'))/
 const _chr = function (c) {
     return String.fromCharCode(c)
 }
-function xlml_parsexmltag(tag /*:string*/, skip_root? /*:?boolean*/) {
+
+function xlml_parsexmltag(tag: string, skip_root?: boolean) {
     const words = tag.split(/\s+/)
-    const z /*:any*/ = []
-    /*:any*/
+    const z = []
+
     if (!skip_root) {
         z[0] = words[0]
     }
@@ -66,7 +67,7 @@ function xlml_parsexmltag(tag /*:string*/, skip_root? /*:?boolean*/) {
     }
     return z
 }
-function xlml_parsexmltagobj(tag /*:string*/) {
+function xlml_parsexmltagobj(tag: string) {
     const words = tag.split(/\s+/)
     const z = {}
     if (words.length === 1) {
@@ -98,7 +99,7 @@ function xlml_parsexmltagobj(tag /*:string*/) {
 
 // ----
 
-function xlml_format(format, value) /*:string*/ {
+function xlml_format(format, value): string {
     const fmt = XLMLFormatMap[format] || unescapexml(format)
     if (fmt === 'General') {
         return SSF._general(value)
@@ -106,8 +107,8 @@ function xlml_format(format, value) /*:string*/ {
     return SSF.format(fmt, value)
 }
 
-function xlml_set_custprop(Custprops, Rn, cp, val /*:string*/) {
-    let oval /*:any*/ = val
+function xlml_set_custprop(Custprops, Rn, cp, val: string) {
+    let oval = val
     switch ((cp[0].match(/dt:dt="([\w.]+)"/) || ['', ''])[1]) {
         case 'boolean':
             oval = parsexmlbool(val)
@@ -136,7 +137,7 @@ function xlml_set_custprop(Custprops, Rn, cp, val /*:string*/) {
     Custprops[unescapexml(Rn[3])] = oval
 }
 
-function safe_format_xlml(cell /*:Cell*/, nf, o) {
+function safe_format_xlml(cell: Cell, nf, o) {
     if (cell.t === 'z') {
         return
     }
@@ -195,7 +196,7 @@ function process_style_xlml(styles, stag, opts) {
 }
 
 /* TODO: there must exist some form of OSP-blessed spec */
-function parse_xlml_data(xml, ss, data, cell /*:any*/, base, styles, csty, row, arrayf, o) {
+function parse_xlml_data(xml, ss, data, cell, base, styles, csty, row, arrayf, o) {
     let nf = 'General'
     let sid = cell.StyleID
     const S = {}
@@ -298,13 +299,13 @@ function parse_xlml_data(xml, ss, data, cell /*:any*/, base, styles, csty, row, 
     cell.ixfe = cell.StyleID !== undefined ? cell.StyleID : 'Default'
 }
 
-export function xlml_clean_comment(comment /*:any*/) {
+export function xlml_clean_comment(comment) {
     comment.t = comment.v || ''
     comment.t = comment.t.replace(/\r\n/g, '\n').replace(/\r/g, '\n')
     comment.v = comment.w = comment.ixfe = undefined
 }
 
-export function xlml_normalize(d) /*:string*/ {
+export function xlml_normalize(d): string {
     if (has_buf && /*::typeof Buffer !== "undefined" && d != null &&*/Buffer.isBuffer(d)) {
         return d.toString('utf8')
     }
@@ -318,7 +319,7 @@ export function xlml_normalize(d) /*:string*/ {
 /* UOS uses CJK in tags */
 export const xlmlregex = /<(\/?)([^\s?>!\/:]*:|)([^\s?>]*[^\s?>\/])[^>]*>/mg
 //var xlmlregex = /<(\/?)([a-z0-9]*:|)(\w+)[^>]*>/mg;
-export function parse_xlml_xml(d, opts) /*:Workbook*/ {
+export function parse_xlml_xml(d, opts): Workbook {
     SSF.make_ssf()
     let str = debom(xlml_normalize(d))
     if (opts && opts.type == 'binary' && typeof cptable !== 'undefined') {
@@ -339,7 +340,7 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
     let sheetname = ''
     let table = {}
     let cell = {}
-    /*:any*/
+
     let row = {}
     let dtag = xlml_parsexmltag('<Data ss:Type="String">')
     let didx = 0
@@ -1460,7 +1461,7 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
         }
     }
     const out = {}
-    /*:any*/
+
     if (!opts.bookSheets && !opts.bookProps) {
         out.Sheets = sheets
     }
@@ -1472,7 +1473,7 @@ export function parse_xlml_xml(d, opts) /*:Workbook*/ {
     return out
 }
 
-export function parse_xlml(data, opts) /*:Workbook*/ {
+export function parse_xlml(data, opts): Workbook {
     fix_read_opts(opts = opts || {})
     switch (opts.type || 'base64') {
         case 'base64':
@@ -1509,13 +1510,13 @@ function write_wb_xlml(wb, opts) {
 }
 
 /* TODO */
-function write_sty_xlml(wb, opts) /*:string*/ {
+function write_sty_xlml(wb, opts): string {
     /* Styles */
     return ''
 }
 
 /* WorksheetOptions */
-function write_ws_xlml_wsopts(ws/*:Worksheet*/, opts, idx/*:number*/, wb/*:Workbook*/)/*:string*/ {
+function write_ws_xlml_wsopts(ws: Worksheet, opts, idx: number, wb: Workbook): string {
     if (!ws) {
         return ''
     }
@@ -1658,7 +1659,7 @@ function write_ws_xlml_comment(comments) {
     }).join('')
 }
 
-function write_ws_xlml_cell(cell, ref, ws, opts, idx, wb, addr) /*:string*/ {
+function write_ws_xlml_cell(cell, ref, ws, opts, idx, wb, addr): string {
     if (!cell || cell.v == undefined && cell.f == undefined) {
         return '<Cell></Cell>'
     }
@@ -1740,7 +1741,7 @@ function write_ws_xlml_cell(cell, ref, ws, opts, idx, wb, addr) /*:string*/ {
     return writextag('Cell', m, attr)
 }
 
-function write_ws_xlml_row(R/*:number*/, row)/*:string*/ {
+function write_ws_xlml_row(R: number, row): string {
     let o = `<Row ss:Index="${R + 1}"`
     if (row) {
         if (row.hpt && !row.hpx) {
@@ -1757,7 +1758,7 @@ function write_ws_xlml_row(R/*:number*/, row)/*:string*/ {
 }
 
 /* TODO */
-function write_ws_xlml_table(ws /*:Worksheet*/, opts, idx /*:number*/, wb /*:Workbook*/) /*:string*/ {
+function write_ws_xlml_table(ws: Worksheet, opts, idx: number, wb: Workbook): string {
     if (!ws['!ref']) {
         return ''
     }
@@ -1818,7 +1819,7 @@ function write_ws_xlml_table(ws /*:Worksheet*/, opts, idx /*:number*/, wb /*:Wor
     }
     return o.join('')
 }
-function write_ws_xlml(idx /*:number*/, opts, wb /*:Workbook*/) /*:string*/ {
+function write_ws_xlml(idx: number, opts, wb: Workbook): string {
     const o = []
     const s = wb.SheetNames[idx]
     const ws = wb.Sheets[s]
@@ -1834,7 +1835,7 @@ function write_ws_xlml(idx /*:number*/, opts, wb /*:Workbook*/) /*:string*/ {
 
     return o.join('')
 }
-export function write_xlml(wb, opts) /*:string*/ {
+export function write_xlml(wb, opts): string {
     const d = []
     d.push(write_props_xlml(wb, opts))
     d.push(write_wb_xlml(wb, opts))

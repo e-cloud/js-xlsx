@@ -52,11 +52,11 @@ export const DBF = function () {
     }
 
     /* TODO: find an actual specification */
-    function dbf_to_aoa(buf, opts) /*:AOA*/ {
-        const out /*:AOA*/ = []
+    function dbf_to_aoa(buf, opts): AOA {
+        const out: AOA = []
         /* TODO: browser based */
-        let d /*:Block*/ = new_raw_buf(1)
-        /*:any*/
+        let d: Block = new_raw_buf(1)
+
         switch (opts.type) {
             case 'base64':
                 d = s2a(Base64.decode(buf))
@@ -289,7 +289,7 @@ export const DBF = function () {
         return out
     }
 
-    function dbf_to_sheet(buf, opts) /*:Worksheet*/ {
+    function dbf_to_sheet(buf, opts): Worksheet {
         const o = opts || {}
         if (!o.dateNF) {
             o.dateNF = 'yyyymmdd'
@@ -297,7 +297,7 @@ export const DBF = function () {
         return aoa_to_sheet(dbf_to_aoa(buf, o), o)
     }
 
-    function dbf_to_workbook(buf, opts) /*:Workbook*/ {
+    function dbf_to_workbook(buf, opts): Workbook {
         try {
             return sheet_to_workbook(dbf_to_sheet(buf, opts), opts)
         } catch (e) {
@@ -316,7 +316,7 @@ export const DBF = function () {
 
 export const SYLK = function () {
     /* TODO: find an actual specification */
-    function sylk_to_aoa(d /*:RawData*/, opts) /*:AOA*/ {
+    function sylk_to_aoa(d: RawData, opts): AOA {
         switch (opts.type) {
             case 'base64':
                 return sylk_to_aoa_str(Base64.decode(d), opts)
@@ -330,7 +330,7 @@ export const SYLK = function () {
         throw new Error(`Unrecognized type ${opts.type}`)
     }
 
-    function sylk_to_aoa_str(str /*:string*/, opts) /*:AOA*/ {
+    function sylk_to_aoa_str(str: string, opts): AOA {
         const records = str.split(/[\n\r]+/)
         let R = -1
         let C = -1
@@ -433,7 +433,7 @@ export const SYLK = function () {
         return arr
     }
 
-    function sylk_to_sheet(str/*:string*/, opts)/*:Worksheet*/ {
+    function sylk_to_sheet(str: string, opts): Worksheet {
         const aoa = sylk_to_aoa(str, opts)
         const ws = aoa.pop()
         const o = aoa_to_sheet(aoa, opts)
@@ -443,11 +443,11 @@ export const SYLK = function () {
         return o
     }
 
-    function sylk_to_workbook(str /*:string*/, opts) /*:Workbook*/ {
+    function sylk_to_workbook(str: string, opts): Workbook {
         return sheet_to_workbook(sylk_to_sheet(str, opts), opts)
     }
 
-    function write_ws_cell_sylk(cell /*:Cell*/, ws /*:Worksheet*/, R /*:number*/, C /*:number*/, opts) /*:string*/ {
+    function write_ws_cell_sylk(cell: Cell, ws: Worksheet, R: number, C: number, opts): string {
         let o = `C;Y${R + 1};X${C + 1};K`
         switch (cell.t) {
             case 'n':
@@ -510,12 +510,11 @@ export const SYLK = function () {
         })
     }
 
-    function sheet_to_sylk(ws /*:Worksheet*/, opts /*:?any*/) /*:string*/ {
-        const preamble /*:Array<string>*/ = ['ID;PWXL;N;E']
-        const o /*:Array<string>*/ = []
+    function sheet_to_sylk(ws: Worksheet, opts ?): string {
+        const preamble: Array<string> = ['ID;PWXL;N;E']
+        const o: Array<string> = []
         const r = decode_range(ws['!ref'])
-        let cell
-        /*:Cell*/
+        let cell: Cell
         const dense = Array.isArray(ws)
 
         const RS = '\r\n'
@@ -550,7 +549,7 @@ export const SYLK = function () {
 }()
 
 export const DIF = function () {
-    function dif_to_aoa(d /*:RawData*/, opts) /*:AOA*/ {
+    function dif_to_aoa(d: RawData, opts): AOA {
         switch (opts.type) {
             case 'base64':
                 return dif_to_aoa_str(Base64.decode(d), opts)
@@ -564,7 +563,7 @@ export const DIF = function () {
         throw new Error(`Unrecognized type ${opts.type}`)
     }
 
-    function dif_to_aoa_str(str /*:string*/, opts) /*:AOA*/ {
+    function dif_to_aoa_str(str: string, opts): AOA {
         const records = str.split('\n')
         let R = -1
         let C = -1
@@ -620,38 +619,34 @@ export const DIF = function () {
         return arr
     }
 
-    function dif_to_sheet(str /*:string*/, opts) /*:Worksheet*/ {
+    function dif_to_sheet(str: string, opts): Worksheet {
         return aoa_to_sheet(dif_to_aoa(str, opts), opts)
     }
 
-    function dif_to_workbook(str /*:string*/, opts) /*:Workbook*/ {
+    function dif_to_workbook(str: string, opts): Workbook {
         return sheet_to_workbook(dif_to_sheet(str, opts), opts)
     }
 
     const sheet_to_dif = function () {
-        const push_field = function pf(o
-                                       /*:Array<string>*/,
-                                       topic
-                                       /*:string*/,
-                                       v
-                                       /*:number*/,
-                                       n
-                                       /*:number*/,
-                                       s,
-                                       /*:string*/) {
+        const push_field = function pf(
+            o: Array<string>,
+            topic: string,
+            v: number,
+            n: number,
+            s: string
+        ) {
             o.push(topic)
             o.push(`${v},${n}`)
             o.push(`"${s.replace(/"/g, '""')}"`)
         }
-        const push_value = function po(o /*:Array<string>*/, type /*:number*/, v /*:number*/, s /*:string*/) {
+        const push_value = function po(o: Array<string>, type: number, v: number, s: string) {
             o.push(`${type},${v}`)
             o.push(type == 1 ? `"${s.replace(/"/g, '""')}"` : s)
         }
-        return function sheet_to_dif(ws /*:Worksheet*/, opts /*:?any*/) /*:string*/ {
-            const o /*:Array<string>*/ = []
+        return function sheet_to_dif(ws: Worksheet, opts ?): string {
+            const o: Array<string> = []
             const r = decode_range(ws['!ref'])
-            let cell
-            /*:Cell*/
+            let cell: Cell
             const dense = Array.isArray(ws)
             push_field(o, 'TABLE', 0, 1, 'sheetjs')
             push_field(o, 'VECTORS', 0, r.e.r - r.s.r + 1, '')
@@ -719,7 +714,7 @@ export const DIF = function () {
 }()
 
 export const PRN = function () {
-    function set_text_arr(data /*:string*/, arr /*:AOA*/, R /*:number*/, C /*:number*/) {
+    function set_text_arr(data: string, arr: AOA, R: number, C: number) {
         if (data === 'TRUE') {
             arr[R][C] = true
         } else if (data === 'FALSE') {
@@ -732,9 +727,9 @@ export const PRN = function () {
         }
     }
 
-    function prn_to_aoa_str(f /*:string*/, opts) /*:AOA*/ {
-        const arr /*:AOA*/ = []
-        /*:any*/
+    function prn_to_aoa_str(f: string, opts): AOA {
+        const arr: AOA = []
+
         if (!f || f.length === 0) {
             return arr
         }
@@ -767,16 +762,15 @@ export const PRN = function () {
         return arr
     }
 
-    function dsv_to_sheet_str(str /*:string*/, opts) /*:Worksheet*/ {
+    function dsv_to_sheet_str(str: string, opts): Worksheet {
         const o = opts || {}
         let sep = ''
         if (DENSE != null && o.dense == null) {
             o.dense = DENSE
         }
-        const ws /*:Worksheet*/ = o.dense ? [] /*:any*/ : {}
-        /*:any*/
-        const range /*:Range*/ = { s: { c: 0, r: 0 }, e: { c: 0, r: 0 } }
-        /*:any*/
+        const ws: Worksheet = o.dense ? [] : {}
+
+        const range: Range = { s: { c: 0, r: 0 }, e: { c: 0, r: 0 } }
 
         /* known sep */
         if (str.substr(0, 4) == 'sep=' && str.charCodeAt(5) == 10) {
@@ -810,7 +804,7 @@ export const PRN = function () {
                     }
                     const s = str.slice(start, end)
                     const cell = {}
-                    /*:any*/
+
                     if (s.charCodeAt(0) == 0x3D) {
                         cell.t = 'n'
                         cell.f = s.substr(1)
@@ -859,7 +853,7 @@ export const PRN = function () {
         return ws
     }
 
-    function prn_to_sheet_str(str /*:string*/, opts) /*:Worksheet*/ {
+    function prn_to_sheet_str(str: string, opts): Worksheet {
         if (str.substr(0, 4) == 'sep=') {
             return dsv_to_sheet_str(str, opts)
         }
@@ -869,7 +863,7 @@ export const PRN = function () {
         return aoa_to_sheet(prn_to_aoa_str(str, opts), opts)
     }
 
-    function prn_to_sheet(d /*:RawData*/, opts) /*:Worksheet*/ {
+    function prn_to_sheet(d: RawData, opts): Worksheet {
         switch (opts.type) {
             case 'base64':
                 return prn_to_sheet_str(Base64.decode(d), opts)
@@ -883,15 +877,14 @@ export const PRN = function () {
         throw new Error(`Unrecognized type ${opts.type}`)
     }
 
-    function prn_to_workbook(str /*:string*/, opts) /*:Workbook*/ {
+    function prn_to_workbook(str: string, opts): Workbook {
         return sheet_to_workbook(prn_to_sheet(str, opts), opts)
     }
 
-    function sheet_to_prn(ws /*:Worksheet*/, opts /*:?any*/) /*:string*/ {
-        const o /*:Array<string>*/ = []
+    function sheet_to_prn(ws: Worksheet, opts ?): string {
+        const o: Array<string> = []
         const r = decode_range(ws['!ref'])
-        let cell
-        /*:Cell*/
+        let cell: Cell
         const dense = Array.isArray(ws)
         for (let R = r.s.r; R <= r.e.r; ++R) {
             const oo = []

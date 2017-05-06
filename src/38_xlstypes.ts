@@ -93,8 +93,8 @@ function parse_VtVecHeadingPair(blob) {
 /* [MS-OLEPS] 2.18.1 Dictionary (uses 2.17, 2.16) */
 function parse_dictionary(blob, CodePage) {
     const cnt = blob.read_shift(4)
-    const dict /*:{[number]:string}*/ = {}
-    /*:any*/
+    const dict: { [n: number]: string } = {}
+
     for (let j = 0; j != cnt; ++j) {
         const pid = blob.read_shift(4)
         const len = blob.read_shift(4)
@@ -220,8 +220,7 @@ function parse_PropertySet(blob, PIDSI) {
     let i = 0
     let CodePage = 0
     let Dictionary = -1
-    let DictObj /*:{[number]:string}*/ = {}
-    /*:any*/
+    let DictObj: { [n: number]: string } = {}
     for (i = 0; i != NumProps; ++i) {
         const PropID = blob.read_shift(4)
         const Offset = blob.read_shift(4)
@@ -411,7 +410,6 @@ export function parse_PropertySetStream(file, PIDSI) {
     const PSet0 = parse_PropertySet(blob, PIDSI)
 
     const rval = { SystemIdentifier }
-    /*:any*/
     for (let y in PSet0) {
         rval[y] = PSet0[y]
     }

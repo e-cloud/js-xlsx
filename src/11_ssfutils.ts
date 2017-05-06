@@ -1,7 +1,7 @@
 import * as SSF from './10_ssf'
 
 /* map from xlml named formats to SSF TODO: localize */
-export const XLMLFormatMap /*{[string]:string}*/ = {
+export const XLMLFormatMap: { [name: string]: string } = {
     'General Number': 'General',
     'General Date': SSF._table[22],
     'Long Date': 'dddd, mmmm dd, yyyy',
@@ -19,4 +19,3 @@ export const XLMLFormatMap /*{[string]:string}*/ = {
     'True/False': '"True";"True";"False";@',
     'On/Off': '"Yes";"Yes";"No";@',
 }
-/*:any*/

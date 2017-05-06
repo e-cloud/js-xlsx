@@ -3,10 +3,10 @@ import { escapexml, writextag, wxt_helper, XML_HEADER } from './22_xmlutils'
 import { decode_range, encode_cell } from './27_csfutils'
 import { csf_to_ods_formula } from './65_fods'
 
-export const write_content_xml /*:{(wb:any, opts:any):string}*/ = function () {
+export const write_content_xml: { (wb: any, opts: any): string } = function () {
     const null_cell_xml = '          <table:table-cell />\n'
     const covered_cell_xml = '          <table:covered-table-cell/>\n'
-    const write_ws = function (ws, wb, i /*:number*/, opts) /*:string*/ {
+    const write_ws = function (ws, wb, i: number, opts): string {
         /* Section 9 Tables */
         const o = []
         o.push(`      <table:table table:name="${escapexml(wb.SheetNames[i])}">\n`)
@@ -103,7 +103,7 @@ export const write_content_xml /*:{(wb:any, opts:any):string}*/ = function () {
         return o.join('')
     }
 
-    function write_automatic_styles_ods(o/*:Array<string>*/) {
+    function write_automatic_styles_ods(o: Array<string>) {
         o.push(' <office:automatic-styles>\n')
         o.push('  <number:date-style style:name="N37" number:automatic-order="true">\n')
         o.push('   <number:month number:style="long"/>\n')

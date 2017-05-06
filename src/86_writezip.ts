@@ -13,7 +13,7 @@ import { write_cmnt, write_sst, write_sty, write_wb, write_ws } from './74_xmlbi
 import { write_ods } from './83_ods'
 import { fix_write_opts } from './84_defaults'
 
-export function write_zip(wb /*:Workbook*/, opts /*:WriteOpts*/) /*:ZIP*/ {
+export function write_zip(wb: Workbook, opts: WriteOpts): ZIP {
     resetShapeId()
     if (opts.bookType == 'ods') {
         return write_ods(wb, opts)
@@ -44,7 +44,7 @@ export function write_zip(wb /*:Workbook*/, opts /*:WriteOpts*/) /*:ZIP*/ {
         calcchains: [], vba: [], drawings: [],
         TODO: [], xmlns: '',
     }
-    /*:any*/
+
     fix_write_opts(opts = opts || {})
     /*:: if(!jszip) throw new Error("JSZip is not available"); */
     const zip = new JSZip()

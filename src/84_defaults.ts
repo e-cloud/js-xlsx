@@ -1,4 +1,4 @@
-function fix_opts_func(defaults /*:Array<Array<any> >*/) /*:{(o:any):void}*/ {
+function fix_opts_func(defaults: Array<Array<any>>): { (o: any): void } {
     return function fix_opts(opts) {
         for (let i = 0; i != defaults.length; ++i) {
             const d = defaults[i]

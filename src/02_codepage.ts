@@ -20,7 +20,7 @@ export function char_codes(data) {
     return o
 }
 
-let debom = function (data /*:string*/) /*:string*/ {
+let debom = function (data: string): string {
     const c1 = data.charCodeAt(0)
     const c2 = data.charCodeAt(1)
     if (c1 == 0xFF && c2 == 0xFE) {

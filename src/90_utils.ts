@@ -15,14 +15,14 @@ import {
 } from './27_csfutils'
 import { parse_dom_table, table_to_book } from './79_html'
 
-function sheet_to_json(sheet /*:Worksheet*/, opts /*:?Sheet2JSONOpts*/) {
+function sheet_to_json(sheet: Worksheet, opts ?: Sheet2JSONOpts) {
     if (sheet == null || sheet['!ref'] == null) {
         return []
     }
     let val = { t: 'n', v: 0 }
     let header = 0
     let offset = 1
-    const hdr /*:Array<any>*/ = []
+    const hdr: Array<any> = []
     let isempty = true
     let v = 0
     let vv = ''
@@ -164,22 +164,16 @@ function sheet_to_json(sheet /*:Worksheet*/, opts /*:?Sheet2JSONOpts*/) {
 }
 
 const qreg = /"/g
-export function make_csv_row(sheet
-                             /*:Worksheet*/,
-                             r
-                             /*:Range*/,
-                             R
-                             /*:number*/,
-                             cols
-                             /*:Array<string>*/,
-                             fs
-                             /*:number*/,
-                             rs
-                             /*:number*/,
-                             FS
-                             /*:string*/,
-                             o,
-                             /*:Sheet2CSVOpts*/) /*:?string*/ {
+export function make_csv_row(
+    sheet: Worksheet,
+    r: Range,
+    R: number,
+    cols: Array<string>,
+    fs: number,
+    rs: number,
+    FS: string,
+    o: Sheet2CSVOpts
+): string {
     let isempty = true
     let row = ''
     let txt = ''
@@ -215,7 +209,7 @@ export function make_csv_row(sheet
     return row
 }
 
-export function sheet_to_csv(sheet /*:Worksheet*/, opts /*:?Sheet2CSVOpts*/) /*:string*/ {
+export function sheet_to_csv(sheet: Worksheet, opts ?: Sheet2CSVOpts): string {
     const out = []
     const o = opts == null ? {} : opts
     if (sheet == null || sheet['!ref'] == null) {
@@ -247,7 +241,7 @@ export function sheet_to_csv(sheet /*:Worksheet*/, opts /*:?Sheet2CSVOpts*/) /*:
     return out.join('')
 }
 
-export function sheet_to_txt(sheet /*:Worksheet*/, opts /*:?Sheet2CSVOpts*/) {
+export function sheet_to_txt(sheet: Worksheet, opts ?: Sheet2CSVOpts) {
     if (!opts) {
         opts = {}
     }
@@ -261,7 +255,7 @@ export function sheet_to_txt(sheet /*:Worksheet*/, opts /*:?Sheet2CSVOpts*/) {
     return `\xFF\xFE${o}`
 }
 
-function sheet_to_formulae(sheet /*:Worksheet*/) /*:Array<string>*/ {
+function sheet_to_formulae(sheet: Worksheet): Array<string> {
     let y = ''
     let x
     let val = ''

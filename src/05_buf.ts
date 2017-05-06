@@ -3,11 +3,11 @@ export const has_buf = typeof Buffer !== 'undefined'
     && typeof process.versions !== 'undefined'
     && process.versions.node
 
-export function new_raw_buf(len :number) {
+export function new_raw_buf(len: number) {
     return new (has_buf ? Buffer : Array)(len)
 }
 
-export function s2a(s :string) {
+export function s2a(s: string) {
     if (has_buf) {
         return new Buffer(s, 'binary')
     }

@@ -4,7 +4,7 @@ import { parseDate } from './20_jsutils'
 import { write_w3cdtf, writetag, writextag, XML_HEADER, XMLNS } from './22_xmlutils'
 import { RELS } from './31_rels'
 
-export const CORE_PROPS /*:Array<Array<string> >*/ = [
+export const CORE_PROPS: Array<Array<string>> = [
     [
         'cp:category',
         'Category',
@@ -72,7 +72,7 @@ export const CORE_PROPS /*:Array<Array<string> >*/ = [
 XMLNS.CORE_PROPS = 'http://schemas.openxmlformats.org/package/2006/metadata/core-properties'
 RELS.CORE_PROPS = 'http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties'
 
-const CORE_PROPS_REGEX /*:Array<RegExp>*/ = function () {
+const CORE_PROPS_REGEX: Array<RegExp> = function () {
     const r = new Array(CORE_PROPS.length)
     for (let i = 0; i < CORE_PROPS.length; ++i) {
         const f = CORE_PROPS[i]

@@ -6,7 +6,7 @@ import { encode_cell, encode_range } from './27_csfutils'
 import { parseuint16 } from './38_xlstypes'
 
 export const WK_ = function () {
-    function lotushopper(data, cb /*:RecordHopperCB*/, opts /*:any*/) {
+    function lotushopper(data, cb: RecordHopperCB, opts) {
         if (!data) {
             return
         }
@@ -25,7 +25,7 @@ export const WK_ = function () {
         }
     }
 
-    function lotus_to_workbook(d /*:RawData*/, opts) {
+    function lotus_to_workbook(d: RawData, opts) {
         switch (opts.type) {
             case 'base64':
                 return lotus_to_workbook_buf(s2a(Base64.decode(d)), opts)
@@ -38,7 +38,7 @@ export const WK_ = function () {
         throw `Unsupported type ${opts.type}`
     }
 
-    function lotus_to_workbook_buf(d, opts) /*:Workbook*/ {
+    function lotus_to_workbook_buf(d, opts): Workbook {
         if (!d) {
             return d
         }
@@ -46,7 +46,7 @@ export const WK_ = function () {
         if (DENSE != null && o.dense == null) {
             o.dense = DENSE
         }
-        let s /*:Worksheet*/ = o.dense ? [] : {}
+        let s: Worksheet = o.dense ? [] : {}
         let n = 'Sheet1'
         let sidx = 0
         const sheets = {}

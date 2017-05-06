@@ -8,7 +8,7 @@ import { write_csv_str, write_dif_str, write_htm_str, write_prn_str, write_slk_s
 import { write_ods } from './83_ods'
 import { write_zip } from './86_writezip'
 
-function write_zip_type(wb /*:Workbook*/, opts /*:?WriteOpts*/) {
+function write_zip_type(wb: Workbook, opts ?: WriteOpts) {
     const o = opts || {}
     const z = write_zip(wb, o)
     const oopts = {}
@@ -36,7 +36,7 @@ function write_zip_type(wb /*:Workbook*/, opts /*:?WriteOpts*/) {
 }
 
 /* TODO: test consistency */
-function write_bstr_type(out /*:string*/, opts /*:WriteOpts*/) {
+function write_bstr_type(out: string, opts: WriteOpts) {
     switch (opts.type) {
         case 'base64':
             return Base64.encode(out)
@@ -58,7 +58,7 @@ function write_bstr_type(out /*:string*/, opts /*:WriteOpts*/) {
 }
 
 /* TODO: test consistency */
-function write_string_type(out /*:string*/, opts /*:WriteOpts*/) {
+function write_string_type(out: string, opts: WriteOpts) {
     switch (opts.type) {
         case 'base64':
             return Base64.encode(out)
@@ -80,7 +80,7 @@ function write_string_type(out /*:string*/, opts /*:WriteOpts*/) {
 }
 
 /* TODO: test consistency */
-function write_binary_type(out, opts /*:WriteOpts*/) {
+function write_binary_type(out, opts: WriteOpts) {
     switch (opts.type) {
         case 'base64':
         case 'binary':
@@ -98,7 +98,7 @@ function write_binary_type(out, opts /*:WriteOpts*/) {
     }
 }
 
-export function writeSync(wb /*:Workbook*/, opts /*:?WriteOpts*/) {
+export function writeSync(wb: Workbook, opts ?: WriteOpts) {
     check_wb(wb)
     const o = opts || {}
     switch (o.bookType || 'xlsb') {
@@ -187,7 +187,7 @@ function resolve_book_type(o /*?WriteFileOpts*/) {
     }
 }
 
-export function writeFileSync(wb /*:Workbook*/, filename /*:string*/, opts /*:?WriteFileOpts*/) {
+export function writeFileSync(wb: Workbook, filename: string, opts ?: WriteFileOpts) {
     const o = opts || {}
     o.type = 'file'
     o.file = filename
@@ -195,14 +195,13 @@ export function writeFileSync(wb /*:Workbook*/, filename /*:string*/, opts /*:?W
     return writeSync(wb, o)
 }
 
-export function writeFileAsync(filename
-                               /*:string*/,
-                               wb
-                               /*:Workbook*/,
-                               opts
-                               /*:?WriteFileOpts*/,
-                               cb,
-                               /*:?(e?:ErrnoError)=>void*/) {
+export function writeFileAsync(
+    filename: string,
+    wb: Workbook,
+    opts
+        ?: WriteFileOpts,
+    cb?: (e?: Error) => void
+) {
     const o = opts || {}
     o.type = 'file'
     o.file = filename
@@ -212,6 +211,6 @@ export function writeFileAsync(filename
     if (!(_cb instanceof Function)) {
         _cb = opts
     }
-    /*:any*/
+
     return fs.writeFile(filename, writeSync(wb, o), _cb)
 }

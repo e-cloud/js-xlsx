@@ -20,7 +20,7 @@ function parse_numCache(data) {
 }
 
 /* 21.2 DrawingML - Charts */
-export function parse_chart(data, name /*:string*/, opts, rels, wb, csheet) {
+export function parse_chart(data, name: string, opts, rels, wb, csheet) {
     const cs = csheet || { '!type': 'chart' }
     if (!data) {
         return csheet

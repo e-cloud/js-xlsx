@@ -21,12 +21,11 @@ import { parse_ArrayParsedFormula, parse_NameParsedFormula, parse_SharedParsedFo
 /* --- MS-XLS --- */
 
 /* 2.5.19 */
-export function parse_XLSCell(blob, length?) /*:Cell*/ {
+export function parse_XLSCell(blob, length?): Cell {
     const rw = blob.read_shift(2) // 0-indexed
     const col = blob.read_shift(2)
     const ixfe = blob.read_shift(2)
     return { r: rw, c: col, ixfe }
-    /*:any*/
 }
 
 /* 2.5.134 */
@@ -260,11 +259,11 @@ export function parse_BoundSheet8(blob, length, opts) {
 }
 
 /* 2.4.265 TODO */
-export function parse_SST(blob, length) /*:SST*/ {
+export function parse_SST(blob, length): SST {
     const cnt = blob.read_shift(4)
     const ucnt = blob.read_shift(4)
-    const strs /*:SST*/ = []
-    /*:any*/
+    const strs: SST = []
+
     for (let i = 0; i != ucnt; ++i) {
         strs.push(parse_XLUnicodeRichExtendedString(blob))
     }
@@ -283,7 +282,7 @@ export function parse_ExtSST(blob, length) {
 
 /* 2.4.221 TODO: check BIFF2-4 */
 export function parse_Row(blob, length) {
-    const z = ({}/*:any*/)
+    const z = {}
     z.r = blob.read_shift(2)
     z.c = blob.read_shift(2)
     z.cnt = blob.read_shift(2) - z.c
@@ -565,7 +564,7 @@ export function parse_ExternName(blob, length, opts) {
         cf: flags >>> 5 & 0x3FF,
         fIcon: flags >>> 15 & 0x01,
     }
-    /*:any*/
+
     if (opts.sbcch === 0x3A01) {
         body = parse_AddinUdf(blob, length - 2, opts)
     }
