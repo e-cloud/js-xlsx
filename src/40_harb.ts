@@ -1,5 +1,5 @@
 /* from js-harb (C) 2014-present  SheetJS */
-import cptable from 'codepage/dist/cpexcel.full.js'
+import * as cptable from 'codepage/dist/cpexcel.full.js'
 import { DENSE, DIF_XL } from './03_consts'
 import * as Base64 from './04_base64'
 import { new_raw_buf, s2a } from './05_buf'

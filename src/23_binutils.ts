@@ -1,4 +1,4 @@
-import cptable from 'codepage/dist/cpexcel.full.js'
+import * as cptable from 'codepage/dist/cpexcel.full.js'
 import { _getchar, current_codepage } from './02_codepage'
 import * as buf from './05_buf'
 import { has_buf, new_raw_buf } from './05_buf'

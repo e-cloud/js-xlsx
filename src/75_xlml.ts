@@ -1,4 +1,4 @@
-import cptable from 'codepage/dist/cpexcel.full.js'
+import * as cptable from 'codepage/dist/cpexcel.full.js'
 import { char_codes, debom } from './02_codepage'
 import { DENSE } from './03_consts'
 import * as Base64 from './04_base64'

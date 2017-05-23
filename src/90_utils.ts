@@ -1,4 +1,4 @@
-import cptable from 'codepage/dist/cpexcel.full.js'
+import * as cptable from 'codepage/dist/cpexcel.full.js'
 import {
     aoa_to_sheet,
     decode_cell,

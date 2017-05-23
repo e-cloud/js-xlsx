@@ -1,4 +1,4 @@
-import cptable from 'codepage/dist/cpexcel.full.js'
+import * as cptable from 'codepage/dist/cpexcel.full.js'
 import { new_raw_buf } from './05_buf'
 import { parseuint16 } from './38_xlstypes'
 

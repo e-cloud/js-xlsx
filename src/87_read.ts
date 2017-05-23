@@ -1,4 +1,4 @@
-import cptable from 'codepage/dist/cpexcel.full.js'
+import * as cptable from 'codepage/dist/cpexcel.full.js'
 import * as fs from 'fs'
 import * as JSZip from 'jszip'
 import * as Base64 from './04_base64'
