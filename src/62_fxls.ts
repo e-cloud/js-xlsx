@@ -16,7 +16,7 @@ function parseread(l) {
         return
     }
 }
-function parseread1(blob, length) {
+function parseread1(blob) {
     blob.l += 1
     return
 }
@@ -47,7 +47,7 @@ function parse_RgceArea(blob, length, opts) {
     return { s: { r, c: c[0], cRel: c[1], rRel: c[2] }, e: { r: R, c: C[0], cRel: C[1], rRel: C[2] } }
 }
 /* BIFF 2-5 encodes flags in the row field */
-function parse_RgceArea_BIFF2(blob, length, opts) {
+function parse_RgceArea_BIFF2(blob/*, length, opts*/) {
     const r = parse_ColRelU(blob, 2)
     const R = parse_ColRelU(blob, 2)
     const c = blob.read_shift(1)
@@ -56,7 +56,7 @@ function parse_RgceArea_BIFF2(blob, length, opts) {
 }
 
 /* 2.5.198.105 TODO */
-function parse_RgceAreaRel(blob, length, opts) {
+function parse_RgceAreaRel(blob, length/*, opts*/) {
     const r = blob.read_shift(length == 12 ? 4 : 2)
     const R = blob.read_shift(length == 12 ? 4 : 2)
     const c = parse_ColRelU(blob, 2)
@@ -884,7 +884,7 @@ export function stringify_formula(formula: Array<any>, range, cell, supbooks, op
     let e1
     let e2
     let type
-    let c
+    let c: CellAddress
     let ixti = 0
     let nameidx = 0
     let r
@@ -950,50 +950,46 @@ export function stringify_formula(formula: Array<any>, range, cell, supbooks, op
                 stack.push(e2 + PtgBinOp[f[0]] + e1)
                 break
 
-            /* 2.5.198.67 */
-            case 'PtgIsect':
+            case 'PtgIsect': /* 2.5.198.67 */
                 e1 = stack.pop()
                 e2 = stack.pop()
                 stack.push(`${e2} ${e1}`)
                 break
-            case 'PtgUnion':
+            case 'PtgUnion': /* 2.5.198.94 */
                 e1 = stack.pop()
                 e2 = stack.pop()
                 stack.push(`${e2},${e1}`)
                 break
-            case 'PtgRange':
+            case 'PtgRange': /* 2.5.198.83 */
                 e1 = stack.pop()
                 e2 = stack.pop()
                 stack.push(`${e2}:${e1}`)
                 break
 
-            /* 2.5.198.34 */
-            case 'PtgAttrChoose':
-                break
-            /* 2.5.198.35 */
-            case 'PtgAttrGoto':
-                break
-            /* 2.5.198.36 */
-            case 'PtgAttrIf':
-                break
-            /* [MS-XLSB] 2.5.97.28 */
-            case 'PtgAttrIfError':
+            case 'PtgAttrChoose':/* 2.5.198.34 */
                 break
 
-            /* 2.5.198.84 */
-            case 'PtgRef':
+            case 'PtgAttrGoto':/* 2.5.198.35 */
+                break
+
+            case 'PtgAttrIf':/* 2.5.198.36 */
+                break
+
+            case 'PtgAttrIfError':/* [MS-XLSB] 2.5.97.28 */
+                break
+
+            case 'PtgRef':/* 2.5.198.84 */
                 type = f[1][0]
                 c = shift_cell_xls(f[1][1], _range, opts)
                 stack.push(encode_cell_xls(c))
                 break
-            /* 2.5.198.88 */
-            case 'PtgRefN':
+
+            case 'PtgRefN':/* 2.5.198.88 */
                 type = f[1][0]
                 c = cell ? shift_cell_xls(f[1][1], cell, opts) : f[1][1]
                 stack.push(encode_cell_xls(c))
                 break
-            case 'PtgRef3d':
-                // TODO: lots of stuff
+            case 'PtgRef3d':/* 2.5.198.85 */
                 type = f[1][0]
                 ixti = /*::Number(*/f[1][1]
                 /*::)*/
@@ -1004,10 +1000,9 @@ export function stringify_formula(formula: Array<any>, range, cell, supbooks, op
                 stack.push(`${sname}!${encode_cell_xls(c)}`)
                 break
 
-            /* 2.5.198.62 */
-            case 'PtgFunc':
-            /* 2.5.198.63 */
-            case 'PtgFuncVar':
+            case 'PtgFunc':/* 2.5.198.62 */
+
+            case 'PtgFuncVar':/* 2.5.198.63 */
                 //console.log(f[1]);
                 /* f[1] = [argc, func, type] */
                 let argc: number = f[1][0]
@@ -1024,42 +1019,40 @@ export function stringify_formula(formula: Array<any>, range, cell, supbooks, op
                 stack.push(`${func}(${args.join(',')})`)
                 break
 
-            /* 2.5.198.42 */
-            case 'PtgBool':
+            case 'PtgBool':/* 2.5.198.42 */
                 stack.push(f[1] ? 'TRUE' : 'FALSE')
                 break
-            /* 2.5.198.66 */
-            case 'PtgInt':
+
+            case 'PtgInt':/* 2.5.198.66 */
                 stack.push(/*::String(*/f[1] /*::)*/)
                 break
-            /* 2.5.198.79 TODO: precision? */
-            case 'PtgNum':
+
+            case 'PtgNum':/* 2.5.198.79 TODO: precision? */
                 stack.push(String(f[1]))
                 break
-            /* 2.5.198.89 */
+
             // $FlowIgnore
-            case 'PtgStr':
+            case 'PtgStr':/* 2.5.198.89 */
                 stack.push(`"${f[1]}"`)
                 break
-            /* 2.5.198.57 */
-            case 'PtgErr':
+
+            case 'PtgErr':/* 2.5.198.57 */
                 stack.push(/*::String(*/f[1] /*::)*/)
                 break
-            /* 2.5.198.31 TODO */
-            case 'PtgAreaN':
+
+            case 'PtgAreaN':/* 2.5.198.31 TODO */
                 type = f[1][0]
                 r = shift_range_xls(f[1][1], _range, opts)
                 stack.push(encode_range_xls(r, opts))
                 break
-            /* 2.5.198.27 TODO: fixed points */
-            case 'PtgArea':
+
+            case 'PtgArea':/* 2.5.198.27 TODO: fixed points */
                 type = f[1][0]
                 r = shift_range_xls(f[1][1], _range, opts)
                 stack.push(encode_range_xls(r, opts))
                 break
-            /* 2.5.198.28 */
-            case 'PtgArea3d':
-                // TODO: lots of stuff
+
+            case 'PtgArea3d':/* 2.5.198.28 TODO */
                 type = f[1][0]
                 ixti = /*::Number(*/f[1][1]
                 /*::)*/
@@ -1067,17 +1060,15 @@ export function stringify_formula(formula: Array<any>, range, cell, supbooks, op
                 sname = supbooks && supbooks[1] ? supbooks[1][ixti + 1] : '**MISSING**'
                 stack.push(`${sname}!${encode_range(r)}`)
                 break
-            /* 2.5.198.41 */
-            case 'PtgAttrSum':
+
+            case 'PtgAttrSum':/* 2.5.198.41 */
                 stack.push(`SUM(${stack.pop()})`)
                 break
 
-            /* 2.5.198.37 */
-            case 'PtgAttrSemi':
+            case 'PtgAttrSemi':/* 2.5.198.37 */
                 break
 
-            /* 2.5.97.60 TODO: do something different for revisions */
-            case 'PtgName':
+            case 'PtgName':/* 2.5.97.60 TODO: revisions */
                 /* f[1] = type, 0, nameindex */
                 nameidx = f[1][2]
                 const lbl = (supbooks.names || [])[nameidx - 1] || (supbooks[0] || [])[nameidx]
@@ -1088,8 +1079,7 @@ export function stringify_formula(formula: Array<any>, range, cell, supbooks, op
                 stack.push(name)
                 break
 
-            /* 2.5.97.61 TODO: do something different for revisions */
-            case 'PtgNameX':
+            case 'PtgNameX':/* 2.5.97.61 TODO: revisions */
                 /* f[1] = type, ixti, nameindex */
                 let bookidx: number = f[1][1]
                 nameidx = f[1][2]
@@ -1130,8 +1120,7 @@ export function stringify_formula(formula: Array<any>, range, cell, supbooks, op
                 stack.push(externbook.Name)
                 break
 
-            /* 2.5.198.80 */
-            case 'PtgParen':
+            case 'PtgParen':/* 2.5.198.80 */
                 let lp = '('
                 let rp = ')'
                 if (last_sp >= 0) {
@@ -1164,19 +1153,15 @@ export function stringify_formula(formula: Array<any>, range, cell, supbooks, op
                 stack.push(lp + stack.pop() + rp)
                 break
 
-            /* 2.5.198.86 */
-            case 'PtgRefErr':
+            case 'PtgRefErr':/* 2.5.198.86 */
                 stack.push('#REF!')
                 break
 
-            /* 2.5.198.87 */
-            case 'PtgRefErr3d':
+            case 'PtgRefErr3d':/* 2.5.198.87 */
                 stack.push('#REF!')
                 break
 
-            /* */
-            /* 2.5.198.58 TODO */
-            case 'PtgExp':
+            case 'PtgExp':/* 2.5.198.58 TODO */
                 c = { c: f[1][1], r: f[1][0] }
                 const q = { c: cell.c, r: cell.r }
 
@@ -1204,48 +1189,39 @@ export function stringify_formula(formula: Array<any>, range, cell, supbooks, op
                 }
                 break
 
-            /* 2.5.198.32 TODO */
-            case 'PtgArray':
+            case 'PtgArray':/* 2.5.198.32 TODO */
                 stack.push(`{${stringify_array(f[1])}}`)
                 break
 
-            /* 2.5.198.70 TODO: confirm this is a non-display */
-            case 'PtgMemArea':
+            case 'PtgMemArea':/* 2.5.198.70 TODO: confirm this is a non-display */
                 //stack.push("(" + f[2].map(encode_range).join(",") + ")");
                 break
 
-            /* 2.5.198.38 */
-            case 'PtgAttrSpace':
-            /* 2.5.198.39 */
-            case 'PtgAttrSpaceSemi':
+            case 'PtgAttrSpace':/* 2.5.198.38 */
+
+            case 'PtgAttrSpaceSemi':/* 2.5.198.39 */
                 last_sp = ff
                 break
 
-            /* 2.5.198.92 TODO */
-            case 'PtgTbl':
+            case 'PtgTbl':/* 2.5.198.92 TODO */
                 break
 
-            /* 2.5.198.71 */
-            case 'PtgMemErr':
+            case 'PtgMemErr':/* 2.5.198.71 */
                 break
 
-            /* 2.5.198.74 */
-            case 'PtgMissArg':
+            case 'PtgMissArg':/* 2.5.198.74 */
                 stack.push('')
                 break
 
-            /* 2.5.198.29 */
-            case 'PtgAreaErr':
+            case 'PtgAreaErr':/* 2.5.198.29 */
                 stack.push('#REF!')
                 break
 
-            /* 2.5.198.30 */
-            case 'PtgAreaErr3d':
+            case 'PtgAreaErr3d':/* 2.5.198.30 */
                 stack.push('#REF!')
                 break
 
-            /* 2.5.198.72 TODO */
-            case 'PtgMemFunc':
+            case 'PtgMemFunc':/* 2.5.198.72 TODO */
                 break
 
             default:

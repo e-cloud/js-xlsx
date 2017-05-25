@@ -19,6 +19,10 @@ function parse_CRYPTOVersion(blob, length?: number) {
     const o = {}
     o.Major = blob.read_shift(2)
     o.Minor = blob.read_shift(2)
+    /*:: if(length == null) return o; */
+    if (length >= 4) {
+        blob.l += length - 4
+    }
     return o
 }
 

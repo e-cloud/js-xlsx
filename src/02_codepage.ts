@@ -2,8 +2,6 @@ import * as cptable from 'codepage/dist/cpexcel.full.js'
 
 export let current_codepage = 1200
 
-let current_cptable = cptable[current_codepage]
-
 function reset_cp() {
     setCurrentCodepage(1200)
 }
@@ -42,7 +40,6 @@ let _getchar = function _gc1(x) {
 if (typeof cptable !== 'undefined') {
     setCurrentCodepage = function (cp) {
         current_codepage = cp
-        current_cptable = cptable[cp]
     }
     debom = function (data) {
         if (data.charCodeAt(0) === 0xFF && data.charCodeAt(1) === 0xFE) {

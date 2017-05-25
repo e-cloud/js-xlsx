@@ -1,9 +1,19 @@
+import * as jszip from 'jszip'
+/* OpenDocument */
 import { parseDate } from './20_jsutils'
 import { escapexml, writextag, wxt_helper, XML_HEADER } from './22_xmlutils'
 import { decode_range, encode_cell } from './27_csfutils'
+import { write_manifest, write_meta_ods, write_rdf } from './32_odmanrdf'
 import { csf_to_ods_formula } from './65_fods'
 
-export const write_content_xml: { (wb: any, opts: any): string } = function () {
+const write_styles_ods/*:{(wb:any, opts:any):string}*/ = (function () {
+    const payload = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?><office:document-styles xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:style="urn:oasis:names:tc:opendocument:xmlns:style:1.0" xmlns:draw="urn:oasis:names:tc:opendocument:xmlns:drawing:1.0" xmlns:fo="urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:number="urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0" xmlns:svg="urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0" xmlns:of="urn:oasis:names:tc:opendocument:xmlns:of:1.2" office:version="1.2"></office:document-styles>'
+    return function wso(wb, opts) {
+        return payload
+    }
+})()
+
+export const write_content_ods: { (wb, opts): string } = function () {
     const null_cell_xml = '          <table:table-cell />\n'
     const covered_cell_xml = '          <table:covered-table-cell/>\n'
     const write_ws = function (ws, wb, i: number, opts): string {
@@ -95,7 +105,7 @@ export const write_content_xml: { (wb: any, opts: any): string } = function () {
                         o.push(null_cell_xml)
                         continue
                 }
-                o.push(writextag('table:table-cell', writextag('text:p', textp, {}), ct))
+                o.push(`          ${writextag('table:table-cell', writextag('text:p', textp, {}), ct)}\n`)
             }
             o.push('        </table:table-row>\n')
         }
@@ -185,3 +195,50 @@ export const write_content_xml: { (wb: any, opts: any): string } = function () {
         return o.join('')
     }
 }()
+
+export function write_ods(wb, opts) {
+    if (opts.bookType == 'fods') {
+        return write_content_ods(wb, opts)
+    }
+
+    /*:: if(!jszip) throw new Error("JSZip is not available"); */
+    const zip = new jszip()
+    let f = ''
+
+    const manifest/*:Array<Array<string> >*/ = []
+    const rdf = []
+
+    /* 3:3.3 and 2:2.2.4 */
+    f = 'mimetype'
+    zip.file(f, 'application/vnd.oasis.opendocument.spreadsheet')
+
+    /* Part 1 Section 2.2 Documents */
+    f = 'content.xml'
+    zip.file(f, write_content_ods(wb, opts))
+    manifest.push([f, 'text/xml'])
+    rdf.push([f, 'ContentFile'])
+
+    /* TODO: these are hard-coded styles to satiate excel */
+    f = 'styles.xml'
+    zip.file(f, write_styles_ods(wb, opts))
+    manifest.push([f, 'text/xml'])
+    rdf.push([f, 'StylesFile'])
+
+    /* Part 3 Section 6 Metadata Manifest File */
+    f = 'manifest.rdf'
+    zip.file(f, write_rdf(rdf, opts))
+    manifest.push([f, 'application/rdf+xml'])
+
+    /* TODO: this is hard-coded to satiate excel */
+    f = 'meta.xml'
+    zip.file(f, write_meta_ods(wb, opts))
+    manifest.push([f, 'text/xml'])
+    rdf.push([f, 'MetadataFile'])
+
+    /* Part 3 Section 4 Manifest File */
+    f = 'META-INF/manifest.xml'
+    zip.file(f, write_manifest(manifest, opts))
+
+    return zip
+}
+

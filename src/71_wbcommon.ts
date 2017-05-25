@@ -1,6 +1,7 @@
 /* 18.2.28 (CT_WorkbookProtection) Defaults */
 import { parsexmlbool } from './22_xmlutils'
 import { _ssfopts } from './66_wscommon'
+
 export const WBPropsDef = [
     ['allowRefreshQuery', '0'],
     ['autoCompressPictures', '1'],
@@ -108,24 +109,37 @@ export function parse_wb_defaults(wb) {
     _ssfopts.date1904 = parsexmlbool(wb.WBProps.date1904, 'date1904')
 }
 
-export function check_wb_names(N) {
-    const badchars = '][*?/\\'.split('')
-    N.forEach(function (n, i) {
-        badchars.forEach(function (c) {
-            if (n.includes(c)) {
-                throw new Error('Sheet name cannot contain : \\ / ? * [ ]')
-            }
-        })
-        if (n.length > 31) {
-            throw new Error('Sheet names cannot exceed 31 chars')
+const badchars = '][*?\/\\'.split('')
+export function check_ws_name(n: string, safe?: boolean): boolean {
+    if (n.length > 31) {
+        if (safe) {
+            return false
         }
+        throw new Error('Sheet names cannot exceed 31 chars')
+    }
+    let _good = true
+    badchars.forEach(function (c) {
+        if (n.indexOf(c) == -1) {
+            return
+        }
+        if (!safe) {
+            throw new Error('Sheet name cannot contain : \\ / ? * [ ]')
+        }
+        _good = false
+    })
+    return _good
+}
+function check_wb_names(N) {
+    N.forEach(function (n, i) {
+        check_ws_name(n)
         for (let j = 0; j < i; ++j) {
             if (n == N[j]) {
-                throw new Error(`Duplicate Sheet Name: ${n}`)
+                throw new Error('Duplicate Sheet Name: ' + n)
             }
         }
     })
 }
+
 export function check_wb(wb) {
     if (!wb || !wb.SheetNames || !wb.Sheets) {
         throw new Error('Invalid Workbook')

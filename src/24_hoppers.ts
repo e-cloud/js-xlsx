@@ -2,7 +2,7 @@ import { __toBuffer, is_buf, new_buf, prep_blob } from './23_binutils'
 import { evert_RE, XLSBRecordEnum } from './77_parsetab'
 
 /* [MS-XLSB] 2.1.4 Record */
-export function recordhopper(data, cb: RecordHopperCB, opts?: any) {
+export function recordhopper(data, cb: RecordHopperCB, opts?) {
     if (!data) {
         return
     }

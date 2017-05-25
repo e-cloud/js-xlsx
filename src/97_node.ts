@@ -30,33 +30,28 @@ const write_csv_stream = function (sheet: Worksheet, opts ?: Sheet2CSVOpts) {
         }
         while (R <= r.e.r) {
             row = make_csv_row(sheet, r, R, cols, fs, rs, FS, o)
-            if (row == null) {
-                ++R
-                continue
-            }
-            if (o.strip) {
-                row = row.replace(endregex, '')
-            }
-            stream.push(row + RS)
             ++R
-            break
+            if (row != null) {
+                if (o.strip) {
+                    row = row.replace(endregex, '')
+                }
+                stream.push(row + RS)
+                break
+            }
         }
     }
     return stream
 }
 
-const HTML_BEGIN = '<html><body><table>'
-const HTML_END = '</table></body></html>'
-
-const write_html_stream = function (sheet: Worksheet, opts) {
+const write_html_stream = function (sheet: Worksheet, opts?: Sheet2HTMLOpts) {
     const stream = new Readable()
-    const o: Array<string> = []
+    const o = opts == null ? {} : opts
     const r = decode_range(sheet['!ref'])
 
     let cell: Cell
 
     o.dense = Array.isArray(sheet)
-    stream.push(HTML_BEGIN)
+    stream.push(HTML_.BEGIN)
 
     let R = r.s.r
     let end = false
@@ -64,7 +59,7 @@ const write_html_stream = function (sheet: Worksheet, opts) {
         if (R > r.e.r) {
             if (!end) {
                 end = true
-                stream.push(HTML_END)
+                stream.push(HTML_.END)
             }
             return stream.push(null)
         }

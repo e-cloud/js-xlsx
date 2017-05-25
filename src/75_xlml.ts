@@ -16,7 +16,7 @@ import {
     xlml_fixstr,
     xlml_unfixstr,
     XLMLNS,
-    XML_HEADER
+    XML_HEADER,
 } from './22_xmlutils'
 import { decode_cell, encode_cell, encode_col, encode_range, encode_row, safe_decode_range } from './27_csfutils'
 import { BErr, RBErr } from './28_binstructs'
@@ -25,7 +25,7 @@ import { DEF_MDW, process_col, pt2px, px2pt, setMDW, width2px, XLMLPatternTypeMa
 import { a1_to_rc, rc_to_a1 } from './61_fcommon'
 import { col_obj_w, default_margins } from './66_wscommon'
 import { HTML_ } from './79_html'
-import { parse_fods } from './83_ods'
+import { parse_fods } from './80_parseods'
 import { fix_read_opts } from './84_defaults'
 
 const attregexg2 = /([\w:]+)=((?:")([^"]*)(?:")|(?:')([^']*)(?:'))/g
@@ -232,6 +232,9 @@ function parse_xlml_data(xml, ss, data, cell, base, styles, csty, row, arrayf, o
             cell.v = xml.includes('<') ? unescapexml(ss) : cell.r
             break
         case 'DateTime':
+            if (xml.slice(-1) != 'Z') {
+                xml += 'Z'
+            }
             cell.v = (parseDate(xml) - new Date(Date.UTC(1899, 11, 30))) / (24 * 60 * 60 * 1000)
             if (cell.v !== cell.v) {
                 cell.v = unescapexml(xml)
@@ -336,7 +339,7 @@ export function parse_xlml_xml(d, opts): Workbook {
     }
     const sheets = {}
     const sheetnames = []
-    let cursheet = opts.dense ? [] : {}
+    let cursheet: Worksheet = opts.dense ? [] : {}
     let sheetname = ''
     let table = {}
     let cell = {}
@@ -364,7 +367,7 @@ export function parse_xlml_xml(d, opts): Workbook {
     let arrayf = []
     let rowinfo = []
     let rowobj = {}
-    const Workbook = { Sheets: [] }
+    const Workbook: WBWBProps = { Sheets: [] }
     let wsprops = {}
     xlmlregex.lastIndex = 0
     str = str.replace(/<!--([^\u2603]*?)-->/mg, '')
@@ -610,13 +613,14 @@ export function parse_xlml_xml(d, opts): Workbook {
                     Workbook.Names = []
                 }
                 const _NamedRange = parsexmltag(Rn[0])
-                const _DefinedName = {
+                const _DefinedName: DefinedName = {
                     Name: _NamedRange.Name,
                     Ref: rc_to_a1(_NamedRange.RefersTo.substr(1)),
                 }
                 if (Workbook.Sheets.length > 0) {
                     _DefinedName.Sheet = Workbook.Sheets.length - 1
                 }
+                /*:: if(Workbook.Names) */
                 Workbook.Names.push(_DefinedName)
                 break
 
@@ -1329,11 +1333,8 @@ export function parse_xlml_xml(d, opts): Workbook {
                         }
                         break
 
-                    /* Sorting */
                     case 'Sorting':
-                    /* ConditionalFormatting */
                     case 'ConditionalFormatting':
-                    /* DataValidation */
                     case 'DataValidation':
                         switch (Rn[3]) {
                             case 'Range':
@@ -1568,7 +1569,7 @@ function write_ws_xlml_wsopts(ws: Worksheet, opts, idx: number, wb: Workbook): s
 
     if (wb && wb.Workbook && wb.Workbook.Sheets && wb.Workbook.Sheets[idx]) {
         /* Visible */
-        if (!!wb.Workbook.Sheets[idx].Hidden) {
+        if (wb.Workbook.Sheets[idx].Hidden) {
             o.push(writextag('Visible', (wb.Workbook.Sheets[idx].Hidden == 1 ? 'SheetHidden' : 'SheetVeryHidden'), {}))
         } else {
             /* Selected */
@@ -1844,11 +1845,11 @@ export function write_xlml(wb, opts): string {
         d.push(writextag('Worksheet', write_ws_xlml(i, opts, wb), { 'ss:Name': escapexml(wb.SheetNames[i]) }))
     }
     return XML_HEADER + writextag('Workbook', d.join(''), {
-            'xmlns': XLMLNS.ss,
-            'xmlns:o': XLMLNS.o,
-            'xmlns:x': XLMLNS.x,
-            'xmlns:ss': XLMLNS.ss,
-            'xmlns:dt': XLMLNS.dt,
-            'xmlns:html': XLMLNS.html,
-        })
+        'xmlns': XLMLNS.ss,
+        'xmlns:o': XLMLNS.o,
+        'xmlns:x': XLMLNS.x,
+        'xmlns:ss': XLMLNS.ss,
+        'xmlns:dt': XLMLNS.dt,
+        'xmlns:html': XLMLNS.html,
+    })
 }

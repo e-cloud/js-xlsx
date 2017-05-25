@@ -331,9 +331,9 @@ function write_ws_xml_cell(cell, ref, ws, opts, idx, wb) {
             } else {
                 cell.t = 'n'
                 vv = `${cell.v = datenum(parseDate(cell.v))}`
-                if (typeof cell.z === 'undefined') {
-                    cell.z = SSF._table[14]
-                }
+            }
+            if (typeof cell.z === 'undefined') {
+                cell.z = SSF._table[14]
             }
             break
         default:
@@ -544,10 +544,14 @@ const parse_ws_xml_data = function parse_ws_xml_data_factory() {
                 }
 
                 if (tag.t == null && p.v === undefined) {
-                    if (!opts.sheetStubs) {
+                    if (p.f || p.F) {
+                        p.v = 0
+                        p.t = 'n'
+                    } else if (!opts.sheetStubs) {
                         continue
+                    } else {
+                        p.t = 'z'
                     }
-                    p.t = 'z'
                 } else {
                     p.t = tag.t || 'n'
                 }
@@ -824,7 +828,6 @@ export function write_ws_xml(idx: number, opts, wb: Workbook, rels): string {
 
     if (ws['!drawing'].length > 0) {
         rId = add_rels(rels, -1, `../drawings/drawing${idx + 1}.xml`, RELS.DRAW)
-        ws['!drawing'].rid = rId
         o[o.length] = writextag('drawing', null, { 'r:id': `rId${rId}` })
     } else {
         delete ws['!drawing']

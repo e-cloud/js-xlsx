@@ -1,4 +1,6 @@
 import * as cptable from 'codepage/dist/cpexcel.full.js'
+import * as SSF from './10_ssf'
+import { datenum } from './20_jsutils'
 import {
     aoa_to_sheet,
     decode_cell,
@@ -11,9 +13,9 @@ import {
     encode_row,
     format_cell,
     safe_decode_range,
-    split_cell
+    split_cell,
 } from './27_csfutils'
-import { parse_dom_table, table_to_book } from './79_html'
+import { HTML_, parse_dom_table, table_to_book } from './79_html'
 
 function sheet_to_json(sheet: Worksheet, opts ?: Sheet2JSONOpts) {
     if (sheet == null || sheet['!ref'] == null) {
@@ -61,7 +63,7 @@ function sheet_to_json(sheet: Worksheet, opts ?: Sheet2JSONOpts) {
     let R = r.s.r
     let C = 0
     let CC = 0
-    if (!sheet[R]) {
+    if (dense && !sheet[R]) {
         sheet[R] = []
     }
     for (C = r.s.c; C <= r.e.c; ++C) {
@@ -172,7 +174,7 @@ export function make_csv_row(
     fs: number,
     rs: number,
     FS: string,
-    o: Sheet2CSVOpts
+    o: Sheet2CSVOpts,
 ): string {
     let isempty = true
     let row = ''
@@ -190,6 +192,9 @@ export function make_csv_row(
                     txt = `"${txt.replace(qreg, '""')}"`
                     break
                 }
+            }
+            if (txt == 'ID') {
+                txt = '"ID"'
             }
         } else if (val.f != null && !val.F) {
             isempty = false
@@ -314,6 +319,53 @@ function sheet_to_formulae(sheet: Worksheet): Array<string> {
     return cmds
 }
 
+function json_to_sheet(js: Array<any>, opts): Worksheet {
+    const o = opts || {}
+    const ws = {}
+    let cell: Cell
+    const range: Range = { s: { c: 0, r: 0 }, e: { c: 0, r: js.length } }
+    const hdr = o.header || []
+    let C = 0
+
+    for (let R = 0; R != js.length; ++R) {
+        Object.keys(js[R])
+            .filter(x => js[R].hasOwnProperty(x))
+            .forEach(function (k) {
+                if ((C = hdr.indexOf(k)) == -1) {
+                    hdr[C = hdr.length] = k
+                }
+                let v = js[R][k]
+                let t = 'z'
+                let z = ''
+                if (typeof v == 'number') {
+                    t = 'n'
+                } else if (typeof v == 'boolean') {
+                    t = 'b'
+                } else if (typeof v == 'string') {
+                    t = 's'
+                } else if (v instanceof Date) {
+                    t = 'd'
+                    if (!o.cellDates) {
+                        t = 'n'
+                        v = datenum(v)
+                    }
+                    z = o.dateNF || SSF._table[14]
+                }
+                ws[encode_cell({ c: C, r: R + 1 })] = cell = { t: t, v: v }
+                if (z) {
+                    cell.z = z
+                }
+            })
+    }
+    range.e.c = hdr.length - 1
+    for (C = 0; C < hdr.length; ++C) {
+        ws[encode_col(C) + '1'] = { t: 's', v: hdr[C] }
+    }
+    ws['!ref'] = encode_range(range)
+    return ws
+}
+
+
 export const utils = {
     encode_col,
     encode_row,
@@ -330,10 +382,12 @@ export const utils = {
     make_json: sheet_to_json,
     make_formulae: sheet_to_formulae,
     aoa_to_sheet,
+    json_to_sheet,
     table_to_sheet: parse_dom_table,
     table_to_book,
     sheet_to_csv,
     sheet_to_json,
+    sheet_to_html: HTML_.from_sheet,
     sheet_to_formulae,
     sheet_to_row_object_array: sheet_to_json,
 }

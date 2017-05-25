@@ -54,8 +54,8 @@ export const a1_to_rc = function () {
 export function shift_formula_str(f: string, delta: Cell): string {
     return f.replace(crefregex, function ($0, $1, $2, $3, $4, $5, off, str) {
         return $1 + ($2 == '$' ? $2 + $3 : encode_col(decode_col($3) + delta.c)) + ($4 == '$'
-                ? $4 + $5
-                : encode_row(decode_row($5) + delta.r))
+            ? $4 + $5
+            : encode_row(decode_row($5) + delta.r))
     })
 }
 

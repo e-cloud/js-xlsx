@@ -1,6 +1,8 @@
 import { DENSE } from './03_consts'
 import * as Base64 from './04_base64'
 import { s2a } from './05_buf'
+import * as SSF from './10_ssf'
+import { numdate } from './20_jsutils'
 import { parsenoop, prep_blob } from './23_binutils'
 import { encode_cell, encode_range } from './27_csfutils'
 import { parseuint16 } from './38_xlstypes'
@@ -86,8 +88,15 @@ export const WK_ = function () {
                     case 0x0D: /* INTEGER */
                     case 0x0E: /* NUMBER */
                     case 0x10: /* FORMULA */
-                    case 0x33:
-                        /* STRING */
+                    case 0x33: /* STRING */
+                        /* TODO: actual translation of the format code */
+                        if (RT == 0x0E && (val[2] & 0x70) == 0x70 && (val[2] & 0x0F) > 1 && (val[2] & 0x0F) < 15) {
+                            val[1].z = o.dateNF || SSF._table[14]
+                            if (o.cellDates) {
+                                val[1].t = 'd'
+                                val[1].v = numdate(val[1].v)
+                            }
+                        }
                         if (o.dense) {
                             if (!s[val[0].r]) {
                                 s[val[0].r] = []
@@ -96,7 +105,6 @@ export const WK_ = function () {
                         } else {
                             s[encode_cell(val[0])] = val[1]
                         }
-                        /* TODO: FORMAT */
                         break
                 }
             } else {

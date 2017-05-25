@@ -1,3 +1,4 @@
+import { version } from './01_version'
 /* Open Document Format for Office Applications (OpenDocument) Version 1.2 */
 /* Part 3 Section 4 Manifest File */
 import { parsexmltag, XML_HEADER } from './22_xmlutils'
@@ -73,3 +74,11 @@ export function write_rdf(rdf, opts) {
     o.push('</rdf:RDF>')
     return o.join('')
 }
+
+/* TODO: pull properties */
+export const write_meta_ods: { (wb, opts): string } = (function () {
+    const payload = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><office:document-meta xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xlink="http://www.w3.org/1999/xlink" office:version="1.2"><office:meta><meta:generator>SheetJS ${version}</meta:generator></office:meta></office:document-meta>`
+    return function wmo(wb, opts) {
+        return payload
+    }
+})()

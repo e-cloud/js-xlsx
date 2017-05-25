@@ -10,10 +10,10 @@ import { write_theme } from './49_theme'
 import { resetShapeId, write_comments_vml } from './55_vml'
 import { get_cell_style } from './66_wscommon'
 import { write_cmnt, write_sst, write_sty, write_wb, write_ws } from './74_xmlbin'
-import { write_ods } from './83_ods'
+import { write_ods } from './81_writeods'
 import { fix_write_opts } from './84_defaults'
 
-export function write_zip(wb: Workbook, opts: WriteOpts): ZIP {
+export function write_zip(wb: Workbook, opts: WriteOpts): JSZip {
     resetShapeId()
     if (opts.bookType == 'ods') {
         return write_ods(wb, opts)
@@ -28,6 +28,7 @@ export function write_zip(wb: Workbook, opts: WriteOpts): ZIP {
         // $FlowIgnore
         opts.revssf = evert_num(wb.SSF)
         opts.revssf[wb.SSF[65535]] = 0
+        opts.ssf = wb.SSF
     }
     opts.rels = {}
     opts.wbrels = {}
@@ -165,5 +166,8 @@ export function write_zip(wb: Workbook, opts: WriteOpts): ZIP {
     zip.file('[Content_Types].xml', write_ct(ct, opts))
     zip.file('_rels/.rels', write_rels(opts.rels))
     zip.file(`xl/_rels/workbook.${wbext}.rels`, write_rels(opts.wbrels))
+
+    delete opts.revssf
+    delete opts.ssf
     return zip
 }

@@ -188,7 +188,10 @@ export function aoa_to_sheet(data: AOA, opts ?): Worksheet {
                 continue
             }
             const cell: Cell = { v: data[R][C] }
-
+            if (Array.isArray(cell.v)) {
+                cell.f = data[R][C][1]
+                cell.v = cell.v[0]
+            }
             if (range.s.r > R) {
                 range.s.r = R
             }
@@ -202,10 +205,13 @@ export function aoa_to_sheet(data: AOA, opts ?): Worksheet {
                 range.e.c = C
             }
             if (cell.v === null) {
-                if (!o.cellStubs) {
+                if (cell.f) {
+                    cell.t = 'n'
+                } else if (!o.cellStubs) {
                     continue
+                } else {
+                    cell.t = 'z'
                 }
-                cell.t = 'z'
             } else if (typeof cell.v === 'number') {
                 cell.t = 'n'
             } else if (typeof cell.v === 'boolean') {

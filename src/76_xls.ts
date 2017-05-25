@@ -107,7 +107,7 @@ function safe_format_xf(p, opts: ParseOpts, date1904 ?: boolean) {
     }
     let fmtid
     try {
-        fmtid = p.XF.ifmt || 0
+        fmtid = p.z || p.XF.ifmt || 0
         if (opts.cellNF) {
             p.z = SSF._table[fmtid]
         }
@@ -148,9 +148,8 @@ function safe_format_xf(p, opts: ParseOpts, date1904 ?: boolean) {
     }
 }
 
-function make_cell(val, ixfe, t) {
+function make_cell(val, ixfe, t): Cell {
     return { v: val, ixfe, t }
-
 }
 
 // 2.3.2
@@ -161,7 +160,7 @@ function parse_workbook(blob, options?: ParseOpts): Workbook {
     if (DENSE != null && options.dense == null) {
         options.dense = DENSE
     }
-    let out = options.dense ? [] : {}
+    let out: Worksheet = options.dense ? [] : {}
     const Directory = {}
     const found_sheet = false
     let range: Range = {}
@@ -180,13 +179,13 @@ function parse_workbook(blob, options?: ParseOpts): Workbook {
     const shared_formulae = {}
     let array_formulae = []
     /* TODO: something more clever */
-    let temp_val
+    let temp_val: Cell
     let country
     let cell_valid = true
     const XFs = []
     /* XF records */
     let palette = []
-    const Workbook = { Sheets: [] }
+    const Workbook: WBWBProps = { Sheets: [] }
     let wsprops = {}
     const get_rgb = function getrgb(icv) {
         if (icv < 8) {
@@ -317,9 +316,10 @@ function parse_workbook(blob, options?: ParseOpts): Workbook {
     let file_depth = 0
     /* TODO: make a real stack */
     let BIFF2Fmt = 0
+    const BIFF2FmtTable: string[] = []
     const FilterDatabases = []
     /* TODO: sort out supbooks and process elsewhere */
-    let last_lbl
+    let last_lbl: DefinedName
 
     /* explicit override for some broken writers */
     opts.codepage = 1200
@@ -381,7 +381,7 @@ function parse_workbook(blob, options?: ParseOpts): Workbook {
                     if (!options.password) {
                         throw new Error('File is password-protected')
                     }
-                    if (val.Type !== 0) {
+                    if (val.valid == null) {
                         throw new Error('Encryption scheme unsupported')
                     }
                     if (!val.valid) {
@@ -418,7 +418,6 @@ function parse_workbook(blob, options?: ParseOpts): Workbook {
                 case 'BookBool':
                     break // TODO
                 case 'UsesELFs':
-                    /* if(val) console.error("Unsupported ELFs"); */
                     break
                 case 'MTRSettings':
                     break
@@ -507,7 +506,9 @@ function parse_workbook(blob, options?: ParseOpts): Workbook {
                     if (opts.biff < 8) {
                         break
                     }
-                    last_lbl.Comment = val[1]
+                    if (last_lbl != null) {
+                        last_lbl.Comment = val[1]
+                    }
                     break
 
                 case 'Protect':
@@ -621,27 +622,38 @@ function parse_workbook(blob, options?: ParseOpts): Workbook {
                             ++val.c
                         }
                     }
-                    temp_val = { ixfe: val.ixfe, XF: XFs[val.ixfe], v: val.val, t: 'n' }
+                    temp_val = { ixfe: val.ixfe, XF: XFs[val.ixfe] || {}, v: val.val, t: 'n' }
+                    if (BIFF2Fmt > 0) {
+                        temp_val.z = BIFF2FmtTable[(temp_val.ixfe >> 8) & 0x1F]
+                    }
                     safe_format_xf(temp_val, options, wb.opts.Date1904)
                     addcell({ c: val.c, r: val.r }, temp_val, options)
                     break
 
                 case 'BoolErr':
                     temp_val = { ixfe: val.ixfe, XF: XFs[val.ixfe], v: val.val, t: val.t }
+                    if (BIFF2Fmt > 0) {
+                        temp_val.z = BIFF2FmtTable[(temp_val.ixfe >> 8) & 0x1F]
+                    }
                     safe_format_xf(temp_val, options, wb.opts.Date1904)
                     addcell({ c: val.c, r: val.r }, temp_val, options)
                     break
 
                 case 'RK':
                     temp_val = { ixfe: val.ixfe, XF: XFs[val.ixfe], v: val.rknum, t: 'n' }
+                    if (BIFF2Fmt > 0) {
+                        temp_val.z = BIFF2FmtTable[(temp_val.ixfe >> 8) & 0x1F]
+                    }
                     safe_format_xf(temp_val, options, wb.opts.Date1904)
                     addcell({ c: val.c, r: val.r }, temp_val, options)
                     break
-
                 case 'MulRk':
                     for (let j = val.c; j <= val.C; ++j) {
                         const ixfe = val.rkrec[j - val.c][0]
                         temp_val = { ixfe, XF: XFs[ixfe], v: val.rkrec[j - val.c][1], t: 'n' }
+                        if (BIFF2Fmt > 0) {
+                            temp_val.z = BIFF2FmtTable[(temp_val.ixfe >> 8) & 0x1F]
+                        }
                         safe_format_xf(temp_val, options, wb.opts.Date1904)
                         addcell({ c: j, r: val.r }, temp_val, options)
                     }
@@ -652,8 +664,7 @@ function parse_workbook(blob, options?: ParseOpts): Workbook {
                         last_formula = val
                         break
                     }
-                    temp_val = { v: val.val, ixfe: val.cell.ixfe, t: val.tt }
-
+                    temp_val = make_cell(val.val, val.cell.ixfe, val.tt)
                     temp_val.XF = XFs[temp_val.ixfe]
                     if (options.cellFormula) {
                         const _f = val.formula
@@ -670,20 +681,23 @@ function parse_workbook(blob, options?: ParseOpts): Workbook {
                             temp_val.f = `${stringify_formula(val.formula, range, val.cell, supbooks, opts)}`
                         }
                     }
+                    if (BIFF2Fmt > 0) {
+                        temp_val.z = BIFF2FmtTable[(temp_val.ixfe >> 8) & 0x1F]
+                    }
                     safe_format_xf(temp_val, options, wb.opts.Date1904)
                     addcell(val.cell, temp_val, options)
                     last_formula = val
                     break
-
                 case 'String':
-                    if (last_formula) {
-                        /* technically always true */
+                    if (last_formula) { /* technically always true */
                         last_formula.val = val
-                        temp_val = { v: val, ixfe: last_formula.cell.ixfe, t: 's' }
-
+                        temp_val = make_cell(val, last_formula.cell.ixfe, 's')
                         temp_val.XF = XFs[temp_val.ixfe]
                         if (options.cellFormula) {
                             temp_val.f = `${stringify_formula(last_formula.formula, range, last_formula.cell, supbooks, opts)}`
+                        }
+                        if (BIFF2Fmt > 0) {
+                            temp_val.z = BIFF2FmtTable[(temp_val.ixfe >> 8) & 0x1F]
                         }
                         safe_format_xf(temp_val, options, wb.opts.Date1904)
                         addcell(last_formula.cell, temp_val, options)
@@ -692,7 +706,6 @@ function parse_workbook(blob, options?: ParseOpts): Workbook {
                         throw new Error('String record expects Formula')
                     }
                     break
-
                 case 'Array':
                     array_formulae.push(val)
                     const _arraystart = encode_cell(val[0].s)
@@ -709,7 +722,6 @@ function parse_workbook(blob, options?: ParseOpts): Workbook {
                         cc.F = encode_range(val[0])
                     }
                     break
-
                 case 'ShrFmla':
                     if (!cell_valid) {
                         break
@@ -724,33 +736,37 @@ function parse_workbook(blob, options?: ParseOpts): Workbook {
                         }
                         /* technically unreachable */
                         shared_formulae[encode_cell(last_formula.cell)] = val[0]
-                        cc = options.dense
-                            ? (out[last_formula.cell.r] || [])[last_formula.cell.c]
-                            : out[encode_cell(last_formula.cell)];
+                        cc = options.dense ? (out[last_formula.cell.r] || [])[last_formula.cell.c] : out[encode_cell(last_formula.cell)];
                         (cc || {}).f = `${stringify_formula(val[0], range, lastcell, supbooks, opts)}`
                     }
                     break
-
                 case 'LabelSst':
                     temp_val = make_cell(sst[val.isst].t, val.ixfe, 's')
                     temp_val.XF = XFs[temp_val.ixfe]
+                    if (BIFF2Fmt > 0) {
+                        temp_val.z = BIFF2FmtTable[(temp_val.ixfe >> 8) & 0x1F]
+                    }
                     safe_format_xf(temp_val, options, wb.opts.Date1904)
                     addcell({ c: val.c, r: val.r }, temp_val, options)
                     break
-
                 case 'Blank':
                     if (options.sheetStubs) {
                         temp_val = { ixfe: val.ixfe, XF: XFs[val.ixfe], t: 'z' }
+                        if (BIFF2Fmt > 0) {
+                            temp_val.z = BIFF2FmtTable[(temp_val.ixfe >> 8) & 0x1F]
+                        }
                         safe_format_xf(temp_val, options, wb.opts.Date1904)
                         addcell({ c: val.c, r: val.r }, temp_val, options)
                     }
                     break
-
                 case 'MulBlank':
                     if (options.sheetStubs) {
                         for (let _j = val.c; _j <= val.C; ++_j) {
                             const _ixfe = val.ixfe[_j - val.c]
                             temp_val = { ixfe: _ixfe, XF: XFs[_ixfe], t: 'z' }
+                            if (BIFF2Fmt > 0) {
+                                temp_val.z = BIFF2FmtTable[(temp_val.ixfe >> 8) & 0x1F]
+                            }
                             safe_format_xf(temp_val, options, wb.opts.Date1904)
                             addcell({ c: _j, r: val.r }, temp_val, options)
                         }
@@ -761,6 +777,9 @@ function parse_workbook(blob, options?: ParseOpts): Workbook {
                 case 'BIFF2STR':
                     temp_val = make_cell(val.val, val.ixfe, 's')
                     temp_val.XF = XFs[temp_val.ixfe]
+                    if (BIFF2Fmt > 0) {
+                        temp_val.z = BIFF2FmtTable[(temp_val.ixfe >> 8) & 0x1F]
+                    }
                     safe_format_xf(temp_val, options, wb.opts.Date1904)
                     addcell({ c: val.c, r: val.r }, temp_val, options)
                     break
@@ -771,18 +790,23 @@ function parse_workbook(blob, options?: ParseOpts): Workbook {
                     }
                     /* TODO: stack */
                     break
-
                 case 'SST':
                     sst = val
                     break
-
-                case 'Format':
-                    /* val = [id, fmt] */
+                case 'Format':  /* val = [id, fmt] */
                     SSF.load(val[1], val[0])
                     break
-
                 case 'BIFF2FORMAT':
-                    SSF.load(val, BIFF2Fmt++)
+                    BIFF2FmtTable[BIFF2Fmt++] = val
+                    let b2idx = 0
+                    for (; b2idx < BIFF2Fmt + 163; ++b2idx) {
+                        if (SSF._table[b2idx] == val) {
+                            break
+                        }
+                    }
+                    if (b2idx >= 163) {
+                        SSF.load(val, BIFF2Fmt + 163)
+                    }
                     break
 
                 case 'MergeCells':
@@ -794,6 +818,9 @@ function parse_workbook(blob, options?: ParseOpts): Workbook {
                     break
                 case 'TxO':
                     opts.lastobj.TxO = val
+                    break
+                case 'ImData':
+                    opts.lastobj.ImData = val
                     break
 
                 case 'HLink':
@@ -886,20 +913,7 @@ function parse_workbook(blob, options?: ParseOpts): Workbook {
                             if (!out['!margins']) {
                                 default_margins(out['!margins'] = {})
                             }
-                            switch (Rn) {
-                                case 'LeftMargin':
-                                    out['!margins'].left = val
-                                    break
-                                case 'RightMargin':
-                                    out['!margins'].right = val
-                                    break
-                                case 'TopMargin':
-                                    out['!margins'].top = val
-                                    break
-                                case 'BottomMargin':
-                                    out['!margins'].bottom = val
-                                    break
-                            }
+                            out['!margins'][Rn.slice(0, -6).toLowerCase()] = val
                             break
 
                         case 'Setup':
@@ -1133,6 +1147,7 @@ function parse_workbook(blob, options?: ParseOpts): Workbook {
                         case 'InterfaceEnd':
                         case 'DSF':
                         case 'BuiltInFnGroupCount':
+                            break
                         /* View Stuff */
                         case 'Window1':
                         case 'Window2':
@@ -1284,18 +1299,17 @@ function parse_workbook(blob, options?: ParseOpts): Workbook {
                                 case 'MsoDrawingGroup':
                                 case 'MsoDrawingSelection':
                                     break
-                                case 'ImData':
-                                    break
                                 /* Pub Stuff */
                                 case 'WebPub':
                                 case 'AutoWebPub':
-
+                                    break
                                 /* Print Stuff */
                                 case 'HeaderFooter':
                                 case 'HFPicture':
                                 case 'PLV':
                                 case 'HorizontalPageBreaks':
                                 case 'VerticalPageBreaks':
+                                    break
                                 /* Behavioral */
                                 case 'Backup':
                                 case 'CompressPictures':

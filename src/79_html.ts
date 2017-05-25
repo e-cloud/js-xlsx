@@ -1,8 +1,10 @@
 import { DENSE } from './03_consts'
+import * as SSF from './10_ssf'
+import { datenum, fuzzydate, parseDate } from './20_jsutils'
 import { escapexml, parsexmltag, unescapexml, writextag } from './22_xmlutils'
 import { decode_range, encode_cell, encode_range, format_cell, sheet_to_workbook } from './27_csfutils'
 
-/* TODO: in browser attach to DOM; in node use an html parser */
+/* note: browser DOM element cannot see mso- style attrs, must parse */
 export const HTML_ = function () {
     function html_to_sheet(str: string, _opts): Workbook {
         const opts = _opts || {}
@@ -104,9 +106,10 @@ export const HTML_ = function () {
         return sheet_to_workbook(html_to_sheet(str, opts), opts)
     }
 
-    function make_html_row(ws: Worksheet, r: Range, R: number, o): string {
+    function make_html_row(ws: Worksheet, r: Range, R: number, o: Sheet2HTMLOpts): string {
         const M = ws['!merges'] || []
         const oo = []
+        const nullcell = '<td' + (o.editable ? ' contenteditable="true"' : '' ) + '></td>'
         for (let C = r.s.c; C <= r.e.c; ++C) {
             let RS = 0
             let CS = 0
@@ -131,7 +134,7 @@ export const HTML_ = function () {
             const coord = encode_cell({ r: R, c: C })
             const cell = o.dense ? (ws[R] || [])[C] : ws[coord]
             if (!cell || cell.v == null) {
-                oo.push('<td></td>')
+                oo.push(nullcell)
                 continue
             }
             /* TODO: html entities */
@@ -143,30 +146,41 @@ export const HTML_ = function () {
             if (CS > 1) {
                 sp.colspan = CS
             }
+            if (o.editable) {
+                sp.contenteditable = 'true'
+            }
             oo.push(writextag('td', w, sp))
         }
         return `<tr>${oo.join('')}</tr>`
     }
 
-    function sheet_to_html(ws: Worksheet, opts): string {
-        const o: Array<string> = []
+    const _BEGIN = '<html><head><title>SheetJS Table Export</title></head><body><table>'
+    const _END = '</table></body></html>'
+
+    function sheet_to_html(ws: Worksheet, opts?: Sheet2HTMLOpts): string {
+        const o = opts || {}
+        const out: Array<string> = []
         const r = decode_range(ws['!ref'])
         o.dense = Array.isArray(ws)
         for (let R = r.s.r; R <= r.e.r; ++R) {
-            o.push(make_html_row(ws, r, R, o))
+            out.push(make_html_row(ws, r, R, o))
         }
-        return `<html><body><table>${o.join('')}</table></body></html>`
+        const header = o.header != null ? o.header : _BEGIN
+        const footer = o.footer != null ? o.footer : _END
+        return header + out.join('') + footer
     }
 
     return {
         to_workbook: html_to_book,
         to_sheet: html_to_sheet,
         _row: make_html_row,
+        BEGIN: _BEGIN,
+        END: _END,
         from_sheet: sheet_to_html,
     }
 }()
 
-export function parse_dom_table(table: HTMLElement, _opts ?: any): Worksheet {
+export function parse_dom_table(table: HTMLElement, _opts ?): Worksheet {
     const opts = _opts || {}
     if (DENSE != null) {
         opts.dense = DENSE
@@ -187,7 +201,7 @@ export function parse_dom_table(table: HTMLElement, _opts ?: any): Worksheet {
         const elts = row.children
         for (_C = C = 0; _C < elts.length; ++_C) {
             const elt = elts[_C]
-            const v = elts[_C].innerText
+            const v = elts[_C].innerText || elts[_C].textContent
             for (midx = 0; midx < merges.length; ++midx) {
                 const m = merges[midx]
                 if (m.s.c == C && m.s.r <= R && R <= m.e.r) {
@@ -203,9 +217,17 @@ export function parse_dom_table(table: HTMLElement, _opts ?: any): Worksheet {
                     e: { r: R + (RS || 1) - 1, c: C + CS - 1 },
                 })
             }
-            let o = { t: 's', v }
-            if (v != null && v.length && !isNaN(Number(v))) {
-                o = { t: 'n', v: Number(v) }
+            let o: Cell = { t: 's', v }
+            if (v != null && v.length) {
+                if (!isNaN(Number(v))) {
+                    o = { t: 'n', v: Number(v) }
+                } else if (!isNaN(fuzzydate(v).getDate())) {
+                    o = { t: 'd', v: parseDate(v) }
+                    if (!opts.cellDates) {
+                        o = { t: 'n', v: datenum(o.v) }
+                    }
+                    o.z = opts.dateNF || SSF._table[14]
+                }
             }
             if (opts.dense) {
                 if (!ws[R]) {
@@ -226,6 +248,6 @@ export function parse_dom_table(table: HTMLElement, _opts ?: any): Worksheet {
     return ws
 }
 
-export function table_to_book(table: HTMLElement, opts ?: any): Workbook {
+export function table_to_book(table: HTMLElement, opts ?): Workbook {
     return sheet_to_workbook(parse_dom_table(table, opts), opts)
 }

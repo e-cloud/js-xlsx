@@ -41,7 +41,7 @@ export function parse_OptXLUnicodeString(blob, length, opts) {
 }
 
 /* 2.5.158 */
-const HIDEOBJENUM = ['SHOWALL', 'SHOWPLACEHOLDER', 'HIDEALL']
+//const HIDEOBJENUM = ['SHOWALL', 'SHOWPLACEHOLDER', 'HIDEALL']
 const parse_HideObjEnum = parseuint16
 
 /* 2.5.344 */
@@ -124,55 +124,47 @@ function parse_FtCf(blob, length) {
 }
 
 /* 2.5.140 - 2.5.154 and friends */
+function parse_FtSkip(blob, length) {
+    blob.l += 2
+    blob.l += blob.read_shift(2)
+}
+
 const FtTab = {
-    /*::[*/0x15 /*::]*/: parse_FtCmo,
-    /*::[*/0x13 /*::]*/: parsenoop, /* FtLbsData */
-    /*::[*/0x12 /*::]*/: function (blob, length) {
-        blob.l += 12
-    }, /* FtCblsData */
-    /*::[*/0x11 /*::]*/: function (blob, length) {
-        blob.l += 8
-    }, /* FtRboData */
-    /*::[*/0x10 /*::]*/: parsenoop, /* FtEdoData */
-    /*::[*/0x0F /*::]*/: parsenoop, /* FtGboData */
-    /*::[*/0x0D /*::]*/: parse_FtNts, /* FtNts */
-    /*::[*/0x0C /*::]*/: function (blob, length) {
-        blob.l += 24
-    }, /* FtSbs */
-    /*::[*/0x0B /*::]*/: function (blob, length) {
-        blob.l += 10
-    }, /* FtRbo */
-    /*::[*/0x0A /*::]*/: function (blob, length) {
-        blob.l += 16
-    }, /* FtCbls */
-    /*::[*/0x09 /*::]*/: parsenoop, /* FtPictFmla */
-    /*::[*/0x08 /*::]*/: function (blob, length) {
-        blob.l += 6
-    }, /* FtPioGrbit */
-    /*::[*/0x07 /*::]*/: parse_FtCf, /* FtCf */
-    /*::[*/0x06 /*::]*/: function (blob, length) {
-        blob.l += 6
-    }, /* FtGmo */
-    /*::[*/0x04 /*::]*/: parsenoop, /* FtMacro */
-    /*::[*/0x00 /*::]*/: function (blob, length) {
-        blob.l += 4
-    } /* FtEnding */
+    /*::[*/0x00/*::]*/: parse_FtSkip, /* FtEnd */
+    /*::[*/0x04/*::]*/: parse_FtSkip, /* FtMacro */
+    /*::[*/0x05/*::]*/: parse_FtSkip, /* FtButton */
+    /*::[*/0x06/*::]*/: parse_FtSkip, /* FtGmo */
+    /*::[*/0x07/*::]*/: parse_FtCf, /* FtCf */
+    /*::[*/0x08/*::]*/: parse_FtSkip, /* FtPioGrbit */
+    /*::[*/0x09/*::]*/: parse_FtSkip, /* FtPictFmla */
+    /*::[*/0x0A/*::]*/: parse_FtSkip, /* FtCbls */
+    /*::[*/0x0B/*::]*/: parse_FtSkip, /* FtRbo */
+    /*::[*/0x0C/*::]*/: parse_FtSkip, /* FtSbs */
+    /*::[*/0x0D/*::]*/: parse_FtNts, /* FtNts */
+    /*::[*/0x0E/*::]*/: parse_FtSkip, /* FtSbsFmla */
+    /*::[*/0x0F/*::]*/: parse_FtSkip, /* FtGboData */
+    /*::[*/0x10/*::]*/: parse_FtSkip, /* FtEdoData */
+    /*::[*/0x11/*::]*/: parse_FtSkip, /* FtRboData */
+    /*::[*/0x12/*::]*/: parse_FtSkip, /* FtCblsData */
+    /*::[*/0x13/*::]*/: parse_FtSkip, /* FtLbsData */
+    /*::[*/0x14/*::]*/: parse_FtSkip, /* FtCblsFmla */
+    /*::[*/0x15/*::]*/: parse_FtCmo,
 }
 function parse_FtArray(blob, length, ot) {
-    const s = blob.l
+    const tgt = blob.l + length
     const fts = []
-    while (blob.l < s + length) {
+    while (blob.l < tgt) {
         const ft = blob.read_shift(2)
         blob.l -= 2
         try {
-            fts.push(FtTab[ft](blob, s + length - blob.l))
+            fts.push(FtTab[ft](blob, tgt - blob.l))
         } catch (e) {
-            blob.l = s + length
+            blob.l = tgt
             return fts
         }
     }
-    if (blob.l != s + length) {
-        blob.l = s + length
+    if (blob.l != tgt) {
+        blob.l = tgt
     } //throw new Error("bad Object Ft-sequence");
     return fts
 }
@@ -319,11 +311,17 @@ export function parse_RecalcId(blob, length) {
 }
 
 /* 2.4.87 */
-export function parse_DefaultRowHeight(blob, length) {
-    const f = blob.read_shift(2)
+export function parse_DefaultRowHeight(blob, length, opts) {
+    let f = 0
+    if (!(opts && opts.biff == 2)) {
+        f = blob.read_shift(2)
+    }
+    let miyRw = blob.read_shift(2)
+    if ((opts && opts.biff == 2)) {
+        f = 1 - (miyRw >> 15)
+        miyRw &= 0x7fff
+    }
     const fl = { Unsynced: f & 1, DyZero: (f & 2) >> 1, ExAsc: (f & 4) >> 2, ExDsc: (f & 8) >> 3 }
-    /* char is misleading, miyRw and miyRwHidden overlap */
-    const miyRw = blob.read_shift(2)
     return [fl, miyRw]
 }
 
@@ -346,9 +344,23 @@ export function parse_Window1(blob, length) {
 
 /* 2.4.122 TODO */
 export function parse_Font(blob, length, opts) {
-    blob.l += 14
-    const name = parse_ShortXLUnicodeString(blob, 0, opts)
-    return name
+    const o = {
+        dyHeight: blob.read_shift(2),
+        fl: blob.read_shift(2),
+    }
+    switch (opts && opts.biff || 8) {
+        case 2:
+            break
+        case 3:
+        case 4:
+            blob.l += 2
+            break
+        default:
+            blob.l += 10
+            break
+    }
+    o.name = parse_ShortXLUnicodeString(blob, 0, opts)
+    return o
 }
 
 /* 2.4.149 */
@@ -416,6 +428,7 @@ export function parse_MulRk(blob, length) {
     }
     return { r: rw, c: col, C: lastcol, rkrec: rkrecs }
 }
+
 /* 2.4.174 */
 export function parse_MulBlank(blob, length) {
     const target = blob.l + length - 2
@@ -703,10 +716,51 @@ export function parse_MergeCells(blob, length) {
 }
 
 /* 2.4.181 TODO: parse all the things! */
-export function parse_Obj(blob, length) {
+export function parse_Obj(blob, length, opts) {
+    if (opts && opts.biff < 8) {
+        return parse_BIFF5Obj(blob, length, opts)
+    }
     const cmo = parse_FtCmo(blob, 22) // id, ot, flags
     const fts = parse_FtArray(blob, length - 22, cmo[1])
     return { cmo, ft: fts }
+}
+
+/* from older spec */
+const parse_BIFF5OT = []
+parse_BIFF5OT[0x08] = function (blob, length, opts) {
+    const tgt = blob.l + length
+    blob.l += 10 // todo
+    const cf = blob.read_shift(2)
+    blob.l += 4
+    const cbPictFmla = blob.read_shift(2)
+    blob.l += 2
+    const grbit = blob.read_shift(2)
+    blob.l += 4
+    const cchName = blob.read_shift(1)
+    blob.l += cchName // TODO: stName
+    blob.l = tgt // TODO: fmla
+    return { fmt: cf }
+}
+
+function parse_BIFF5Obj(blob, length, opts) {
+    const cnt = blob.read_shift(4)
+    const ot = blob.read_shift(2)
+    const id = blob.read_shift(2)
+    const grbit = blob.read_shift(2)
+    const colL = blob.read_shift(2)
+    const dxL = blob.read_shift(2)
+    const rwT = blob.read_shift(2)
+    const dyT = blob.read_shift(2)
+    const colR = blob.read_shift(2)
+    const dxR = blob.read_shift(2)
+    const rwB = blob.read_shift(2)
+    const dyB = blob.read_shift(2)
+    const cbMacro = blob.read_shift(2)
+    blob.l += 6
+    length -= 36
+    const fts = []
+    fts.push((parse_BIFF5OT[ot] || parsenoop)(blob, length, opts))
+    return { cmo: [id, ot, grbit], ft: fts }
 }
 
 /* 2.4.329 TODO: parse properly */
@@ -727,7 +781,7 @@ export function parse_TxO(blob, length, opts) {
         const ifntEmpty = parse_FontIndex(blob, 2)
         const len = blob.read_shift(2)
         blob.l += len
-        //var fmla = parse_ObjFmla(blob, s + length - blob.l);
+        //const fmla = parse_ObjFmla(blob, s + length - blob.l);
 
         for (let i = 1; i < blob.lens.length - 1; ++i) {
             if (blob.l - s != blob.lens[i]) {
@@ -746,9 +800,9 @@ export function parse_TxO(blob, length, opts) {
 
         blob.l = s + length
         /* 2.5.272 TxORuns */
-        //	var rgTxoRuns = [];
-        //	for(var j = 0; j != cbRuns/8-1; ++j) blob.l += 8;
-        //	var cchText2 = blob.read_shift(2);
+        //	const rgTxoRuns = [];
+        //	for(let j = 0; j != cbRuns/8-1; ++j) blob.l += 8;
+        //	const cchText2 = blob.read_shift(2);
         //	if(cchText2 !== cchText) throw new Error("TxOLastRun mismatch: " + cchText2 + " " + cchText);
         //	blob.l += 6;
         //	if(s + length != blob.l) throw new Error("TxO " + (s + length) + ", at " + blob.l);
@@ -1220,6 +1274,16 @@ export const parse_BopPopCustom = parsenoop
 export const parse_Fbi2 = parsenoop
 
 /* --- Specific to versions before BIFF8 --- */
+export function parse_ImData(blob, length, opts) {
+    const tgt = blob.l + length
+    const cf = blob.read_shift(2)
+    const env = blob.read_shift(2)
+    const lcb = blob.read_shift(4)
+    const o = { fmt: cf, env: env, len: lcb, data: blob.slice(blob.l, blob.l + lcb) }
+    blob.l += lcb
+    return o
+}
+
 export function parse_BIFF5String(blob) {
     const len = blob.read_shift(1)
     return blob.read_shift(len, 'sbcs-cont')
@@ -1269,7 +1333,7 @@ export function parse_BIFF2FONTXTRA(blob, length) {
     blob.l += 1 // charset
     blob.l += 3 // unknown
     blob.l += 1 // font family
-    blob.l += length - 9
+    blob.l += length - 13
 }
 
 /* TODO: parse rich text runs */

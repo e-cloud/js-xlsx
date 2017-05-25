@@ -1,9 +1,46 @@
 /* [MS-XLSB] 2.5.143 */
 import { evert_num } from './20_jsutils'
 import { __double, __readInt32LE, new_buf } from './23_binutils'
+import { XLSIcv } from './29_xlsenum'
+
+export function write_UInt32LE(x: number, o) {
+    if (!o) {
+        o = new_buf(4)
+    }
+    o.write_shift(4, x)
+    return o
+}
+
+/* [MS-XLSB] 2.5.168 */
+export function parse_XLWideString(data): string {
+    const cchCharacters = data.read_shift(4)
+    return cchCharacters === 0 ? '' : data.read_shift(cchCharacters, 'dbcs')
+}
+
+export function write_XLWideString(data: string, o) {
+    let _null = false
+    if (o == null) {
+        _null = true
+        o = new_buf(4 + 2 * data.length)
+    }
+    o.write_shift(4, data.length)
+    if (data.length > 0) {
+        o.write_shift(0, data, 'dbcs')
+    }
+    return _null ? o.slice(0, o.l) : o
+}
 
 function parse_StrRun(data, length?: number) {
     return { ich: data.read_shift(2), ifnt: data.read_shift(2) }
+}
+
+function write_StrRun(run, o) {
+    if (!o) {
+        o = new_buf(4)
+    }
+    o.write_shift(2, run.ich || 0)
+    o.write_shift(2, run.ifnt || 0)
+    return o
 }
 
 /* [MS-XLSB] 2.1.7.121 */
@@ -44,6 +81,22 @@ export function write_RichStr(str: XLString, o?: Block): Block {
     return _null ? o.slice(0, o.l) : o
 }
 
+/* [MS-XLSB] 2.4.325 BrtCommentText (RichStr w/1 run) */
+export const parse_BrtCommentText = parse_RichStr
+export function write_BrtCommentText(str: XLString, o?: Block): Block {
+    /* TODO: formatted string */
+    let _null = false
+    if (o == null) {
+        _null = true
+        o = new_buf(23 + 4 * str.t.length)
+    }
+    o.write_shift(1, 1)
+    write_XLWideString(str.t, o)
+    o.write_shift(4, 1)
+    write_StrRun({ ich: 0, ifnt: 0 }, o)
+    return _null ? o.slice(0, o.l) : o
+}
+
 /* [MS-XLSB] 2.5.9 */
 export function parse_XLSBCell(data) {
     const col = data.read_shift(4)
@@ -79,25 +132,6 @@ export function write_XLNullableWideString(data: string, o) {
         o = new_buf(127)
     }
     o.write_shift(4, data.length > 0 ? data.length : 0xFFFFFFFF)
-    if (data.length > 0) {
-        o.write_shift(0, data, 'dbcs')
-    }
-    return _null ? o.slice(0, o.l) : o
-}
-
-/* [MS-XLSB] 2.5.168 */
-export function parse_XLWideString(data): string {
-    const cchCharacters = data.read_shift(4)
-    return cchCharacters === 0 ? '' : data.read_shift(cchCharacters, 'dbcs')
-}
-
-export function write_XLWideString(data: string, o?) {
-    let _null = false
-    if (o == null) {
-        _null = true
-        o = new_buf(4 + 2 * data.length)
-    }
-    o.write_shift(4, data.length)
     if (data.length > 0) {
         o.write_shift(0, data, 'dbcs')
     }
@@ -198,27 +232,112 @@ export const RBErr = evert_num(BErr)
 export function parse_BrtColor(data, length: number) {
     const out = {}
     const d = data.read_shift(1)
-    out.fValidRGB = d & 1
-    out.xColorType = d >>> 1
-    out.index = data.read_shift(1)
-    out.nTintAndShade = data.read_shift(2, 'i')
-    out.bRed = data.read_shift(1)
-    out.bGreen = data.read_shift(1)
-    out.bBlue = data.read_shift(1)
-    out.bAlpha = data.read_shift(1)
+    const fValidRGB = d & 1
+    const xColorType = d >>> 1
+
+    const index = data.read_shift(1)
+    const nTS = data.read_shift(2, 'i')
+    const bR = data.read_shift(1)
+    const bG = data.read_shift(1)
+    const bB = data.read_shift(1)
+    const bAlpha = data.read_shift(1)
+
+    switch (xColorType) {
+        case 0:
+            out.auto = 1
+            break
+        case 1:
+            out.index = index
+            const icv = XLSIcv[index]
+            /* automatic pseudo index 81 */
+            if (icv) {
+                out.rgb = icv[0].toString(16) + icv[1].toString(16) + icv[2].toString(16)
+            }
+            break
+        case 2:
+            /* if(!fValidRGB) throw new Error("invalid"); */
+            out.rgb = bR.toString(16) + bG.toString(16) + bB.toString(16)
+            break
+        case 3:
+            out.theme = index
+            break
+    }
+    if (nTS != 0) {
+        out.tint = nTS > 0 ? nTS / 32767 : nTS / 32768
+    }
+
+    return out
+}
+
+export function write_BrtColor(color, o) {
+    if (!o) {
+        o = new_buf(8)
+    }
+    if (!color || color.auto) {
+        o.write_shift(4, 0)
+        o.write_shift(4, 0)
+        return o
+    }
+    if (color.index) {
+        o.write_shift(1, 0x02)
+        o.write_shift(1, color.index)
+    } else if (color.theme) {
+        o.write_shift(1, 0x06)
+        o.write_shift(1, color.theme)
+    } else {
+        o.write_shift(1, 0x05)
+        o.write_shift(1, 0)
+    }
+    let nTS = color.tint || 0
+    if (nTS > 0) {
+        nTS *= 32767
+    } else if (nTS < 0) {
+        nTS *= 32768
+    }
+    o.write_shift(2, nTS)
+    if (!color.rgb) {
+        o.write_shift(2, 0)
+        o.write_shift(1, 0)
+        o.write_shift(1, 0)
+    } else {
+        const rgb = (color.rgb || 'FFFFFF')
+        o.write_shift(1, parseInt(rgb.substr(0, 2), 16))
+        o.write_shift(1, parseInt(rgb.substr(2, 2), 16))
+        o.write_shift(1, parseInt(rgb.substr(4, 2), 16))
+        o.write_shift(1, 0xFF)
+    }
+    return o
 }
 
 /* [MS-XLSB] 2.5.52 */
-export function parse_FontFlags(data, length: number) {
+export function parse_FontFlags(data, length: number, opts) {
     const d = data.read_shift(1)
     data.l++
     const out = {
-        fItalic: d & 0x2,
-        fStrikeout: d & 0x8,
+        /* fBold: d & 0x01 */
+        fItalic: d & 0x02,
+        /* fUnderline: d & 0x04 */
+        fStrikeout: d & 0x08,
         fOutline: d & 0x10,
         fShadow: d & 0x20,
         fCondense: d & 0x40,
         fExtend: d & 0x80,
     }
     return out
+}
+
+export function write_FontFlags(font, o) {
+    if (!o) {
+        o = new_buf(2)
+    }
+    const grbit =
+        (font.italic ? 0x02 : 0) |
+        (font.strike ? 0x08 : 0) |
+        (font.outline ? 0x10 : 0) |
+        (font.shadow ? 0x20 : 0) |
+        (font.condense ? 0x40 : 0) |
+        (font.extend ? 0x80 : 0)
+    o.write_shift(1, grbit)
+    o.write_shift(1, 0)
+    return o
 }

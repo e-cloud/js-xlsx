@@ -3,10 +3,9 @@ import { buf_array, recordhopper, write_record } from './24_hoppers'
 /* [MS-XLSB] 2.4.28 BrtBeginComment */
 import { decode_cell, encode_cell } from './27_csfutils'
 import {
-    parse_RichStr,
     parse_UncheckedRfX,
     parse_XLWideString,
-    write_RichStr,
+    write_BrtCommentText,
     write_UncheckedRfX,
     write_XLWideString
 } from './28_binstructs'
@@ -37,9 +36,6 @@ export function write_BrtBeginComment(data, o?) {
 
 /* [MS-XLSB] 2.4.324 BrtCommentAuthor */
 export const parse_BrtCommentAuthor = parse_XLWideString
-
-/* [MS-XLSB] 2.4.325 BrtCommentText */
-export const parse_BrtCommentText = parse_RichStr
 
 /* [MS-XLSB] 2.1.7.8 Comments */
 export function parse_comments_bin(data, opts) {
@@ -131,7 +127,7 @@ export function write_comments_bin(data, opts) {
             const range = { s: decode_cell(comment[0]), e: decode_cell(comment[0]) }
             write_record(ba, 'BrtBeginComment', write_BrtBeginComment([range, c]))
             if (c.t && c.t.length > 0) {
-                write_record(ba, 'BrtCommentText', write_RichStr(c))
+                write_record(ba, 'BrtCommentText', write_BrtCommentText(c))
             }
             write_record(ba, 'BrtEndComment')
             delete c.iauthor

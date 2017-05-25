@@ -29,10 +29,10 @@ import {
     parse_wb,
     parse_ws
 } from './74_xmlbin'
-import { parse_ods } from './83_ods'
+import { parse_ods } from './80_parseods'
 import { fix_read_opts } from './84_defaults'
 
-function get_sheet_type(n) {
+function get_sheet_type(n: string): string {
     if (RELS.WS.includes(n)) {
         return 'sheet'
     }
@@ -119,7 +119,7 @@ const nodirs = function nodirs(x: string): boolean {
     return x.slice(-1) != '/'
 }
 
-export function parse_zip(zip: ZIP, opts ?: ParseOpts): Workbook {
+export function parse_zip(zip: JSZip, opts ?: ParseOpts): Workbook {
     SSF.make_ssf()
     opts = opts || {}
     fix_read_opts(opts)

@@ -192,6 +192,7 @@ function rgbify(arr) {
 }
 
 /* [MS-XLS] 2.5.161 */
+/* [MS-XLSB] 2.5.75 */
 export const XLSIcv = rgbify([
     /* Color Constants */
     0x000000,
@@ -203,7 +204,7 @@ export const XLSIcv = rgbify([
     0xFF00FF,
     0x00FFFF,
 
-    /* Defaults */
+    /* Overridable Defaults */
     0x000000,
     0xFFFFFF,
     0xFF0000,
@@ -261,7 +262,23 @@ export const XLSIcv = rgbify([
     0x333399,
     0x333333,
 
-    /* Sheet */
-    0xFFFFFF,
-    0x000000,
+    /* Other entries to appease BIFF8/12 */
+    0xFFFFFF, /* 0x40 icvForeground ?? */
+    0x000000, /* 0x41 icvBackground ?? */
+    0x000000, /* 0x42 icvFrame ?? */
+    0x000000, /* 0x43 icv3D ?? */
+    0x000000, /* 0x44 icv3DText ?? */
+    0x000000, /* 0x45 icv3DHilite ?? */
+    0x000000, /* 0x46 icv3DShadow ?? */
+    0x000000, /* 0x47 icvHilite ?? */
+    0x000000, /* 0x48 icvCtlText ?? */
+    0x000000, /* 0x49 icvCtlScrl ?? */
+    0x000000, /* 0x4A icvCtlInv ?? */
+    0x000000, /* 0x4B icvCtlBody ?? */
+    0x000000, /* 0x4C icvCtlFrame ?? */
+    0x000000, /* 0x4D icvCtlFore ?? */
+    0x000000, /* 0x4E icvCtlBack ?? */
+    0x000000, /* 0x4F icvCtlNeutral */
+    0x000000, /* 0x50 icvInfoBk ?? */
+    0x000000 /* 0x51 icvInfoText ?? */
 ])

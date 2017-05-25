@@ -46,7 +46,7 @@ export function parse_BrtWbProp(data, length) {
 
 export function write_BrtWbProp(data, o) {
     if (!o) {
-        o = new_buf(68)
+        o = new_buf(72)
     }
     o.write_shift(4, 0)
     o.write_shift(4, 0)
@@ -103,22 +103,22 @@ export function parse_wb_bin(data, opts): WorkbookFile {
 
     recordhopper(data, function hopper_wb(val, R_n, RT) {
         switch (RT) {
-            case 0x009C:
-                /* 'BrtBundleSh' */
+            case 0x009C: /* 'BrtBundleSh' */
                 supbooks.SheetNames.push(val.name)
                 wb.Sheets.push(val)
                 break
 
-            case 0x0027:
-                /* 'BrtName' */
+            case 0x0027: /* 'BrtName' */
                 val.Ref = stringify_formula(val.Ptg, null, null, supbooks, opts)
                 delete val.Ptg
                 Names.push(val)
                 break
-            case 0x040C:
-                /* 'BrtNameExt' */
+            case 0x040C: /* 'BrtNameExt' */
                 break
 
+            /* case 'BrtModelTimeGroupingCalcCol' */
+            /* case 'BrtRevisionPtr' */
+            /* case 'BrtUid' */
             case 0x0817: /* 'BrtAbsPath15' */
             case 0x0216: /* 'BrtBookProtection' */
             case 0x02A5: /* 'BrtBookProtectionIso' */
@@ -134,11 +134,9 @@ export function parse_wb_bin(data, opts): WorkbookFile {
             case 0x0299: /* 'BrtFnGroup' */
             case 0x0850: /* 'BrtModelRelationship' */
             case 0x084D: /* 'BrtModelTable' */
-            /* case 'BrtModelTimeGroupingCalcCol' */
             case 0x0225: /* 'BrtOleSize' */
             case 0x0805: /* 'BrtPivotTableRef' */
             case 0x0169: /* 'BrtPlaceholderName' */
-            /* case 'BrtRevisionPtr' */
             case 0x0254: /* 'BrtSmartTagType' */
             case 0x029B: /* 'BrtSupAddin' */
             case 0x0163: /* 'BrtSupBookSrc' */
@@ -147,33 +145,26 @@ export function parse_wb_bin(data, opts): WorkbookFile {
             case 0x081C: /* 'BrtTableSlicerCacheID' */
             case 0x081B: /* 'BrtTableSlicerCacheIDs' */
             case 0x0822: /* 'BrtTimelineCachePivotCacheID' */
-            /* case 'BrtUid' */
             case 0x018D: /* 'BrtUserBookView' */
             case 0x009A: /* 'BrtWbFactoid' */
             case 0x0099: /* 'BrtWbProp' */
             case 0x045D: /* 'BrtWbProp14' */
             case 0x0229: /* 'BrtWebOpt' */
-            case 0x082B:
-                /* 'BrtWorkBookPr15' */
+            case 0x082B: /* 'BrtWorkBookPr15' */
                 break
 
-            case 0x0023:
-                /* 'BrtFRTBegin' */
+            case 0x0023: /* 'BrtFRTBegin' */
                 pass = true
                 break
-            case 0x0024:
-                /* 'BrtFRTEnd' */
+            case 0x0024: /* 'BrtFRTEnd' */
                 pass = false
                 break
-            case 0x0025:
-                /* 'BrtACBegin' */
+            case 0x0025: /* 'BrtACBegin' */
                 break
-            case 0x0026:
-                /* 'BrtACEnd' */
+            case 0x0026: /* 'BrtACEnd' */
                 break
 
-            case 0x0010:
-                /* 'BrtFRTArchID$' */
+            case 0x0010: /* 'BrtFRTArchID$' */
                 break
 
             default:

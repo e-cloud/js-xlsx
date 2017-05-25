@@ -67,7 +67,10 @@ export function write_comments_vml(rId, comments) {
             writetag('x:Anchor', [c.c, 0, c.r, 0, c.c + 3, 100, c.r + 5, 100].join(',')),
             writetag('x:AutoFill', 'False'),
             writetag('x:Row', String(c.r)),
-            writetag('x:Column', String(c.c)), '</x:ClientData>', '</v:shape>',
+            writetag('x:Column', String(c.c)),
+            '<x:Visible/>',
+            '</x:ClientData>',
+            '</v:shape>',
         ])
     })
     o.push('</xml>')

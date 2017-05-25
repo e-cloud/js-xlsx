@@ -72,7 +72,7 @@ const encodings = {
     '&amp;': '&',
 }
 const rencoding = evert(encodings)
-const rencstr = '&<>\'"'.split('')
+//const rencstr = '&<>\'"'.split('')
 
 // TODO: CP remap (need to read file version to determine OS)
 export const unescapexml: StringConv = function () {
@@ -126,13 +126,14 @@ export const xlml_fixstr: StringConv = function () {
         return str.replace(entregex, entrepl)
     }
 }()
+
 export const xlml_unfixstr: StringConv = function () {
     return function xlml_unfixstr(str: string): string {
         return str.replace(/(\r\n|[\r\n])/g, '&#10;')
     }
 }()
 
-export function parsexmlbool(value: any, tag?: string): boolean {
+export function parsexmlbool(value, tag?: string): boolean {
     switch (value) {
         case '1':
         case 'true':
@@ -210,8 +211,7 @@ if (has_buf) {
             out[k++] = w % 256
             out[k++] = w >>> 8
         }
-        //out.length = k
-        return out.toString('ucs2')
+        return out.slice(0, k).toString('ucs2')
     }
     const corpus = 'foo bar baz\xE2\x98\x83\xF0\x9F\x8D\xA3'
     if (utf8read(corpus) == utf8readb(corpus)) {
@@ -276,8 +276,8 @@ export function wxt_helper(h): string {
 
 export function writextag(f, g, h?) {
     return `<${f}${isval(h) /*:: && h */ ? wxt_helper(h) : ''}${isval(g) /*:: && g */ ? (g.match(wtregex)
-            ? ' xml:space="preserve"'
-            : '') + `>${g}</${f}` : '/'}>`
+        ? ' xml:space="preserve"'
+        : '') + `>${g}</${f}` : '/'}>`
 }
 
 export function write_w3cdtf(d: Date, t?: boolean): string {

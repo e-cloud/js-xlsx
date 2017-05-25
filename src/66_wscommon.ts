@@ -56,7 +56,7 @@ export function col_obj_w(C: number, col) {
     return p
 }
 
-export function default_margins(margins, mode?) {
+export function default_margins(margins: Margins, mode?: string) {
     if (!margins) {
         return
     }
@@ -85,9 +85,20 @@ export function default_margins(margins, mode?) {
 }
 
 export function get_cell_style(styles, cell, opts) {
-    const z = opts.revssf[cell.z != null ? cell.z : 'General']
+    let z = opts.revssf[cell.z != null ? cell.z : 'General']
     const len = styles.length
-    for (let i = 0; i != len; ++i) {
+    let i = 0x3c
+    if (z == null && opts.ssf) {
+        for (; i < 0x188; ++i) {
+            if (opts.ssf[i] == null) {
+                SSF.load(cell.z, i)
+                opts.ssf[i] = cell.z
+                opts.revssf[cell.z] = z = i
+                break
+            }
+        }
+    }
+    for (i = 0; i != len; ++i) {
         if (styles[i].numFmtId === z) {
             return i
         }
@@ -103,7 +114,7 @@ export function get_cell_style(styles, cell, opts) {
     return len
 }
 
-export function safe_format(p, fmtid, fillid, opts, themes, styles) {
+export function safe_format(p, fmtid: number, fillid, opts, themes, styles) {
     if (p.t === 'z') {
         return
     }
@@ -156,7 +167,7 @@ export function safe_format(p, fmtid, fillid, opts, themes, styles) {
     if (fillid) {
         try {
             p.s = styles.Fills[fillid]
-            if (p.s.fgColor && p.s.fgColor.theme) {
+            if (p.s.fgColor && p.s.fgColor.theme && !p.s.fgColor.rgb) {
                 p.s.fgColor.rgb = rgb_tint(themes.themeElements.clrScheme[p.s.fgColor.theme].rgb, p.s.fgColor.tint || 0)
                 if (opts.WTF) {
                     p.s.fgColor.raw_rgb = themes.themeElements.clrScheme[p.s.fgColor.theme].rgb

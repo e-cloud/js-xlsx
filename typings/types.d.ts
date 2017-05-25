@@ -3,8 +3,11 @@ declare interface Block {
 
 declare interface BufArray {
     newblk(sz: number): Block;
+
     next(sz: number): Block;
+
     end(): any;
+
     push(buf: Block): void;
 }
 
@@ -77,6 +80,10 @@ declare interface CellAddress {
 declare type CellAddrSpec = CellAddress | string;
 
 declare interface Cell {
+    l?: Hyperlink
+    t: string
+    v: any
+    z?: string
 }
 
 declare interface Range {
@@ -114,9 +121,12 @@ declare interface XLSXModule {
 
 declare interface SST {
     [n: number]: XLString;
+
     Count: number;
     Unique: number;
+
     push(x: XLString): void;
+
     length: number;
 }
 
@@ -131,3 +141,44 @@ declare interface ColInfo {
 }
 
 declare type AOA = Array<Array<any>>;
+
+declare type RowInfo = {
+    /* visibility */
+    hidden?: boolean; // if true, the row is hidden
+
+    /* row height is specified in one of the following ways: */
+    hpx?: number;     // height in screen pixels
+    hpt?: number;     // height in points
+}
+
+declare interface SSFTable {
+
+}
+
+declare interface Margins {
+    left?: number;
+    right?: number;
+    top?: number;
+    bottom?: number;
+    header?: number;
+    footer?: number;
+}
+
+declare interface DefinedName {
+    Name: string;
+    Ref: string;
+    Sheet?: number;
+    Comment?: string;
+}
+
+declare interface Hyperlink {
+    Target: string;
+    Tooltip?: string;
+}
+
+declare interface Sheet2HTMLOpts {
+    editable?: boolean
+    dense?: boolean
+    header?: boolean
+    footer?: boolean
+}

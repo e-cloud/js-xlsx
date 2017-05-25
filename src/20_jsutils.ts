@@ -1,14 +1,14 @@
 import * as SSF from './10_ssf'
 
-export function isval(x?: any): boolean {
+export function isval(x?): boolean {
     return x !== undefined && x !== null
 }
 
-export function keys(o: any) {
+export function keys(o) {
     return Object.keys(o)
 }
 
-export function evert_key(obj: any, key: string): EvertType {
+export function evert_key(obj, key: string): EvertType {
     const o = {}
     const K = keys(obj)
     for (let i = 0; i !== K.length; ++i) {
@@ -17,7 +17,7 @@ export function evert_key(obj: any, key: string): EvertType {
     return o
 }
 
-export function evert(obj: any): EvertType {
+export function evert(obj) {
     const o = {}
     const K = keys(obj)
     for (let i = 0; i !== K.length; ++i) {
@@ -26,7 +26,7 @@ export function evert(obj: any): EvertType {
     return o
 }
 
-export function evert_num(obj: any): EvertNumType {
+export function evert_num(obj): EvertNumType {
     const o = {}
     const K = keys(obj)
     for (let i = 0; i !== K.length; ++i) {
@@ -35,7 +35,7 @@ export function evert_num(obj: any): EvertNumType {
     return o
 }
 
-export function evert_arr(obj: any): EvertArrType {
+export function evert_arr(obj): EvertArrType {
     const o = {}
     const K = keys(obj)
     for (let i = 0; i !== K.length; ++i) {
@@ -111,18 +111,32 @@ export function parse_isodur(s) {
     return sec
 }
 
-const good_pd_date = new Date('2017-02-19T19:06:09.000Z')
+let good_pd_date = new Date('2017-02-19T19:06:09.000Z')
+
+if (isNaN(good_pd_date.getFullYear())) {
+    good_pd_date = new Date('2/19/17')
+}
+
 const good_pd = good_pd_date.getFullYear() == 2017
 
 export function parseDate(str: string | Date): Date {
-    if (good_pd) {
-        return new Date(str)
-    }
     if (str instanceof Date) {
         return str
     }
+    const d = new Date(str)
+    if (good_pd) {
+        return d
+    }
+    if (good_pd_date.getFullYear() == 1917 && !isNaN(d.getFullYear())) {
+        const s = d.getFullYear()
+        if (str.includes(`${s}`)) {
+            return d
+        }
+        d.setFullYear(d.getFullYear() + 100)
+        return d
+    }
     const n = str.match(/\d+/g) || ['2017', '2', '19', '0', '0', '0']
-    return new Date(Date.UTC(+n[0], +n[1] - 1, +n[2], +n[3], +n[4], +n[5]))
+    return new Date(Date.UTC(+n[0], +n[1] - 1, +n[2], (+n[3] || 0), (+n[4] || 0), (+n[5] || 0)))
 }
 
 export function cc2str(arr: Array<number>): string {
@@ -141,7 +155,7 @@ export function str2cc(str) {
     return o
 }
 
-export function dup(o: any): any {
+export function dup(o) {
     if (typeof JSON != 'undefined' && !Array.isArray(o)) {
         return JSON.parse(JSON.stringify(o))
     }
@@ -163,4 +177,29 @@ export function fill(c: string, l: number): string {
         o += c
     }
     return o
+}
+
+/* TODO: stress test */
+export function fuzzydate(s: string): Date {
+    const o = new Date(s)
+    const n = new Date(NaN)
+    const y = o.getYear()
+    const m = o.getMonth()
+    const d = o.getDate()
+    if (isNaN(d)) {
+        return n
+    }
+    if (y < 0 || y > 8099) {
+        return n
+    }
+    if ((m > 0 || d > 1) && y != 101) {
+        return o
+    }
+    if (s.toLowerCase().match(/jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec/)) {
+        return o
+    }
+    if (!s.match(/[a-zA-Z]/)) {
+        return o
+    }
+    return n
 }

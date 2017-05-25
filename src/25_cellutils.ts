@@ -2,7 +2,7 @@
 import { dup } from './20_jsutils'
 import { encode_cell, encode_col, encode_row, fix_col, fix_row } from './27_csfutils'
 
-export function shift_cell_xls(cell, tgt, opts?) {
+export function shift_cell_xls(cell: CellAddress, tgt, opts?): CellAddress {
     const out = dup(cell)
     if (tgt.s) {
         if (out.cRel) {
@@ -33,7 +33,7 @@ export function shift_range_xls(cell, range, opts) {
     return out
 }
 
-export function encode_cell_xls(c): string {
+export function encode_cell_xls(c: CellAddress): string {
     let s = encode_cell(c)
     if (c.cRel === 0) {
         s = fix_col(s)

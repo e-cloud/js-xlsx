@@ -274,10 +274,11 @@ function parse_PropertySet(blob, PIDSI) {
                     case 0:
                         PropH[piddsi.n] = 1252
                     /* falls through */
-                    case 10000: // OSX Roman
-                    case 1252: // Windows Latin
-
                     case 874: // SB Windows Thai
+                    case 932: // DB Windows Japanese Shift-JIS
+                    case 936: // DB Windows Simplified Chinese GBK
+                    case 949: // DB Windows Korean
+                    case 950: // DB Windows Traditional Chinese Big5
                     case 1250: // SB Windows Central Europe
                     case 1251: // SB Windows Cyrillic
                     case 1253: // SB Windows Greek
@@ -286,19 +287,14 @@ function parse_PropertySet(blob, PIDSI) {
                     case 1256: // SB Windows Arabic
                     case 1257: // SB Windows Baltic
                     case 1258: // SB Windows Vietnam
-
-                    case 932: // DB Windows Japanese Shift-JIS
-                    case 936: // DB Windows Simplified Chinese GBK
-                    case 949: // DB Windows Korean
-                    case 950: // DB Windows Traditional Chinese Big5
-
+                    case 10000: // OSX Roman
                     case 1200: // UTF16LE
                     case 1201: // UTF16BE
-                    case 65000:
+                    case 1252: // Windows Latin
+                    case 65000: // UTF-7
                     case -536: // UTF-7
-                    case 65001:
-                    case -535:
-                        // UTF-8
+                    case 65001: // UTF-7
+                    case -535: // UTF-8
                         setCurrentCodepage(CodePage = PropH[piddsi.n])
                         break
                     default:
@@ -581,7 +577,7 @@ export function parse_XLUnicodeString2(blob, length, opts) {
 export const parse_ControlInfo = parsenoop
 
 /* [MS-OSHARED] 2.3.7.6 URLMoniker TODO: flags */
-const parse_URLMoniker = function (blob, length) {
+const parse_URLMoniker = function (blob/*, length, opts*/) {
     const len = blob.read_shift(4)
     const start = blob.l
     let extra = false

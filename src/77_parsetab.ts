@@ -1,6 +1,6 @@
 import { evert_key } from './20_jsutils'
 import { parsenoop } from './23_binutils'
-import { parse_RelID, parse_RichStr, parse_UncheckedRfX } from './28_binstructs'
+import { parse_BrtCommentText, parse_RelID, parse_RichStr, parse_UncheckedRfX } from './28_binstructs'
 import {
     parse_AlRuns,
     parse_Area,
@@ -147,6 +147,7 @@ import {
     parse_HLinkTooltip,
     parse_HorizontalPageBreaks,
     parse_IFmtRecord,
+    parse_ImData,
     parse_Index,
     parse_InterfaceEnd,
     parse_InterfaceHdr,
@@ -364,7 +365,7 @@ import { parse_FilePass } from './44_offcrypto'
 import { parse_BrtFmt, parse_BrtFont, parse_BrtXF } from './48_stybin'
 import { parse_Theme, parse_XFExt } from './50_styxls'
 import { parse_BrtCalcChainItem$ } from './53_ccbin'
-import { parse_BrtBeginComment, parse_BrtCommentAuthor, parse_BrtCommentText } from './58_cmntbin'
+import { parse_BrtBeginComment, parse_BrtCommentAuthor } from './58_cmntbin'
 import { parse_Formula } from './62_fxls'
 /* [MS-XLSB] 2.3 Record Enumeration */
 import {
@@ -1583,9 +1584,10 @@ export const XLSRecordEnum = {
     /*::[*/0x0007 /*::]*/: { n: 'String', f: parse_BIFF2STRING },
     /*::[*/0x0008 /*::]*/: { n: 'BIFF2ROW', f: parsenoop },
     /*::[*/0x000b /*::]*/: { n: 'Index', f: parse_Index },
+    /*::[*/0x0016 /*::]*/: { n: 'ExternCount', f: parsenoop },
     /*::[*/0x001e /*::]*/: { n: 'BIFF2FORMAT', f: parse_BIFF2Format },
     /*::[*/0x001f /*::]*/: { n: 'BIFF2FMTCNT', f: parsenoop }, /* 16-bit cnt of BIFF2FORMAT records */
-    /*::[*/0x0016 /*::]*/: { n: 'ExternCount', f: parsenoop },
+    /*::[*/0x0020 /*::]*/: { n: 'BIFF2COLINFO', f: parsenoop },
     /*::[*/0x0021 /*::]*/: { n: 'Array', f: parse_Array },
     /*::[*/0x0025 /*::]*/: { n: 'DefaultRowHeight', f: parse_DefaultRowHeight },
     /*::[*/0x0032 /*::]*/: { n: 'BIFF2FONTXTRA', f: parse_BIFF2FONTXTRA },
@@ -1593,7 +1595,7 @@ export const XLSRecordEnum = {
     /*::[*/0x0045 /*::]*/: { n: 'BIFF2FONTCLR', f: parsenoop },
     /*::[*/0x0056 /*::]*/: { n: 'BIFF4FMTCNT', f: parsenoop }, /* 16-bit cnt, similar to BIFF2 */
     /*::[*/0x007e /*::]*/: { n: 'RK', f: parsenoop }, /* Not necessarily same as 0x027e */
-    /*::[*/0x007f /*::]*/: { n: 'ImData', f: parsenoop },
+    /*::[*/0x007f /*::]*/: { n: 'ImData', f: parse_ImData },
     /*::[*/0x0087 /*::]*/: { n: 'Addin', f: parsenoop },
     /*::[*/0x0088 /*::]*/: { n: 'Edg', f: parsenoop },
     /*::[*/0x0089 /*::]*/: { n: 'Pub', f: parsenoop },

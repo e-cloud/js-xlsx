@@ -1,7 +1,10 @@
+/* OpenDocument */
 import { DENSE } from './03_consts'
 import { datenum, dup, parse_isodur, parseDate } from './20_jsutils'
+import { getzipdata, getzipstr, safegetzipfile } from './21_ziputils'
 import { parsexmlbool, parsexmltag, unescapexml, utf8read } from './22_xmlutils'
 import { encode_cell, encode_range } from './27_csfutils'
+import { parse_manifest } from './32_odmanrdf'
 import { ods_to_csf_formula, ods_to_csf_range_3D } from './65_fods'
 import { xlml_normalize, xlmlregex } from './75_xlml'
 
@@ -509,8 +512,8 @@ export const parse_content_xml = function () {
                 case '\u6587\u672C\u4E32':
                     if (Rn[1] === '/') {
                         textp = (textp.length > 0
-                                ? textp + '\n'
-                                : '') + parse_text_p(str.slice(textpidx, Rn.index), textptag)
+                            ? textp + '\n'
+                            : '') + parse_text_p(str.slice(textpidx, Rn.index), textptag)
                     } else {
                         textptag = parsexmltag(Rn[0], false)
                         textpidx = Rn.index + Rn[0].length
@@ -592,11 +595,11 @@ export const parse_content_xml = function () {
                 case 'chapter': // 7.3.8
                 case 'file-name': // 7.3.9
                 case 'template-name': // 7.3.9
-                case 'sheet-name':
-                    // 7.3.9
+                case 'sheet-name': // 7.3.9
                     break
 
-                case 'event-listener': // TODO
+                case 'event-listener':
+                    break
                 /* TODO: FODS Properties */
                 case 'initial-creator':
                 case 'creation-date':
@@ -700,3 +703,20 @@ export const parse_content_xml = function () {
         return out
     }
 }()
+
+export function parse_ods(zip: ZIPFile, opts?: ParseOpts) {
+    opts = opts || {}
+    const ods = !!safegetzipfile(zip, 'objectdata')
+    if (ods) {
+        const manifest = parse_manifest(getzipdata(zip, 'META-INF/manifest.xml'), opts)
+    }
+    const content = getzipstr(zip, 'content.xml')
+    if (!content) {
+        throw new Error(`Missing content.xml in ${ods ? 'ODS' : 'UOF'} file`)
+    }
+    return parse_content_xml(ods ? content : utf8read(content), opts)
+}
+
+export function parse_fods(data: string, opts?: ParseOpts) {
+    return parse_content_xml(data, opts)
+}

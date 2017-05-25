@@ -16,7 +16,11 @@
     "sourceMap": true,
     "strictNullChecks": false,
     "target": "es6",
-    "suppressImplicitAnyIndexErrors": true
+    "suppressImplicitAnyIndexErrors": true,
+    "typeRoots": [
+      "node_modules/@types",
+      "typings"
+    ]
   },
   "exclude": ["node_modules"]
 }

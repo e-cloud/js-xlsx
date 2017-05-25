@@ -4,8 +4,8 @@ import { has_buf } from './05_buf'
 import { check_wb } from './71_wbcommon'
 import { write_xlml } from './75_xlml'
 import { write_biff_buf } from './78_writebiff'
+import { write_ods } from './81_writeods'
 import { write_csv_str, write_dif_str, write_htm_str, write_prn_str, write_slk_str, write_txt_str } from './82_sheeter'
-import { write_ods } from './83_ods'
 import { write_zip } from './86_writezip'
 
 function write_zip_type(wb: Workbook, opts ?: WriteOpts) {
@@ -198,9 +198,8 @@ export function writeFileSync(wb: Workbook, filename: string, opts ?: WriteFileO
 export function writeFileAsync(
     filename: string,
     wb: Workbook,
-    opts
-        ?: WriteFileOpts,
-    cb?: (e?: Error) => void
+    opts?: WriteFileOpts,
+    cb?: (e?: Error) => void,
 ) {
     const o = opts || {}
     o.type = 'file'

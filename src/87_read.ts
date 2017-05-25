@@ -4,14 +4,14 @@ import * as JSZip from 'jszip'
 import * as Base64 from './04_base64'
 import { has_buf, s2a } from './05_buf'
 import * as CFB from './18_cfb'
-import { DBF, DIF, PRN, SYLK } from './40_harb'
+import { DBF, DIF, PRN, read_wb_ID } from './40_harb'
 import { WK_ } from './41_lotus'
 import { _ssfopts, resetSSFOpts } from './66_wscommon'
 import { parse_xlml } from './75_xlml'
 import { parse_xlscfb } from './76_xls'
 import { parse_xlsxcfb, parse_zip } from './85_parsezip'
 
-function firstbyte(f: RawData, o ?: TypeOpts): Array<number> {
+export function firstbyte(f: RawData, o ?: TypeOpts): Array<number> {
     let x = ''
     switch ((o || {}).type || 'base64') {
         case 'buffer':
@@ -101,7 +101,7 @@ export function readSync(data: RawData, opts ?: ParseOpts): Workbook {
             return parse_xlml(d, o)
         case 0x49:
             if (n[1] == 0x44) {
-                return SYLK.to_workbook(d, o)
+                return read_wb_ID(d, o)
             }
             break
         case 0x54:
@@ -115,7 +115,7 @@ export function readSync(data: RawData, opts ?: ParseOpts): Workbook {
             }
             break
         case 0xEF:
-            return parse_xlml(d, o)
+            return n[3] == 0x3C ? parse_xlml(d, o) : PRN.to_workbook(d, o)
         case 0xFF:
             if (n[1] == 0xFE) {
                 return read_utf16(d, o)

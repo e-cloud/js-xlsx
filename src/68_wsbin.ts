@@ -24,6 +24,7 @@ import {
     parse_XLSBCodeName,
     parse_XLWideString,
     parse_Xnum,
+    write_BrtColor,
     write_RelID,
     write_RkNumber,
     write_UncheckedRfX,
@@ -37,7 +38,7 @@ import { crypto_CreatePasswordVerifier_Method1 } from './44_offcrypto'
 import { find_mdw_colw, process_col, pt2px, px2pt } from './45_styutils'
 import { stringify_formula } from './62_fxls'
 import { parse_XLSBArrayParsedFormula, parse_XLSBCellParsedFormula, parse_XLSBSharedParsedFormula } from './63_fbin'
-import { col_obj_w, default_margins, get_sst_id, safe_format, strs } from './66_wscommon'
+import { col_obj_w, default_margins, get_cell_style, get_sst_id, safe_format, strs } from './66_wscommon'
 
 export function parse_BrtRowHdr(data, length) {
     const z = {}
@@ -137,6 +138,9 @@ export function write_row_header(ba, ws, range, R) {
 export const parse_BrtWsDim = parse_UncheckedRfX
 export const write_BrtWsDim = write_UncheckedRfX
 
+/* [MS-XLSB] 2.4.813 BrtWsFmtInfo */
+//function write_BrtWsFmtInfo(ws, o) { }
+
 /* [MS-XLSB] 2.4.815 BrtWsProp */
 export function parse_BrtWsProp(data, length) {
     const z = {}
@@ -147,11 +151,12 @@ export function parse_BrtWsProp(data, length) {
 }
 export function write_BrtWsProp(str, o?) {
     if (o == null) {
-        o = new_buf(80 + 4 * str.length)
+        o = new_buf(84 + 4 * str.length)
     }
-    for (let i = 0; i < 11; ++i) {
+    for (let i = 0; i < 3; ++i) {
         o.write_shift(1, 0)
     }
+    write_BrtColor({ auto: 1 }, o)
     o.write_shift(-4, -1)
     o.write_shift(-4, -1)
     write_XLSBCodeName(str, o)
@@ -488,6 +493,7 @@ export function write_BrtSheetProtection(sp, o?) {
         ['pivotTables', true], // fPivotTables
         ['selectUnlockedCells', false] // fSelUnlockedCells
     ].forEach(function (n) {
+        /*:: if(o == null) throw "unreachable"; */
         if (n[1]) {
             o.write_shift(4, sp[n[0]] != null && !sp[n[0]] ? 1 : 0)
         } else {
@@ -509,7 +515,7 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles): Worksheet {
     if (DENSE != null && opts.dense == null) {
         opts.dense = DENSE
     }
-    const s = opts.dense ? [] : {}
+    const s: Worksheet = opts.dense ? [] : {}
 
     let ref
     const refguess = { s: { r: 2000000, c: 2000000 }, e: { r: 0, c: 0 } }
@@ -524,7 +530,7 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles): Worksheet {
     let addr
     let sstr
     let rr
-    let cell
+    let cell: Cell
     const mergecells = []
     opts.biff = 12
     opts['!row'] = 0
@@ -539,8 +545,8 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles): Worksheet {
     supbooks.sharedf = shared_formulae
     supbooks.arrayf = array_formulae
     supbooks.SheetNames = wb.SheetNames || wb.Sheets.map(function (x) {
-            return x.name
-        })
+        return x.name
+    })
     opts.supbooks = supbooks
     for (let i = 0; i < wb.Names.length; ++i) {
         supbooks[0][i + 1] = wb.Names[i]
@@ -773,6 +779,7 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles): Worksheet {
                 s['!margins'] = val
                 break
 
+            /* case 'BrtUid' */
             case 0x00AF: /* 'BrtAFilterDateGroupItem' */
             case 0x0284: /* 'BrtActiveX' */
             case 0x0271: /* 'BrtBigName' */
@@ -822,7 +829,6 @@ export function parse_ws_bin(data, _opts, rels, wb, themes, styles): Worksheet {
             case 0x0413: /* 'BrtSparkline' */
             case 0x01AC: /* 'BrtTable' */
             case 0x00AA: /* 'BrtTop10Filter' */
-            /* case 'BrtUid' */
             case 0x0032: /* 'BrtValueMeta' */
             case 0x0816: /* 'BrtWebExtension' */
             case 0x01E5: /* 'BrtWsFmtInfo' */
@@ -923,7 +929,7 @@ function write_ws_bin_cell(ba: BufArray, cell: Cell, R: number, C: number, opts,
     const o = { r: R, c: C }
 
     /* TODO: cell style */
-    //o.s = get_cell_style(opts.cellXfs, cell, opts);
+    o.s = get_cell_style(opts.cellXfs, cell, opts)
     if (cell.l) {
         ws['!links'].push([encode_cell(o), cell.l])
     }
@@ -1066,6 +1072,11 @@ function write_WSVIEWS2(ba, ws) {
     write_record(ba, 'BrtEndWsViews')
 }
 
+function write_WSFMTINFO(ba, ws) {
+    /* [ACWSFMTINFO] */
+    //write_record(ba, "BrtWsFmtInfo", write_BrtWsFmtInfo(ws));
+}
+
 function write_SHEETPROTECT(ba, ws) {
     if (!ws['!protect']) {
         return
@@ -1086,7 +1097,7 @@ export function write_ws_bin(idx: number, opts, wb: Workbook, rels) {
     write_record(ba, 'BrtWsProp', write_BrtWsProp(s))
     write_record(ba, 'BrtWsDim', write_BrtWsDim(r))
     write_WSVIEWS2(ba, ws)
-    /* [WSFMTINFO] */
+    write_WSFMTINFO(ba, ws)
     write_COLINFOS(ba, ws, idx, opts, wb)
     write_CELLTABLE(ba, ws, idx, opts, wb)
     /* [BrtSheetCalcProp] */

@@ -23,34 +23,34 @@ function fill(c: string, l: number): string {
     return o
 }
 
-function pad0(v: any, d: number): string {
+function pad0(v, d: number): string {
     const t = `${v}`
     return t.length >= d ? t : fill('0', d - t.length) + t
 }
 
-function pad_(v: any, d: number): string {
+function pad_(v, d: number): string {
     const t = `${v}`
     return t.length >= d ? t : fill(' ', d - t.length) + t
 }
 
-function rpad_(v: any, d: number): string {
+function rpad_(v, d: number): string {
     const t = `${v}`
     return t.length >= d ? t : t + fill(' ', d - t.length)
 }
 
-function pad0r1(v: any, d: number): string {
+function pad0r1(v, d: number): string {
     const t = `${Math.round(v)}`
     return t.length >= d ? t : fill('0', d - t.length) + t
 }
 
-function pad0r2(v: any, d: number): string {
+function pad0r2(v, d: number): string {
     const t = `${v}`
     return t.length >= d ? t : fill('0', d - t.length) + t
 }
 
 const p2_32 = Math.pow(2, 32)
 
-function pad0r(v: any, d: number): string {
+function pad0r(v, d: number): string {
     if (v > p2_32 || v < -p2_32) {
         return pad0r1(v, d)
     }
@@ -140,7 +140,7 @@ export function init_table(t: object) {
     t[65535] = 'General'
 }
 
-function frac(x, D, mixed) {
+function frac(x: number, D: number, mixed?: boolean): number[] {
     const sgn = x < 0 ? -1 : 1
     let B = x * sgn
     let P_2 = 0
@@ -179,7 +179,7 @@ function frac(x, D, mixed) {
     return [q, sgn * P - q * Q, Q]
 }
 
-function general_fmt_int(v: number, opts?: any): string {
+function general_fmt_int(v: number): string {
     return `${v}`
 }
 
@@ -226,12 +226,10 @@ const general_fmt_num = function make_general_fmt_num() {
     }
 
     function gfn5(o) {
-        //for(var i = 0; i != o.length; ++i) if(o.charCodeAt(i) === 46) return
-        // o.replace(gnr2,"").replace(gnr1,".$1"); return o;
         return o.includes('.') ? o.replace(gnr2, '').replace(gnr1, '.$1') : o
     }
 
-    return function general_fmt_num(v: number, opts?: any): string {
+    return function general_fmt_num(v: number): string {
         const V = Math.floor(Math.log(Math.abs(v)) * Math.LOG10E)
         let o
         if (V >= -4 && V <= -1) {
@@ -249,14 +247,14 @@ const general_fmt_num = function make_general_fmt_num() {
 
 export const _general_num = general_fmt_num
 
-function general_fmt(v: any, opts?: any) {
+function general_fmt(v) {
     switch (typeof v) {
         case 'string':
             return v
         case 'boolean':
             return v ? 'TRUE' : 'FALSE'
         case 'number':
-            return (v | 0) === v ? general_fmt_int(v, opts) : general_fmt_num(v, opts)
+            return (v | 0) === v ? general_fmt_int(v) : general_fmt_num(v)
         case 'undefined':
             return ''
         case 'object':
@@ -273,7 +271,7 @@ function fix_hijri(date, o) {
     return 0
 }
 
-export function parse_date_code(v: number, opts?: any, b2?: boolean) {
+export function parse_date_code(v: number, opts?, b2?: boolean) {
     if (v > 2958465 || v < 0) {
         return null
     }
@@ -289,11 +287,12 @@ export function parse_date_code(v: number, opts?: any, b2?: boolean) {
     if (opts.date1904) {
         date += 1462
     }
-    if (out.u > 0.999) {
+    if (out.u > 0.9999) {
         out.u = 0
         if (++time == 86400) {
-            time = 0
+            out.T = time = 0
             ++date
+            ++out.D
         }
     }
     if (date === 60) {
@@ -528,17 +527,22 @@ const write_num = function make_write_num() {
         let o: string
         const idx = fmt.indexOf('E') - fmt.indexOf('.') - 1
         if (fmt.match(/^#+0.0E\+0$/)) {
+            if (val == 0) {
+                return '0.0E+0'
+            } else if (val < 0) {
+                return `-${write_num_exp(fmt, -val)}`
+            }
             let period = fmt.indexOf('.')
             if (period === -1) {
                 period = fmt.indexOf('E')
             }
-            let ee = Math.floor(Math.log(Math.abs(val)) * Math.LOG10E) % period
+            let ee = Math.floor(Math.log(val) * Math.LOG10E) % period
             if (ee < 0) {
                 ee += period
             }
             o = (val / Math.pow(10, ee)).toPrecision(idx + 1 + (period + ee) % period)
             if (!o.includes('e')) {
-                const fakee = Math.floor(Math.log(Math.abs(val)) * Math.LOG10E)
+                const fakee = Math.floor(Math.log(val) * Math.LOG10E)
                 if (!o.includes('.')) {
                     o = `${o.charAt(0)}.${o.substr(1)}E+${fakee - o.length + ee}`
                 } else {
@@ -687,11 +691,11 @@ const write_num = function make_write_num() {
         fmt = fmt.replace(/^#+([0.])/, '$1')
         if (r = fmt.match(/^(0*)\.(#*)$/)) {
             return sign + rnd(aval, r[2].length)
-                    .replace(/\.(\d*[1-9])0*$/, '.$1')
-                    .replace(/^(-?\d*)$/, '$1.')
-                    .replace(/^0\./, r[1].length ? '0.' : '.')
+                .replace(/\.(\d*[1-9])0*$/, '.$1')
+                .replace(/^(-?\d*)$/, '$1.')
+                .replace(/^0\./, r[1].length ? '0.' : '.')
         }
-        if (r = fmt.match(/^#,##0(\.?)$/)) {
+        if ((r = fmt.match(/^#{1,3},##0(\.?)$/))) {
             return sign + commaify(pad0r(aval, 0))
         }
         if (r = fmt.match(/^#,##0\.([#0]*0)$/)) {
@@ -761,9 +765,17 @@ const write_num = function make_write_num() {
                 })}.${pad0(ri, r[1].length)}`
         }
         switch (fmt) {
+            case '###,##0.00':
+                return write_num_flt(type, '#,##0.00', val)
+            case '###,###':
+            case '##,###':
             case '#,###':
                 const x = commaify(pad0r(aval, 0))
                 return x !== '0' ? sign + x : ''
+            case '###,###.00':
+                return write_num_flt(type, '###,##0.00', val).replace(/^0\./, '.')
+            case '#,###.00':
+                return write_num_flt(type, '#,##0.00', val).replace(/^0\./, '.')
             default:
         }
         throw new Error(`unsupported format |${fmt}|`)
@@ -787,17 +799,22 @@ const write_num = function make_write_num() {
         let o: string
         const idx = fmt.indexOf('E') - fmt.indexOf('.') - 1
         if (fmt.match(/^#+0.0E\+0$/)) {
+            if (val == 0) {
+                return '0.0E+0'
+            } else if (val < 0) {
+                return '-' + write_num_exp2(fmt, -val)
+            }
             let period = fmt.indexOf('.')
             if (period === -1) {
                 period = fmt.indexOf('E')
             }
-            let ee = Math.floor(Math.log(Math.abs(val)) * Math.LOG10E) % period
+            let ee = Math.floor(Math.log(val) * Math.LOG10E) % period
             if (ee < 0) {
                 ee += period
             }
             o = (val / Math.pow(10, ee)).toPrecision(idx + 1 + (period + ee) % period)
             if (!o.match(/[Ee]/)) {
-                const fakee = Math.floor(Math.log(Math.abs(val)) * Math.LOG10E)
+                const fakee = Math.floor(Math.log(val) * Math.LOG10E)
                 if (!o.includes('.')) {
                     o = `${o.charAt(0)}.${o.substr(1)}E+${fakee - o.length + ee}`
                 } else {
@@ -842,7 +859,7 @@ const write_num = function make_write_num() {
                 fmt.substr(fmt.charAt(1) == ' ' ? 2 : 1), val)}`
         }
         let o
-        let r
+        let r: string[]
         let ri
         let ff
         const aval = Math.abs(val)
@@ -875,12 +892,12 @@ const write_num = function make_write_num() {
         fmt = fmt.replace(/^#+([0.])/, '$1')
         if (r = fmt.match(/^(0*)\.(#*)$/)) {
             return sign + ('' + aval)
-                    .replace(/\.(\d*[1-9])0*$/, '.$1')
-                    .replace(/^(-?\d*)$/, '$1.')
-                    .replace(/^0\./, r[1].length ? '0.' : '.')
+                .replace(/\.(\d*[1-9])0*$/, '.$1')
+                .replace(/^(-?\d*)$/, '$1.')
+                .replace(/^0\./, r[1].length ? '0.' : '.')
         }
-        if (r = fmt.match(/^#,##0(\.?)$/)) {
-            return sign + commaify('' + aval)
+        if (r = fmt.match(/^#{1,3},##0(\.?)$/)) {
+            return sign + commaify(`${aval}`)
         }
         if (r = fmt.match(/^#,##0\.([#0]*0)$/)) {
             return val < 0
@@ -947,10 +964,15 @@ const write_num = function make_write_num() {
                 })}.${pad0(0, r[1].length)}`
         }
         switch (fmt) {
+            case '###,###':
+            case '##,###':
             case '#,###':
                 const x = commaify(`${aval}`)
                 return x !== '0' ? sign + x : ''
             default:
+                if (fmt.match(/\.[0#?]*$/)) {
+                    return write_num_int(type, fmt.slice(0, fmt.lastIndexOf('.')), val) + hashq(fmt.slice(fmt.lastIndexOf('.')))
+                }
         }
         throw new Error(`unsupported format |${fmt}|`)
     }
@@ -963,11 +985,10 @@ const write_num = function make_write_num() {
 function split_fmt(fmt: string): Array<string> {
     const out: Array<string> = []
     let in_str = false
-    let cc
     let i = 0
     let j = 0
     for (; i < fmt.length; ++i) {
-        switch (cc = fmt.charCodeAt(i)) {
+        switch (fmt.charCodeAt(i)) {
             case 34:
                 /* '"' */
                 in_str = !in_str
@@ -996,7 +1017,6 @@ const abstime = /\[[HhMmSs]*\]/
 
 function fmt_is_date(fmt: string): boolean {
     let i = 0
-    let cc = 0
     let c = ''
     let o = ''
     while (i < fmt.length) {
@@ -1008,7 +1028,7 @@ function fmt_is_date(fmt: string): boolean {
                 i++
                 break
             case '"':
-                for (; (cc = fmt.charCodeAt(++i)) !== 34 && i < fmt.length;) {
+                for (; fmt.charCodeAt(++i) !== 34 && i < fmt.length;) {
                     ++i
                 }
                 ++i
@@ -1113,7 +1133,7 @@ function fmt_is_date(fmt: string): boolean {
 
 export const is_date = fmt_is_date
 
-function eval_fmt(fmt: string, v: any, opts: any, flen: number) {
+function eval_fmt(fmt: string, v, opts, flen: number) {
     const out = []
     let o = ''
     let i = 0
@@ -1204,7 +1224,6 @@ function eval_fmt(fmt: string, v: any, opts: any, flen: number) {
                 if (c === 'm' && lst.toLowerCase() === 'h') {
                     c = 'M'
                 }
-                /* m = minute */
                 if (c === 'h') {
                     c = hr
                 }
@@ -1256,6 +1275,7 @@ function eval_fmt(fmt: string, v: any, opts: any, flen: number) {
                         }
                     }
                     out[out.length] = { t: 'Z', v: o.toLowerCase() }
+                    lst = o.charAt(1)
                 } else if (o.includes('$')) {
                     o = (o.match(/\$([^-\[\]]*)/) || [])[1] || '$'
                     if (!fmt_is_date(fmt)) {
@@ -1277,12 +1297,14 @@ function eval_fmt(fmt: string, v: any, opts: any, flen: number) {
             case '0':
             case '#':
                 o = c
-                while (++i < fmt.length
-                && '0#?.,E+-%'.includes(c = fmt.charAt(i)) || c == '\\'
+                while (++i < fmt.length && '0#?.,E+-%'.includes(c = fmt.charAt(i))
+                || c == '\\'
                 && fmt.charAt(i + 1) == '-'
+                && i < fmt.length - 2
                 && '0#'.includes(fmt.charAt(i + 2))) {
                     o += c
                 }
+
                 out[out.length] = { t: 'n', v: o }
                 break
             case '?':
@@ -1450,17 +1472,19 @@ function eval_fmt(fmt: string, v: any, opts: any, flen: number) {
                 while (out[jj] != null && (
                     (c = out[jj].t) === '?'
                     || c === 'D'
-                    || (c === ' '
-                    || c === 't')
+                    || (c === ' ' || c === 't')
                     && out[jj + 1] != null
-                    && (out[jj + 1].t === '?' || out[jj + 1].t === 't' && out[jj + 1].v === '/')
+                    && (
+                        out[jj + 1].t === '?'
+                        || out[jj + 1].t === 't'
+                        && out[jj + 1].v === '/'
+                    )
                     || out[i].t === '('
                     && (c === ' ' || c === 'n' || c === ')')
                     || c === 't'
                     &&
                     (
                         out[jj].v === '/'
-                        || '$\u20AC'.includes(out[jj].v)
                         || out[jj].v === ' '
                         && out[jj + 1] != null
                         && out[jj + 1].t == '?'
@@ -1664,11 +1688,10 @@ function choose_fmt(f: string, v): [number, string] {
     return [len, ff]
 }
 
-export function format(fmt: string | number, v: any, o?: any) {
+export function format(fmt: string | number, v, o?) {
     if (o == null) {
         o = {}
     }
-    //fixopts(o != null ? o : (o=[]));
     let sfmt = ''
     switch (typeof fmt) {
         case 'string':
