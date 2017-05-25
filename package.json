@@ -62,7 +62,7 @@
     "test": "make travis",
     "dtslint": "dtslint types",
     "commitmsg": "validate-commit-msg",
-    "build": "tsc"
+    "build": "tsc || true"
   },
   "config": {
     "blanket": {

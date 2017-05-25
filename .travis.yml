@@ -11,11 +11,14 @@ node_js:
 #  - "0.8"
 before_install:
   - "npm install -g npm@4.3.0"
-  - "npm install -g mocha@2.x voc"
+  - "npm install -g mocha@3.x voc"
   - "npm install blanket"
   - "npm install coveralls mocha-lcov-reporter"
 before_script:
   - "make init"
   - "cd test_files; make all; cd -"
+script:
+  - "npm run build"
+  - "mocha -R spec -t 20000"
 after_success:
 #  - "make coveralls-spin"
